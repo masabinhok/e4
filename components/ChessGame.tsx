@@ -47,6 +47,7 @@ export default function ChessGame() {
     const moves = CARO_KANN_LINES[lineKey].line;
     setCurrentLine(moves);
     setBoardFlip(CARO_KANN_LINES[lineKey].boardflip || 'white');
+    setCurrentLineIndex(CARO_KANN_LINES[lineKey].index);
     setLineName(CARO_KANN_LINES[lineKey].name);
     setCurrentMoveIndex(0);
     setMoveHistory([]); // Reset move history
@@ -54,6 +55,18 @@ export default function ChessGame() {
     const newGame = new Chess();
     setGame(newGame);
   };
+
+  useEffect(() => {
+    console.log('Current Move Index:', currentMoveIndex, boardFlip);
+    if (boardFlip === 'black' && currentMoveIndex % 2 == 0) {
+      setTimeout(() => nextMove(), 500);
+    }
+
+    if (boardFlip === 'white' && currentMoveIndex % 2 !== 0) {
+      setTimeout(() => nextMove(), 500);
+    }
+
+  }, [currentLineIndex, currentMoveIndex]);
 
   // Advance to next move in the line
   const nextMove = () => {
@@ -105,6 +118,14 @@ export default function ChessGame() {
 
       const gameCopy = new Chess(game.fen());
       const result = gameCopy.move(move);
+
+      // Ensure the player moves only on their turn
+      if (boardFlip === 'black' && currentMoveIndex % 2 === 0) {
+        return false; // Black's turn, but it's white's move
+      }
+      if (boardFlip === 'white' && currentMoveIndex % 2 !== 0) {
+        return false; // White's turn, but it's black's move
+      }
 
       if (!result) return false; // Invalid chess move
 
