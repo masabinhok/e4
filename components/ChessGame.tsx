@@ -39,6 +39,7 @@ export default function ChessGame() {
   const [autoPlay, setAutoPlay] = useState(false);
   const [boardFlip, setBoardFlip] = useState<string>(CARO_KANN_LINES[currentLineIndex].boardflip || 'white');
   const [mode, setMode] = useState<MODE>('learn');
+  const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
 
   // Flip the board
   const toggleBoardFlip = () => {
@@ -130,21 +131,38 @@ export default function ChessGame() {
         return false; // White's turn, but it's black's move
       }
 
-      if (!result) return false; // Invalid chess move
+      if (!result) {
+        setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
+        return false; // Invalid chess move
+      }
 
-      // Check if user is following the line
+      // Check if user is following the line in quiz mode
       const expectedMove = currentLine[currentMoveIndex];
-      if (!expectedMove || result.san !== expectedMove) {
+      if ((!expectedMove || result.san !== expectedMove)) {
+        setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
         return false; // Move does not match the line
       }
 
+      // If the move is valid
+      setMoveValidation({ source: sourceSquare, target: targetSquare, valid: true });
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]); // Add move to history
       setCurrentMoveIndex(currentMoveIndex + 1);
       return true;
     } catch {
+      setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
       return false;
     }
+  };
+
+  const getSquareStyles = () => {
+    if (!moveValidation) return {};
+    const { source, target, valid } = moveValidation;
+    const color = valid ? 'rgba(0, 255, 0, 0.4)' : 'rgba(255, 0, 0, 0.4)';
+    return {
+      [source]: { backgroundColor: color },
+      [target]: { backgroundColor: color },
+    };
   };
 
   return (
@@ -157,6 +175,7 @@ export default function ChessGame() {
           boardWidth={Math.min(window.innerWidth * 0.7, 600)}
           customDarkSquareStyle={{ backgroundColor: '#4a5568' }}
           customLightSquareStyle={{ backgroundColor: '#718096' }}
+          customSquareStyles={getSquareStyles()} // Highlight squares
           boardOrientation={boardFlip === 'black' ? 'black' : 'white'}
         />
       </div>
