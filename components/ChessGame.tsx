@@ -29,6 +29,11 @@ const CARO_KANN_LINES = [
 ];
 
 type MODE = 'learn' | 'practice' | 'quiz';
+type MessageType = {
+  content: string;
+  type: 'success' | 'error' | 'info'; // Define message types
+  onClose?: () => void; // Optional callback for when the message is closed
+};
 
 export default function ChessGame() {
   const [game, setGame] = useState(new Chess());
@@ -42,13 +47,17 @@ export default function ChessGame() {
   const [mode, setMode] = useState<MODE>('learn');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);
-  const [messages, setMessages] = useState<string[]>([]); // Change to an array of messages
+  const [messages, setMessages] = useState<MessageType[]>([]); // Update state to store message objects
 
-  const addMessage = (newMessage: string) => {
-    setMessages((prevMessages) => [...prevMessages, newMessage]); // Add new message to the array
+  const addMessage = (newMessage: MessageType) => {
+    setMessages((prevMessages) => [...prevMessages, newMessage]); // Add new message object to the array
   };
 
   const removeMessage = (index: number) => {
+    const messageToRemove = messages[index];
+    if (messageToRemove.onClose) {
+      messageToRemove.onClose(); // Call the onClose callback if it exists
+    }
     setMessages((prevMessages) => prevMessages.filter((_, i) => i !== index)); // Remove message by index
   };
 
@@ -73,8 +82,15 @@ export default function ChessGame() {
   };
 
   const handleLineCompletion = () => {
-    if (lineCompleted && mode == 'practice') {
-      addMessage("Congratulations! You've completed the line.");
+    if (lineCompleted && mode === 'practice') {
+      addMessage({
+        content: "Congratulations! You've completed the line.",
+        type: 'success',
+        onClose: () => {
+          setLineCompleted(false);
+          loadLine(currentLineIndex);
+        },
+      });
     }
   };
 
@@ -165,6 +181,10 @@ export default function ChessGame() {
 
       if (!result) {
         setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
+        addMessage({
+          content: "Invalid move",
+          type: 'error',
+        });
         return false; // Invalid chess move
       }
 
@@ -172,6 +192,10 @@ export default function ChessGame() {
       const expectedMove = currentLine[currentMoveIndex];
       if ((!expectedMove || result.san !== expectedMove)) {
         setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
+        addMessage({
+          content: "Move does not match the expected line.",
+          type: 'error',
+        });
         return false; // Move does not match the line
       }
 
@@ -191,6 +215,10 @@ export default function ChessGame() {
       return true;
     } catch {
       setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
+      addMessage({
+        content: "Invalid move",
+        type: 'error',
+      });
       return false;
     }
   };
@@ -215,13 +243,9 @@ export default function ChessGame() {
         {messages.map((msg, index) => (
           <Message
             key={index}
-            message={msg}
-            type="success"
-            onClose={() => {
-              removeMessage(index); // Remove message on close
-              setLineCompleted(false); // Reset line completion state
-              loadLine(currentLineIndex); // Reload the current line
-            }} // Remove the message when closed
+            message={msg.content}
+            type={msg.type}
+            onClose={() => removeMessage(index)} // Remove the message when closed
           />
         ))}
       </div>

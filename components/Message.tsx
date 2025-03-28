@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import {AnimatePresence, motion } from 'motion/react'
+import React, { useEffect, useRef } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 
 interface MessageProps {
   message: string
@@ -11,13 +11,21 @@ interface MessageProps {
 const Message: React.FC<MessageProps> = ({
   message,
   type = 'info',
-  duration = 3000,
+  duration = 2000,
   onClose
 }) => {
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+
   useEffect(() => {
     if (duration && onClose) {
-      const timer = setTimeout(onClose, duration)
-      return () => clearTimeout(timer)
+      timerRef.current = setTimeout(onClose, duration)
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
     }
   }, [duration, onClose])
 
@@ -70,11 +78,36 @@ const Message: React.FC<MessageProps> = ({
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, x: 50 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 50 }}
-        transition={{ type: 'spring', damping: 25 }}
-        className={`fixed top-4 right-4 ${getStyles()}`}
+        initial={{ opacity: 0.5, scale: 0.96 }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+          transition: {
+            type: "spring",
+            stiffness: 300,
+            damping: 25,
+            mass: 0.4,
+            delay: 0.1, // Slight delay before appearing
+            duration: 1
+          }
+        }}
+        exit={{
+          opacity: 0.5,
+          scale: 0.96,
+          transition: {
+            ease: "easeOut",
+            duration: 1
+          }
+        }}
+        transition={{
+          opacity: { duration: 0.4 },
+          scale: {
+            type: "spring",
+            stiffness: 300,
+            damping: 15
+          }
+        }}
+        className={` ${getStyles()}`}
       >
         {getIcon()}
         <div className="flex-1">
