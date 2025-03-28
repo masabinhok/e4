@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
+import Message from './Message';
 
 const CARO_KANN_LINES = [
   {
@@ -40,6 +41,8 @@ export default function ChessGame() {
   const [boardFlip, setBoardFlip] = useState<string>(CARO_KANN_LINES[currentLineIndex].boardflip || 'white');
   const [mode, setMode] = useState<MODE>('learn');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
+  const [lineCompleted, setLineCompleted] = useState<boolean>(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   // Flip the board
   const toggleBoardFlip = () => {
@@ -60,6 +63,12 @@ export default function ChessGame() {
     const newGame = new Chess();
     setGame(newGame);
   };
+
+  const handleLineCompletion = () => {
+    if (lineCompleted && mode == 'practice') {
+      setMessage("Congratulations! You've completed the line.");
+    }
+  }
 
   const handleModeChange = (newMode: MODE) => {
     setMode(newMode);
@@ -109,10 +118,18 @@ export default function ChessGame() {
 
   // Auto-play through the line
   useEffect(() => {
+
+    if (currentMoveIndex >= currentLine.length) {
+      setLineCompleted(true);
+      setAutoPlay(false);
+      handleLineCompletion();
+      return;
+    }
+
     if (autoPlay && currentMoveIndex < currentLine.length) {
       const timer = setTimeout(() => {
         nextMove();
-      }, 800);
+      }, 1000);
       return () => clearTimeout(timer);
     } else {
       setAutoPlay(false);
@@ -155,6 +172,14 @@ export default function ChessGame() {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]); // Add move to history
       setCurrentMoveIndex(currentMoveIndex + 1);
+
+      // Check for line completion
+      if (currentMoveIndex + 1 >= currentLine.length) {
+        setLineCompleted(true);
+        setAutoPlay(false);
+        handleLineCompletion();
+      }
+
       return true;
     } catch {
       setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
@@ -176,6 +201,21 @@ export default function ChessGame() {
     <div onAuxClick={() => {
       setMoveValidation(null); // Reset square highlights on click
     }} className="flex flex-col items-center lg:flex-row bg-gray-900 text-gray-100 min-h-screen">
+
+      {
+        message && (
+          <Message
+            message={message}
+            type="success"
+            onClose={() => {
+              setMessage(null);
+              setLineCompleted(false);
+              loadLine(currentLineIndex);
+            }}
+          />
+        )
+      }
+
       {/* Chessboard */}
       <div className="flex-1 flex items-center justify-center p-4">
         <Chessboard
