@@ -27,6 +27,8 @@ const CARO_KANN_LINES = [
   // Add other variations here
 ];
 
+type MODE = 'learn' | 'practice' | 'quiz';
+
 export default function ChessGame() {
   const [game, setGame] = useState(new Chess());
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
@@ -36,6 +38,7 @@ export default function ChessGame() {
   const [moveHistory, setMoveHistory] = useState<string[]>([]); // Track move history
   const [autoPlay, setAutoPlay] = useState(false);
   const [boardFlip, setBoardFlip] = useState<string>(CARO_KANN_LINES[currentLineIndex].boardflip || 'white');
+  const [mode, setMode] = useState<MODE>('learn');
 
   // Flip the board
   const toggleBoardFlip = () => {
@@ -57,15 +60,15 @@ export default function ChessGame() {
   };
 
   useEffect(() => {
-    console.log('Current Move Index:', currentMoveIndex, boardFlip);
-    if (boardFlip === 'black' && currentMoveIndex % 2 == 0) {
-      setTimeout(() => nextMove(), 500);
-    }
+    if (mode === 'practice' || mode == 'quiz') {
+      if (CARO_KANN_LINES[currentLineIndex].boardflip === 'black' && currentMoveIndex % 2 == 0) {
+        setTimeout(() => nextMove(), 500);
+      }
 
-    if (boardFlip === 'white' && currentMoveIndex % 2 !== 0) {
-      setTimeout(() => nextMove(), 500);
+      if (CARO_KANN_LINES[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
+        setTimeout(() => nextMove(), 500);
+      }
     }
-
   }, [currentLineIndex, currentMoveIndex]);
 
   // Advance to next move in the line
@@ -120,10 +123,10 @@ export default function ChessGame() {
       const result = gameCopy.move(move);
 
       // Ensure the player moves only on their turn
-      if (boardFlip === 'black' && currentMoveIndex % 2 === 0) {
+      if (CARO_KANN_LINES[currentLineIndex].boardflip === 'black' && currentMoveIndex % 2 === 0) {
         return false; // Black's turn, but it's white's move
       }
-      if (boardFlip === 'white' && currentMoveIndex % 2 !== 0) {
+      if (CARO_KANN_LINES[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
         return false; // White's turn, but it's black's move
       }
 
@@ -162,69 +165,125 @@ export default function ChessGame() {
       <div className="w-full lg:w-96 bg-gray-800 p-6 overflow-y-auto h-full">
         <h1 className="text-2xl font-bold text-blue-400 mb-6">Caro-Kann Trainer</h1>
 
-        {/* Line Selection */}
+        {/* Mode Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Select Variation:</label>
+          <label className="block text-sm font-medium mb-2">Select Mode:</label>
           <select
-            className="w-full bg-gray-700 border border-gray-600 rounded-md p-2"
-            value={lineName}
-            onChange={(e) => loadLine(e.target.selectedIndex)}
+            className="w-full capitalize bg-gray-700 border border-gray-600 rounded-md p-2"
+            value={mode}
+            onChange={(e) => {
+              setMode(e.target.value as MODE);
+              loadLine(currentLineIndex);
+            }}
           >
-            {CARO_KANN_LINES.map((line, index) => (
-              <option key={index} value={line.name}>{line.name}</option>
+            {["learn", "practice", "quiz"].map((line, index) => (
+              <option className='capitalize' key={index} value={line}>{line}</option>
             ))}
           </select>
         </div>
 
+        {
+          (mode === 'learn' || mode === 'practice') && (
+            <>
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2">Select Variation:</label>
+                <select
+                  className="w-full bg-gray-700 border border-gray-600 rounded-md p-2"
+                  value={lineName}
+                  onChange={(e) => loadLine(e.target.selectedIndex)}
+                >
+                  {CARO_KANN_LINES.map((line, index) => (
+                    <option key={index} value={line.name}>{line.name}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )
+        }
+
         {/* Current Line Info */}
         <div className="bg-gray-700 p-4 rounded-md mb-6">
           <h2 className="font-bold text-blue-400 mb-2">{lineName}</h2>
+
           <div className="font-mono bg-gray-800 p-2 rounded">
             {currentLine.slice(0, currentMoveIndex).join(' ')}
             {currentMoveIndex < currentLine.length && (
               <span className="text-yellow-400">
-                {' ' + currentLine[currentMoveIndex]}
+                {' ' +
+                  currentLine[currentMoveIndex]
+                }
               </span>
             )}
           </div>
+
         </div>
 
         {/* Controls */}
         <div className="flex space-x-3 space-y-3 mb-6 flex-wrap">
+          {
+            mode === 'learn' && (
+              <div className='flex space-x-3 w-full'>
+                <button
+                  className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md w-full"
+                  onClick={previousMove}
+                  disabled={currentMoveIndex == 0}
+                >
+                  Previous Move
+                </button>
+                <button
+                  className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md w-full"
+                  onClick={nextMove}
+                  disabled={currentMoveIndex >= currentLine.length}
+                >
+                  Next Move
+                </button></div>
+            )
+          }
+
+          {
+            (mode === 'learn' || mode === 'practice') && (
+              <>
+                <div className='flex space-x-3 w-full'>
+                  <button
+                    className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-md w-full"
+                    onClick={() => setAutoPlay(!autoPlay)}
+                  >
+                    {autoPlay ? 'Pause' : 'Autoplay'}
+                  </button>
+                  <button
+                    className=" bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md w-full"
+                    onClick={() => {
+                      setAutoPlay(false);
+                      loadLine(currentLineIndex)
+                    }}
+                  >
+                    Reset
+                  </button>
+                </div>
+              </>
+            )
+          }
+
+          {
+            mode === 'quiz' && (
+              <>
+                <button onClick={() => {
+                  const randomLineIndex = Math.floor(Math.random() * CARO_KANN_LINES.length);
+                  loadLine(randomLineIndex);
+                }} className='bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md w-full'>
+                  Random Line
+                </button>
+              </>
+            )
+          }
           <button
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md"
-            onClick={previousMove}
-            disabled={currentMoveIndex == 0}
-          >
-            Previous Move
-          </button>
-          <button
-            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md"
-            onClick={nextMove}
-            disabled={currentMoveIndex >= currentLine.length}
-          >
-            Next Move
-          </button>
-          <button
-            className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-md"
-            onClick={() => setAutoPlay(!autoPlay)}
-          >
-            {autoPlay ? 'Pause' : 'Autoplay'}
-          </button>
-          <button
-            className=" bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md"
-            onClick={() => loadLine(currentLineIndex)}
-          >
-            Reset
-          </button>
-          <button
-            className="border border-gray-500 px-4 py-2 rounded-md w-full"
+            className="border border-gray-500 px-4 py-2 mt-3 rounded-md w-full"
             onClick={() => toggleBoardFlip()}
           >
             Flip board
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
