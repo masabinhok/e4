@@ -55,9 +55,16 @@ export default function ChessGame() {
     setLineName(CARO_KANN_LINES[lineKey].name);
     setCurrentMoveIndex(0);
     setMoveHistory([]); // Reset move history
+    setMoveValidation(null); // Reset square highlights
 
     const newGame = new Chess();
     setGame(newGame);
+  };
+
+  const handleModeChange = (newMode: MODE) => {
+    setMode(newMode);
+    setMoveValidation(null); // Reset square highlights
+    loadLine(currentLineIndex); // Reload the current line
   };
 
   useEffect(() => {
@@ -166,7 +173,9 @@ export default function ChessGame() {
   };
 
   return (
-    <div className="flex flex-col items-center lg:flex-row bg-gray-900 text-gray-100 min-h-screen">
+    <div onAuxClick={() => {
+      setMoveValidation(null); // Reset square highlights on click
+    }} className="flex flex-col items-center lg:flex-row bg-gray-900 text-gray-100 min-h-screen">
       {/* Chessboard */}
       <div className="flex-1 flex items-center justify-center p-4">
         <Chessboard
@@ -190,10 +199,7 @@ export default function ChessGame() {
           <select
             className="w-full capitalize bg-gray-700 border border-gray-600 rounded-md p-2"
             value={mode}
-            onChange={(e) => {
-              setMode(e.target.value as MODE);
-              loadLine(currentLineIndex);
-            }}
+            onChange={(e) => handleModeChange(e.target.value as MODE)} // Use the new handler
           >
             {["learn", "practice", "quiz"].map((line, index) => (
               <option className='capitalize' key={index} value={line}>{line}</option>
@@ -209,7 +215,7 @@ export default function ChessGame() {
                 <select
                   className="w-full bg-gray-700 border border-gray-600 rounded-md p-2"
                   value={lineName}
-                  onChange={(e) => loadLine(e.target.selectedIndex)}
+                  onChange={(e) => loadLine(e.target.selectedIndex)} // Reset highlights on variation change
                 >
                   {CARO_KANN_LINES.map((line, index) => (
                     <option key={index} value={line.name}>{line.name}</option>
