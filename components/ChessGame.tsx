@@ -89,16 +89,15 @@ export default function ChessGame() {
       const gameCopy = new Chess(game.fen());
       const result = gameCopy.move(move);
 
-      if (!result) return false; // Invalid move
-
-      setGame(gameCopy);
+      if (!result) return false; // Invalid chess move
 
       // Check if user is following the line
       const expectedMove = currentLine[currentMoveIndex];
-      if (expectedMove && result.san !== expectedMove) {
+      if (!expectedMove || result.san !== expectedMove) {
         return false; // Move does not match the line
       }
 
+      setGame(gameCopy);
       setCurrentMoveIndex(currentMoveIndex + 1);
       return true;
     } catch {
