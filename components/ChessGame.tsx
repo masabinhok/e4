@@ -42,7 +42,15 @@ export default function ChessGame() {
   const [mode, setMode] = useState<MODE>('learn');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [messages, setMessages] = useState<string[]>([]); // Change to an array of messages
+
+  const addMessage = (newMessage: string) => {
+    setMessages((prevMessages) => [...prevMessages, newMessage]); // Add new message to the array
+  };
+
+  const removeMessage = (index: number) => {
+    setMessages((prevMessages) => prevMessages.filter((_, i) => i !== index)); // Remove message by index
+  };
 
   // Flip the board
   const toggleBoardFlip = () => {
@@ -66,9 +74,9 @@ export default function ChessGame() {
 
   const handleLineCompletion = () => {
     if (lineCompleted && mode == 'practice') {
-      setMessage("Congratulations! You've completed the line.");
+      addMessage("Congratulations! You've completed the line.");
     }
-  }
+  };
 
   const handleModeChange = (newMode: MODE) => {
     setMode(newMode);
@@ -202,19 +210,21 @@ export default function ChessGame() {
       setMoveValidation(null); // Reset square highlights on click
     }} className="flex flex-col items-center lg:flex-row bg-gray-900 text-gray-100 min-h-screen">
 
-      {
-        message && (
+      {/* Messages */}
+      <div className="absolute top-4 right-4 space-y-2">
+        {messages.map((msg, index) => (
           <Message
-            message={message}
+            key={index}
+            message={msg}
             type="success"
             onClose={() => {
-              setMessage(null);
-              setLineCompleted(false);
-              loadLine(currentLineIndex);
-            }}
+              removeMessage(index); // Remove message on close
+              setLineCompleted(false); // Reset line completion state
+              loadLine(currentLineIndex); // Reload the current line
+            }} // Remove the message when closed
           />
-        )
-      }
+        ))}
+      </div>
 
       {/* Chessboard */}
       <div className="flex-1 flex items-center justify-center p-4">
