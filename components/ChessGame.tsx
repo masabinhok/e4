@@ -69,7 +69,7 @@ export default function ChessGame() {
         setTimeout(() => nextMove(), 500);
       }
     }
-  }, [currentLineIndex, currentMoveIndex]);
+  }, [currentLineIndex, currentMoveIndex, mode]);
 
   // Advance to next move in the line
   const nextMove = () => {
@@ -208,10 +208,11 @@ export default function ChessGame() {
           <div className="font-mono bg-gray-800 p-2 rounded">
             {currentLine.slice(0, currentMoveIndex).join(' ')}
             {currentMoveIndex < currentLine.length && (
-              <span className="text-yellow-400">
-                {' ' +
-                  currentLine[currentMoveIndex]
+              <span className="text-green-400">
+                {
+                  mode === 'quiz' ? " ?" : " " + currentLine[currentMoveIndex]
                 }
+
               </span>
             )}
           </div>
@@ -277,7 +278,7 @@ export default function ChessGame() {
             )
           }
           <button
-            className="border border-gray-500 px-4 py-2 mt-3 rounded-md w-full"
+            className="border border-gray-500 px-4 py-2 mt-2 rounded-md w-full"
             onClick={() => toggleBoardFlip()}
           >
             Flip board
