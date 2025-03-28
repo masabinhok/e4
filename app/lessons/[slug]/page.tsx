@@ -1,5 +1,5 @@
 'use client'
-import ChessGame from "@/components/Chessboard";
+import ChessGame from "@/components/ChessGame";
 import { use } from "react";
 
 export default function LessonPage({ params }: { params: Promise<{ slug: string }> }) {
