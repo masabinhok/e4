@@ -33,13 +33,14 @@ export default function ChessGame() {
   const [currentLine, setCurrentLine] = useState<string[]>(CARO_KANN_LINES[currentLineIndex].line);
   const [lineName, setLineName] = useState(CARO_KANN_LINES[currentLineIndex].name);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
+  const [moveHistory, setMoveHistory] = useState<string[]>([]); // Track move history
   const [autoPlay, setAutoPlay] = useState(false);
   const [boardFlip, setBoardFlip] = useState<string>(CARO_KANN_LINES[currentLineIndex].boardflip || 'white');
 
   // Flip the board
   const toggleBoardFlip = () => {
     setBoardFlip(boardFlip === 'white' ? 'black' : 'white');
-  }
+  };
 
   // Load the selected line
   const loadLine = (lineKey: number) => {
@@ -48,6 +49,7 @@ export default function ChessGame() {
     setBoardFlip(CARO_KANN_LINES[lineKey].boardflip || 'white');
     setLineName(CARO_KANN_LINES[lineKey].name);
     setCurrentMoveIndex(0);
+    setMoveHistory([]); // Reset move history
 
     const newGame = new Chess();
     setGame(newGame);
@@ -60,7 +62,22 @@ export default function ChessGame() {
       const gameCopy = new Chess(game.fen());
       gameCopy.move(move);
       setGame(gameCopy);
+      setMoveHistory([...moveHistory, move]); // Add move to history
       setCurrentMoveIndex(currentMoveIndex + 1);
+      return true;
+    }
+    return false;
+  };
+
+  // Step back to the previous move
+  const previousMove = () => {
+    if (currentMoveIndex > 0) {
+      const newHistory = moveHistory.slice(0, -1); // Remove the last move
+      const newGame = new Chess();
+      newHistory.forEach((move) => newGame.move(move)); // Replay all moves except the last one
+      setGame(newGame);
+      setMoveHistory(newHistory); // Update move history
+      setCurrentMoveIndex(currentMoveIndex - 1); // Decrement move index
       return true;
     }
     return false;
@@ -98,6 +115,7 @@ export default function ChessGame() {
       }
 
       setGame(gameCopy);
+      setMoveHistory([...moveHistory, result.san]); // Add move to history
       setCurrentMoveIndex(currentMoveIndex + 1);
       return true;
     } catch {
@@ -154,6 +172,13 @@ export default function ChessGame() {
         <div className="flex space-x-3 space-y-3 mb-6 flex-wrap">
           <button
             className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md"
+            onClick={previousMove}
+            disabled={currentMoveIndex == 0}
+          >
+            Previous Move
+          </button>
+          <button
+            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md"
             onClick={nextMove}
             disabled={currentMoveIndex >= currentLine.length}
           >
@@ -166,13 +191,13 @@ export default function ChessGame() {
             {autoPlay ? 'Pause' : 'Autoplay'}
           </button>
           <button
-            className="border border-gray-500 px-4 py-2 rounded-md"
+            className=" bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md"
             onClick={() => loadLine(currentLineIndex)}
           >
             Reset
           </button>
           <button
-            className="border border-gray-500 px-4 py-2 rounded-md"
+            className="border border-gray-500 px-4 py-2 rounded-md w-full"
             onClick={() => toggleBoardFlip()}
           >
             Flip board
