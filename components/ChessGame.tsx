@@ -81,7 +81,6 @@ export default function ChessGame({ code }: { code: string }) {
   };
 
   const loadLine = (lineKey: number) => {
-    setSoundEvent('scatter');
     const moves = currentOpening?.variations[lineKey].line;
     setCurrentLine(moves);
     setBoardFlip(currentOpening?.variations[lineKey].boardflip || 'white');
@@ -105,6 +104,7 @@ export default function ChessGame({ code }: { code: string }) {
         onClose: () => {
           setLineCompleted(false);
           loadLine(currentLineIndex);
+          setSoundEvent('scatter');
         },
       });
     }
@@ -120,6 +120,7 @@ export default function ChessGame({ code }: { code: string }) {
             return currentOpening?.variations[randomLineIndex].line;
           });
           loadLine(currentLineIndex);
+          setSoundEvent('scatter');
         },
       });
     }
