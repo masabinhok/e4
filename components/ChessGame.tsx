@@ -48,6 +48,7 @@ export default function ChessGame() {
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);
   const [messages, setMessages] = useState<MessageType[]>([]); // Update state to store message objects
+  const [mistakes, setMistakes] = useState<number>(0); // Track mistakes
 
   const addMessage = (newMessage: MessageType) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]); // Add new message object to the array
@@ -76,6 +77,7 @@ export default function ChessGame() {
     setCurrentMoveIndex(0);
     setMoveHistory([]); // Reset move history
     setMoveValidation(null); // Reset square highlights
+    setMistakes(0); // Reset mistakes
 
     const newGame = new Chess();
     setGame(newGame);
@@ -88,6 +90,20 @@ export default function ChessGame() {
         type: 'success',
         onClose: () => {
           setLineCompleted(false);
+          loadLine(currentLineIndex);
+        },
+      });
+    }
+    if (lineCompleted && mode === 'quiz') {
+      addMessage({
+        content: `Congratulations! You've completed the line. You made ${mistakes} mistakes.`,
+        type: 'success',
+        onClose: () => {
+          setLineCompleted(false);
+          setCurrentLine(() => {
+            const randomLineIndex = Math.floor(Math.random() * CARO_KANN_LINES.length);
+            return CARO_KANN_LINES[randomLineIndex].line;
+          })
           loadLine(currentLineIndex);
         },
       });
@@ -191,6 +207,7 @@ export default function ChessGame() {
       // Check if user is following the line in quiz mode
       const expectedMove = currentLine[currentMoveIndex];
       if ((!expectedMove || result.san !== expectedMove)) {
+        setMistakes(mistakes + 1);
         setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
         addMessage({
           content: "Move does not match the expected line.",
