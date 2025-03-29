@@ -3,30 +3,8 @@ import { useState, useEffect } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
+import openings from '@/api/openings.json'
 
-const CARO_KANN_LINES = [
-  {
-    name: "Early ...c5 Break",
-    index: 0,
-    line: [
-      'e4', 'c6', 'd4', 'd5', 'e5', 'c5',
-      'dxc5', 'Nc6', 'Bb5', 'e6', 'Be3',
-      'Ne7', 'c3', 'Nf5', 'Bd4', 'Bd7'
-    ],
-    boardflip: 'black',
-  },
-  {
-    name: "Classical Variation",
-    index: 1,
-    line: [
-      'e4', 'c6', 'd4', 'd5', 'Nc3', 'dxe4',
-      'Nxe4', 'Bf5', 'Ng3', 'Bg6', 'h4',
-      'h6', 'Nf3', 'Nd7', 'h5', 'Bh7'
-    ],
-    boardflip: 'black',
-  }
-  // Add other variations here
-];
 
 type MODE = 'learn' | 'practice' | 'quiz';
 type MessageType = {
@@ -35,20 +13,23 @@ type MessageType = {
   onClose?: () => void; // Optional callback for when the message is closed
 };
 
-export default function ChessGame() {
+export default function ChessGame({ code }: { code: string }) {
+
+  const currentOpening = openings.openings.find((opening) => opening.code === code);
   const [game, setGame] = useState(new Chess());
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
-  const [currentLine, setCurrentLine] = useState<string[]>(CARO_KANN_LINES[currentLineIndex].line);
-  const [lineName, setLineName] = useState(CARO_KANN_LINES[currentLineIndex].name);
+  const [currentLine, setCurrentLine] = useState<string[] | undefined>(currentOpening?.variations[currentLineIndex]?.line);
+  const [lineName, setLineName] = useState(currentOpening?.variations[currentLineIndex].name);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]); // Track move history
   const [autoPlay, setAutoPlay] = useState(false);
-  const [boardFlip, setBoardFlip] = useState<string>(CARO_KANN_LINES[currentLineIndex].boardflip || 'white');
+  const [boardFlip, setBoardFlip] = useState<string>(currentOpening?.variations[currentLineIndex].boardflip || 'white');
   const [mode, setMode] = useState<MODE>('learn');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);
   const [messages, setMessages] = useState<MessageType[]>([]); // Update state to store message objects
   const [mistakes, setMistakes] = useState<number>(0); // Track mistakes
+
 
   const addMessage = (newMessage: MessageType) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]); // Add new message object to the array
@@ -69,11 +50,11 @@ export default function ChessGame() {
 
   // Load the selected line
   const loadLine = (lineKey: number) => {
-    const moves = CARO_KANN_LINES[lineKey].line;
+    const moves = currentOpening?.variations[lineKey].line;
     setCurrentLine(moves);
-    setBoardFlip(CARO_KANN_LINES[lineKey].boardflip || 'white');
-    setCurrentLineIndex(CARO_KANN_LINES[lineKey].index);
-    setLineName(CARO_KANN_LINES[lineKey].name);
+    setBoardFlip(currentOpening?.variations[lineKey].boardflip || 'white');
+    setCurrentLineIndex(currentOpening?.variations[lineKey].index!);
+    setLineName(currentOpening?.variations[lineKey].name);
     setCurrentMoveIndex(0);
     setMoveHistory([]); // Reset move history
     setMoveValidation(null); // Reset square highlights
@@ -101,8 +82,8 @@ export default function ChessGame() {
         onClose: () => {
           setLineCompleted(false);
           setCurrentLine(() => {
-            const randomLineIndex = Math.floor(Math.random() * CARO_KANN_LINES.length);
-            return CARO_KANN_LINES[randomLineIndex].line;
+            const randomLineIndex = Math.floor(Math.random() * currentOpening?.variations.length!);
+            return currentOpening?.variations[randomLineIndex].line;
           })
           loadLine(currentLineIndex);
         },
@@ -118,11 +99,11 @@ export default function ChessGame() {
 
   useEffect(() => {
     if (mode === 'practice' || mode == 'quiz') {
-      if (CARO_KANN_LINES[currentLineIndex].boardflip === 'black' && currentMoveIndex % 2 == 0) {
+      if (currentOpening?.variations[currentLineIndex].boardflip === 'black' && currentMoveIndex % 2 == 0) {
         setTimeout(() => nextMove(), 500);
       }
 
-      if (CARO_KANN_LINES[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
+      if (currentOpening?.variations[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
         setTimeout(() => nextMove(), 500);
       }
     }
@@ -130,8 +111,8 @@ export default function ChessGame() {
 
   // Advance to next move in the line
   const nextMove = () => {
-    if (currentMoveIndex < currentLine.length) {
-      const move = currentLine[currentMoveIndex];
+    if (currentMoveIndex < currentLine!.length) {
+      const move = currentLine![currentMoveIndex];
       const gameCopy = new Chess(game.fen());
       gameCopy.move(move);
       setGame(gameCopy);
@@ -161,14 +142,14 @@ export default function ChessGame() {
   // Auto-play through the line
   useEffect(() => {
 
-    if (currentMoveIndex >= currentLine.length) {
+    if (currentMoveIndex >= currentLine!.length) {
       setLineCompleted(true);
       setAutoPlay(false);
       handleLineCompletion();
       return;
     }
 
-    if (autoPlay && currentMoveIndex < currentLine.length) {
+    if (autoPlay && currentMoveIndex < currentLine!.length) {
       const timer = setTimeout(() => {
         nextMove();
       }, 1000);
@@ -190,10 +171,10 @@ export default function ChessGame() {
       const result = gameCopy.move(move);
 
       // Ensure the player moves only on their turn
-      if (CARO_KANN_LINES[currentLineIndex].boardflip === 'black' && currentMoveIndex % 2 === 0) {
+      if (currentOpening?.variations[currentLineIndex].boardflip === 'black' && currentMoveIndex % 2 === 0) {
         return false; // Black's turn, but it's white's move
       }
-      if (CARO_KANN_LINES[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
+      if (currentOpening?.variations[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
         return false; // White's turn, but it's black's move
       }
 
@@ -207,7 +188,7 @@ export default function ChessGame() {
       }
 
       // Check if user is following the line in quiz mode
-      const expectedMove = currentLine[currentMoveIndex];
+      const expectedMove = currentLine![currentMoveIndex];
       if ((!expectedMove || result.san !== expectedMove)) {
         setMistakes(mistakes + 1);
         setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
@@ -225,7 +206,7 @@ export default function ChessGame() {
       setCurrentMoveIndex(currentMoveIndex + 1);
 
       // Check for line completion
-      if (currentMoveIndex + 1 >= currentLine.length) {
+      if (currentMoveIndex + 1 >= currentLine!.length) {
         setLineCompleted(true);
         setAutoPlay(false);
         handleLineCompletion();
@@ -284,7 +265,7 @@ export default function ChessGame() {
 
       {/* Teaching Panel */}
       <div className="w-full lg:w-96 bg-gray-800 p-6 overflow-y-auto h-full">
-        <h1 className="text-2xl font-bold text-blue-400 mb-6">Caro-Kann Trainer</h1>
+        <h1 className="text-2xl font-bold text-blue-400 mb-6">{currentOpening?.name}</h1>
 
         {/* Mode Selection */}
         <div className="mb-6">
@@ -310,7 +291,7 @@ export default function ChessGame() {
                   value={lineName}
                   onChange={(e) => loadLine(e.target.selectedIndex)} // Reset highlights on variation change
                 >
-                  {CARO_KANN_LINES.map((line, index) => (
+                  {currentOpening?.variations.map((line, index) => (
                     <option key={index} value={line.name}>{line.name}</option>
                   ))}
                 </select>
@@ -324,11 +305,11 @@ export default function ChessGame() {
           <h2 className="font-bold text-blue-400 mb-2">{lineName}</h2>
 
           <div className="font-mono bg-gray-800 p-2 rounded">
-            {currentLine.slice(0, currentMoveIndex).join(' ')}
-            {currentMoveIndex < currentLine.length && (
+            {currentLine!.slice(0, currentMoveIndex).join(' ')}
+            {currentMoveIndex < currentLine!.length && (
               <span className="text-green-400">
                 {
-                  mode === 'quiz' ? " ?" : " " + currentLine[currentMoveIndex]
+                  mode === 'quiz' ? " ?" : " " + currentLine![currentMoveIndex]
                 }
 
               </span>
@@ -352,7 +333,7 @@ export default function ChessGame() {
                 <button
                   className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md w-full"
                   onClick={nextMove}
-                  disabled={currentMoveIndex >= currentLine.length}
+                  disabled={currentMoveIndex >= currentLine!.length}
                 >
                   Next Move
                 </button></div>
@@ -387,7 +368,7 @@ export default function ChessGame() {
             mode === 'quiz' && (
               <>
                 <button onClick={() => {
-                  const randomLineIndex = Math.floor(Math.random() * CARO_KANN_LINES.length);
+                  const randomLineIndex = Math.floor(Math.random() * currentOpening?.variations.length!);
                   loadLine(randomLineIndex);
                 }} className='bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md w-full'>
                   Random Line

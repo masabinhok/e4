@@ -1,0 +1,133 @@
+{
+  "openings": [
+    {
+      "name": "Caro-Kann Defense",
+      "description": "The Caro-Kann Defense is a solid defense to 1.e4. It is a great opening for beginners to learn as it is solid and has a clear plan.",
+      "code": "carokann",
+      "variations": [
+        {
+          "name": "Early ...c5 Break",
+          "index": 0,
+          "line": [
+            "e4",
+            "c6",
+            "d4",
+            "d5",
+            "e5",
+            "c5",
+            "dxc5",
+            "Nc6",
+            "Bb5",
+            "e6",
+            "Be3",
+            "Ne7",
+            "c3",
+            "Nf5",
+            "Bd4",
+            "Bd7"
+          ],
+          "boardflip": "black"
+        },
+        {
+          "name": "Classical Variation",
+          "index": 1,
+          "line": [
+            "e4",
+            "c6",
+            "d4",
+            "d5",
+            "Nc3",
+            "dxe4",
+            "Nxe4",
+            "Bf5",
+            "Ng3",
+            "Bg6",
+            "h4",
+            "h6",
+            "Nf3",
+            "Nd7",
+            "h5",
+            "Bh7"
+          ],
+          "boardflip": "black"
+        },
+        {
+          "name": "Advance Variation",
+          "index": 2,
+          "line": [
+            "e4",
+            "c6",
+            "d4",
+            "d5",
+            "e5",
+            "Bf5",
+            "Nf3",
+            "e6",
+            "Be2",
+            "c5",
+            "Be3"
+          ],
+          "boardflip": "black"
+        },
+        {
+          "name": "Exchange Variation",
+          "index": 3,
+          "line": [
+            "e4",
+            "c6",
+            "d4",
+            "d5",
+            "exd5",
+            "cxd5",
+            "Bd3",
+            "Nc6",
+            "c3",
+            "Nf6",
+            "Bf4"
+          ],
+          "boardflip": "black"
+        }
+      ]
+    },
+    {
+      "name": "Jobava London System",
+      "description": "The Jobava London System is a solid opening for white that is easy to learn and has a clear plan.",
+      "code": "jobava",
+      "variations": [
+        {
+          "name": "Standard Setup",
+          "index": 0,
+          "line": [
+            "d4",
+            "d5",
+            "Nc3",
+            "Nf6",
+            "Bf4",
+            "e6",
+            "e3",
+            "c5",
+            "Nb5",
+            "Na6"
+          ],
+          "boardflip": "white"
+        },
+        {
+          "name": "Jobava Gambit",
+          "index": 1,
+          "line": [
+            "d4",
+            "d5",
+            "Nc3",
+            "Nf6",
+            "Bf4",
+            "c5",
+            "e4",
+            "dxe4",
+            "d5"
+          ],
+          "boardflip": "white"
+        }
+      ]
+    }
+  ]
+}
