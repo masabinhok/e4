@@ -82,6 +82,7 @@ export default function ChessGame({ code }: { code: string }) {
 
   const loadLine = (lineKey: number) => {
     const moves = currentOpening?.variations[lineKey].line;
+    setAutoPlay(false);
     setCurrentLine(moves);
     setBoardFlip(currentOpening?.variations[lineKey].boardflip || 'white');
     setCurrentLineIndex(currentOpening?.variations[lineKey].index!);
@@ -144,7 +145,6 @@ export default function ChessGame({ code }: { code: string }) {
 
       if (currentMoveIndex + 1 >= currentLine!.length) {
         setLineCompleted(true);
-        setAutoPlay(false);
         handleLineCompletion();
       }
     }
@@ -372,7 +372,6 @@ export default function ChessGame({ code }: { code: string }) {
                 <button
                   className=" bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md w-full"
                   onClick={() => {
-                    setAutoPlay(false);
                     loadLine(currentLineIndex);
                   }}
                 >
