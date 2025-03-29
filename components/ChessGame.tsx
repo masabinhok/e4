@@ -4,7 +4,6 @@ import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import openings from '@/api/openings.json'
-import { div, section } from 'motion/react-client';
 
 
 type MODE = 'learn' | 'practice' | 'quiz';
@@ -272,8 +271,8 @@ export default function ChessGame({ code }: { code: string }) {
             />
           ) : (
             <section className='w-2xl flex items-center justify-center font-bold text-7xl text-blue-400'>
-                    LOADING...
-            </section>  
+              LOADING...
+            </section>
           )
         }
 
@@ -318,7 +317,9 @@ export default function ChessGame({ code }: { code: string }) {
 
         {/* Current Line Info */}
         <div className="bg-gray-700 p-4 rounded-md mb-6">
-          <h2 className="font-bold text-blue-400 mb-2">{lineName}</h2>
+          <h2 className="font-bold text-blue-400 ">{lineName}</h2>
+
+          <p className='text-xs mb-3'>{currentOpening?.variations[currentLineIndex].description}</p>
 
           <div className="font-mono bg-gray-800 p-2 rounded">
             {currentLine!.slice(0, currentMoveIndex).join(' ')}
