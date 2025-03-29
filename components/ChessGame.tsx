@@ -154,6 +154,7 @@ export default function ChessGame({ code }: { code: string }) {
   // Auto-play through the line
   useEffect(() => {
     if (autoPlay && currentMoveIndex < currentLine!.length) {
+      setMessages([]); // Clear messages when autoplay is active
       const timer = setTimeout(() => {
         nextMove();
       }, 1000);
@@ -164,6 +165,7 @@ export default function ChessGame({ code }: { code: string }) {
   }, [autoPlay, currentMoveIndex]);
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
+    if (autoPlay) return false; // Prevent moves during autoplay
     try {
       const move = {
         from: sourceSquare,
@@ -210,7 +212,7 @@ export default function ChessGame({ code }: { code: string }) {
       setCurrentMoveIndex(currentMoveIndex + 1);
 
       // Check for line completion
-     
+
       return true;
     } catch {
       setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
@@ -238,7 +240,7 @@ export default function ChessGame({ code }: { code: string }) {
     }} className="flex flex-col items-center lg:flex-row bg-gray-900 text-gray-100 min-h-screen">
 
       {/* Messages */}
-      <div className="absolute top-4 right-4 space-y-2">
+      <div className="space-y-2">
         {messages.map((msg, index) => (
           <Message
             key={index}

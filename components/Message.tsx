@@ -34,13 +34,13 @@ const Message: React.FC<MessageProps> = ({
 
     switch (type) {
       case 'success':
-        return `${base} bg-green-50 border-green-400 text-green-800`
+        return `${base} absolute top-4 left-4  bg-green-50 border-green-400 text-green-800`
       case 'error':
-        return `${base} bg-red-50 border-red-400 text-red-800`
+        return `${base} absolute top-4 right-4  bg-red-50 border-red-400 text-red-800`
       case 'warning':
-        return `${base} bg-amber-50 border-amber-400 text-amber-800`
+        return `${base} absolute top-4 right-4 bg-amber-50 border-amber-400 text-amber-800`
       default:
-        return `${base} bg-blue-50 border-blue-400 text-blue-800`
+        return `${base} absolute top-4 right-4 bg-blue-50 border-blue-400 text-blue-800`
     }
   }
 
