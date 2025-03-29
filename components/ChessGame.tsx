@@ -137,6 +137,7 @@ export default function ChessGame() {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, move]); // Add move to history
       setCurrentMoveIndex(currentMoveIndex + 1);
+      setMoveValidation(null);
       return true;
     }
     return false;
@@ -151,6 +152,7 @@ export default function ChessGame() {
       setGame(newGame);
       setMoveHistory(newHistory); // Update move history
       setCurrentMoveIndex(currentMoveIndex - 1); // Decrement move index
+      setMoveValidation(null);
       return true;
     }
     return false;
