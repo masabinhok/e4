@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
+import Image from "next/image";
+import logo from "../public/e4.svg";
+import Link from "next/link";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -31,6 +34,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.variable} font-poppins antialiased`}>
+        <Link href={"/"} className="fixed top-10 left-5 flex items-center">
+          <Image src={logo} height={40} width={40} alt="logo" className="size-24"></Image>
+          <h1 className="text-2xl font-bold">e4.<span className="text-xs">learnchess</span></h1>
+        </Link>
         {children}
       </body>
     </html>
