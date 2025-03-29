@@ -97,6 +97,7 @@ export default function ChessGame({ code }: { code: string }) {
   };
 
   const handleLineCompletion = () => {
+    setMessages([]);
     if (lineCompleted && mode === 'practice') {
       setSoundEvent('achievement');
       addMessage({
@@ -129,7 +130,6 @@ export default function ChessGame({ code }: { code: string }) {
 
   const handleModeChange = (newMode: 'learn' | 'practice' | 'quiz') => {
     setMode(newMode);
-    setMoveValidation(null);
     loadLine(currentLineIndex);
   };
 
