@@ -4,6 +4,7 @@ import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import openings from '@/api/openings.json'
+import { div, section } from 'motion/react-client';
 
 
 type MODE = 'learn' | 'practice' | 'quiz';
@@ -29,6 +30,11 @@ export default function ChessGame({ code }: { code: string }) {
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);
   const [messages, setMessages] = useState<MessageType[]>([]); // Update state to store message objects
   const [mistakes, setMistakes] = useState<number>(0); // Track mistakes
+  const [isBrowser, setIsBrowser] = useState<boolean>(false); // Track if in browser environment
+
+  useEffect(() => {
+    setIsBrowser(true)
+  }, [])
 
 
   const addMessage = (newMessage: MessageType) => {
@@ -252,15 +258,25 @@ export default function ChessGame({ code }: { code: string }) {
 
       {/* Chessboard */}
       <div className="flex-1 flex items-center justify-center p-4">
-        <Chessboard
-          position={game.fen()}
-          onPieceDrop={onDrop}
-          boardWidth={Math.min(window.innerWidth * 0.7, 600)}
-          customDarkSquareStyle={{ backgroundColor: '#4a5568' }}
-          customLightSquareStyle={{ backgroundColor: '#718096' }}
-          customSquareStyles={getSquareStyles()} // Highlight squares
-          boardOrientation={boardFlip === 'black' ? 'black' : 'white'}
-        />
+
+        {
+          isBrowser ? (
+            <Chessboard
+              position={game.fen()}
+              onPieceDrop={onDrop}
+              boardWidth={Math.min(window.innerWidth * 0.7, 600)}
+              customDarkSquareStyle={{ backgroundColor: '#4a5568' }}
+              customLightSquareStyle={{ backgroundColor: '#718096' }}
+              customSquareStyles={getSquareStyles()} // Highlight squares
+              boardOrientation={boardFlip === 'black' ? 'black' : 'white'}
+            />
+          ) : (
+            <section className='w-2xl flex items-center justify-center font-bold text-7xl text-blue-400'>
+                    LOADING...
+            </section>  
+          )
+        }
+
       </div>
 
       {/* Teaching Panel */}
