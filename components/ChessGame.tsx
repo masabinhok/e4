@@ -105,7 +105,7 @@ export default function ChessGame({ code }: { code: string }) {
         type: 'success',
         onClose: () => {
           setLineCompleted(false);
-          loadLine(currentLineIndex);
+          loadRandomLine();
           setSoundEvent('scatter');
         },
       });
@@ -117,11 +117,11 @@ export default function ChessGame({ code }: { code: string }) {
         type: 'success',
         onClose: () => {
           setLineCompleted(false);
-          setCurrentLine(() => {
+          setCurrentLineIndex(() => {
             const randomLineIndex = Math.floor(Math.random() * currentOpening?.variations.length!);
-            return currentOpening?.variations[randomLineIndex].line;
+            return randomLineIndex;
           });
-          loadLine(currentLineIndex);
+          loadRandomLine();
           setSoundEvent('scatter');
         },
       });
@@ -164,6 +164,11 @@ export default function ChessGame({ code }: { code: string }) {
     }
     return false;
   };
+
+  const loadRandomLine = () => {
+    const randomLineIndex = Math.floor(Math.random() * currentOpening?.variations.length!);
+    loadLine(randomLineIndex);
+  }
 
   const previousMove = () => {
     setSoundEvent('moveSelf');
@@ -384,10 +389,7 @@ export default function ChessGame({ code }: { code: string }) {
           {mode === 'quiz' && (
             <>
               <button
-                onClick={() => {
-                  const randomLineIndex = Math.floor(Math.random() * currentOpening?.variations.length!);
-                  loadLine(randomLineIndex);
-                }}
+                onClick={loadRandomLine}
                 className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md w-full"
               >
                 Random Line
