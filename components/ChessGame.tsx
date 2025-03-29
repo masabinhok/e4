@@ -111,6 +111,13 @@ export default function ChessGame({ code }: { code: string }) {
       if (currentOpening?.variations[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
         setTimeout(() => nextMove(), 500);
       }
+
+      if (currentMoveIndex + 1 >= currentLine!.length) {
+        setLineCompleted(true);
+        setAutoPlay(false);
+        handleLineCompletion();
+      }
+
     }
   }, [currentLineIndex, currentMoveIndex, mode]);
 
@@ -146,14 +153,6 @@ export default function ChessGame({ code }: { code: string }) {
 
   // Auto-play through the line
   useEffect(() => {
-
-    if (currentMoveIndex >= currentLine!.length) {
-      setLineCompleted(true);
-      setAutoPlay(false);
-      handleLineCompletion();
-      return;
-    }
-
     if (autoPlay && currentMoveIndex < currentLine!.length) {
       const timer = setTimeout(() => {
         nextMove();
@@ -211,12 +210,7 @@ export default function ChessGame({ code }: { code: string }) {
       setCurrentMoveIndex(currentMoveIndex + 1);
 
       // Check for line completion
-      if (currentMoveIndex + 1 >= currentLine!.length) {
-        setLineCompleted(true);
-        setAutoPlay(false);
-        handleLineCompletion();
-      }
-
+     
       return true;
     } catch {
       setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
