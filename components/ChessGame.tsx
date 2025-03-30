@@ -152,8 +152,9 @@ export default function ChessGame({ code }: { code: string }) {
   }, [currentLineIndex, currentMoveIndex, mode]);
 
   const nextMove = () => {
-    setSoundEvent('moveOpponent');
+    
     if (currentMoveIndex < currentLine!.length) {
+      setSoundEvent('moveOpponent');
       const move = currentLine![currentMoveIndex];
       const gameCopy = new Chess(game.fen());
       gameCopy.move(move);
@@ -172,8 +173,8 @@ export default function ChessGame({ code }: { code: string }) {
   }
 
   const previousMove = () => {
-    setSoundEvent('moveSelf');
     if (currentMoveIndex > 0) {
+      setSoundEvent('moveSelf');
       const newHistory = moveHistory.slice(0, -1);
       const newGame = new Chess();
       newHistory.forEach((move) => newGame.move(move));
@@ -239,11 +240,12 @@ export default function ChessGame({ code }: { code: string }) {
         return false;
       }
 
-      setSoundEvent('moveSelf');
+     
       setMoveValidation({ source: sourceSquare, target: targetSquare, valid: true });
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
+      setSoundEvent('moveSelf');
 
       return true;
     } catch {
