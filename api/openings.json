@@ -57,54 +57,6 @@
           "description": "Black avoids the bishop trade, aiming for a compact position with ...e6 and ...Be7."
         },
         {
-          "name": "Tartakower's Nc5",
-          "index": 2,
-          "line": [
-            "e4",
-            "c6",
-            "d4",
-            "d5",
-            "Nc3",
-            "dxe4",
-            "Nxe4",
-            "Bf5",
-            "Nc5",
-            "Qa5+",
-            "Bd2",
-            "Qc7",
-            "Nxb7",
-            "Qb6",
-            "Nc5",
-            "Bxc2"
-          ],
-          "boardflip": "black",
-          "description": "White's aggressive 5.Nc5 leads to sharp play after 5...Qa5+. Black regains the pawn with ...Bxc2."
-        },
-        {
-          "name": "Bronstein-Larsen (Nf6)",
-          "index": 3,
-          "line": [
-            "e4",
-            "c6",
-            "d4",
-            "d5",
-            "Nc3",
-            "dxe4",
-            "Nxe4",
-            "Nf6",
-            "Nxf6+",
-            "gxf6",
-            "Bc4",
-            "e6",
-            "Ne2",
-            "Bd7",
-            "O-O",
-            "Bc6"
-          ],
-          "boardflip": "black",
-          "description": "Black accepts doubled pawns (...gxf6) for open files and bishop activity on the long diagonal."
-        },
-        {
           "name": "Smyslov Variation (gxf6)",
           "index": 4,
           "line": [
