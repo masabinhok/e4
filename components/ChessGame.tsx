@@ -4,18 +4,19 @@ import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import openings from '@/api/openings.json';
+import useLocalStorage from '@/hooks/useLocalStorage';
 
 export default function ChessGame({ code }: { code: string }) {
   const currentOpening = openings.openings.find((opening) => opening.code === code);
   const [game, setGame] = useState(new Chess());
-  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [currentLineIndex, setCurrentLineIndex] = useLocalStorage<number>('currentLineIndex', 0);
   const [currentLine, setCurrentLine] = useState<string[] | undefined>(currentOpening?.variations[currentLineIndex]?.line);
   const [lineName, setLineName] = useState(currentOpening?.variations[currentLineIndex].name);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [autoPlay, setAutoPlay] = useState(false);
   const [boardFlip, setBoardFlip] = useState<string>(currentOpening?.variations[currentLineIndex].boardflip || 'white');
-  const [mode, setMode] = useState<'learn' | 'practice' | 'quiz'>('learn');
+  const [mode, setMode] = useLocalStorage<'learn' | 'practice' | 'quiz'>('currentMode', 'learn');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
