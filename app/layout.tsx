@@ -21,6 +21,21 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
+const sidebarContent = [{
+  title: "Lessons",
+  url: "/lessons",
+}, {
+  title: "Record",
+  url: "/record",
+}, {
+  title: "PGN",
+  url: "/pgn",
+},
+{
+  title: "Credit",
+  url: "/credit",
+},]
+
 export const metadata: Metadata = {
   title: "e4.learnchess",
   description: "The Anti-Video Chess Coach",
@@ -50,12 +65,15 @@ export default function RootLayout({
             <h1 className="text-2xl font-bold">e4.<span className="text-xs">learnchess</span></h1>
           </Link>
           <div className="flex flex-col gap-2 text-xl font-bold p-5 border-r w-[150px] border-white">
-            <Link href={"/lessons"}>
-              <h1 className="">Lessons</h1>
-            </Link>
-            <Link href={"/credit"}>
-              <h1 className="">Credit</h1>
-            </Link>
+            {
+              sidebarContent.map((item, index) => {
+                return (
+                  <Link key={index} href={item.url} >
+                    <h1 className="">{item.title}</h1>
+                  </Link>
+                )
+              })
+            }
           </div>
         </div>
 
