@@ -1,14 +1,15 @@
+'use client'
 import React from 'react'
 import Link from 'next/link'
-import openings from '@/api/openings.json'
+import openings from '@/constants/openings'
 
 
 const LessonsPage = () => {
   return (
     <main className="p-10">
-      <section className='grid grid-cols-2 gap-6 max-w-[1100px]'>
+      <section className='grid grid-cols-2  space-y-15 space-x-10 max-w-[1100px]'>
         {
-          openings.openings.map((lesson, index) => (
+          openings.map((lesson, index) => (
             <div key={index}>
               <h1 className="text-3xl font-bold mb-4">{lesson.name}</h1>
               <p className="text-gray-600 mb-6">

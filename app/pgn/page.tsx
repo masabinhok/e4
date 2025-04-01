@@ -1,8 +1,12 @@
+
+import CustomPGN from '@/components/CustomLine'
 import React from 'react'
 
 const EnterPGNpage = () => {
   return (
-    <div>EnterPGNpage</div>
+    <div>
+      <CustomPGN />
+    </div>
   )
 }
 

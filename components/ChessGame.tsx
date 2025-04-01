@@ -3,11 +3,12 @@ import { useState, useEffect } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
-import openings from '@/api/openings.json';
+import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
 
 export default function ChessGame({ code }: { code: string }) {
-  const currentOpening = openings.openings.find((opening) => opening.code === code);
+  const [updatedOpenings, setUpdatedOpenings] = useLocalStorage('openings', openings);
+  const currentOpening = updatedOpenings.find((opening) => opening.code === code);
   const [game, setGame] = useState(new Chess());
   const [currentLineIndex, setCurrentLineIndex] = useLocalStorage<number>('currentLineIndex', 0);
   const [currentLine, setCurrentLine] = useState<string[] | undefined>(currentOpening?.variations[currentLineIndex]?.line);
@@ -152,7 +153,7 @@ export default function ChessGame({ code }: { code: string }) {
   }, [currentLineIndex, currentMoveIndex, mode]);
 
   const nextMove = () => {
-    
+
     if (currentMoveIndex < currentLine!.length) {
       setSoundEvent('moveOpponent');
       const move = currentLine![currentMoveIndex];
@@ -240,7 +241,7 @@ export default function ChessGame({ code }: { code: string }) {
         return false;
       }
 
-     
+
       setMoveValidation({ source: sourceSquare, target: targetSquare, valid: true });
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
