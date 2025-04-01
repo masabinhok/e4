@@ -210,37 +210,49 @@ export default function CustomPGN({ code }: { code?: string }) {
 
 
   const loadPGN = () => {
-    const moves = pgn.split(' ').filter((move, index) => index % 3 !== 0);
+    try {
+      const moves = pgn.split(' ').filter((move, index) => index % 3 !== 0);
 
-    const gameCopy = new Chess();
-    let pgnVerified = false;
+      const gameCopy = new Chess();
+      let pgnVerified = false;
 
-    moves.forEach((move) => {
-      const result = gameCopy.move(move);
-      if (!result) {
-        setSoundEvent('illegal');
-        setMoveValidation({ source: '', target: '', valid: false });
-        addMessage({
-          content: 'Invalid move',
-          type: 'error',
-        });
-        return false;
-      }
-      pgnVerified = true;
-      setMoveHistory((prev) => [...prev, result.san]);
-      setCurrentMoveIndex((prev) => prev + 1);
-      setGame(gameCopy);
-      setMoveValidation({ source: '', target: '', valid: true });
-      setPgn('');
-    });
-    if (pgnVerified) {
-      setMessages([]);
-      setCurrentLine(moves);
-      addMessage({
-        content: 'PGN loaded successfully',
-        type: 'success',
+      moves.forEach((move) => {
+        const result = gameCopy.move(move);
+        if (!result) {
+          setSoundEvent('illegal');
+          setMoveValidation({ source: '', target: '', valid: false });
+          addMessage({
+            content: 'Invalid move',
+            type: 'error',
+          });
+          return false;
+        }
+        pgnVerified = true;
+        setMoveHistory((prev) => [...prev, result.san]);
+        setCurrentMoveIndex((prev) => prev + 1);
+        setGame(gameCopy);
+        setMoveValidation({ source: '', target: '', valid: true });
+        setPgn('');
       });
+      if (pgnVerified) {
+        setMessages([]);
+        setCurrentLine(moves);
+        addMessage({
+          content: 'PGN loaded successfully',
+          type: 'success',
+        });
+      }
     }
+    catch (error) {
+      setSoundEvent('illegal');
+      setMoveValidation({ source: '', target: '', valid: false });
+      addMessage({
+        content: 'Invalid PGN format',
+        type: 'error',
+      });
+      return false;
+    }
+
   }
 
 
