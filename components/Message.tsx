@@ -31,17 +31,17 @@ const Message: React.FC<MessageProps> = ({
   }, [duration, onClose])
 
   const getStyles = () => {
-    const base = "p-4 rounded-lg shadow-lg max-w-xs z-50 border-2 font-medium flex items-start"
+    const base = "p-4 rounded-lg shadow-lg max-w-xs z-50 border font-medium flex items-start backdrop-blur-sm"
 
     switch (type) {
       case 'success':
-        return `${base} absolute top-4 left-4  bg-green-50 border-green-400 text-green-800`
+        return `${base} bg-green-500/10 border-green-500/20 text-green-300`
       case 'error':
-        return `${base} absolute top-4 right-4  bg-red-50 border-red-400 text-red-800`
+        return `${base} bg-red-500/10 border-red-500/20 text-red-300`
       case 'warning':
-        return `${base} absolute top-4 right-4 bg-amber-50 border-amber-400 text-amber-800`
+        return `${base} bg-amber-500/10 border-amber-500/20 text-amber-300`
       default:
-        return `${base} absolute top-4 right-4 bg-blue-50 border-blue-400 text-blue-800`
+        return `${base} bg-blue-500/10 border-blue-500/20 text-blue-300`
     }
   }
 
@@ -79,36 +79,29 @@ const Message: React.FC<MessageProps> = ({
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0.5, scale: 0.96 }}
+        initial={{ opacity: 0, y: -20, scale: 0.95 }}
         animate={{
           opacity: 1,
+          y: 0,
           scale: 1,
           transition: {
             type: "spring",
             stiffness: 300,
             damping: 25,
             mass: 0.4,
-            delay: 0.1, // Slight delay before appearing
-            duration: 1
+            delay: 0.1
           }
         }}
         exit={{
-          opacity: 0.5,
-          scale: 0.96,
+          opacity: 0,
+          y: -20,
+          scale: 0.95,
           transition: {
             ease: "easeOut",
-            duration: 1
+            duration: 0.2
           }
         }}
-        transition={{
-          opacity: { duration: 0.4 },
-          scale: {
-            type: "spring",
-            stiffness: 300,
-            damping: 15
-          }
-        }}
-        className={` ${getStyles()}`}
+        className={`${getStyles()}`}
       >
         {getIcon()}
         <div className="flex-1">
@@ -117,7 +110,7 @@ const Message: React.FC<MessageProps> = ({
         {onClose && (
           <button
             onClick={onClose}
-            className="ml-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="ml-3 text-gray-400 hover:text-gray-200 focus:outline-none transition-colors"
             aria-label="Close"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">

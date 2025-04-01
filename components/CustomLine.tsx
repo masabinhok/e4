@@ -373,7 +373,7 @@ export default function CustomPGN({ code }: { code?: string }) {
     <div
       className="flex flex-col lg:flex-row bg-gray-900 text-gray-100  min-h-screen"
     >
-      <div className="space-y-2">
+      <div className="space-y-2 fixed top-4 right-4 z-50">
         {messages.map((msg, index) => (
           <Message key={index} message={msg.content} type={msg.type} onClose={() => removeMessage(index)} />
         ))}
