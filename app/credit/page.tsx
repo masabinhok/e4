@@ -63,7 +63,9 @@ const CreditPage = () => {
                 I hope you find it useful! Feel free to share any feedback or suggestions for improvement.
                 <span onClick={() => {
                   navigator.clipboard.writeText("sabin.shrestha.er@gmail.com")
-                }} className=' text-xs underline ml-2 text-yellow-200'>sabin.shrestha.er@gmail.com</span>
+                }} className=' text-xs underline ml-2 text-yellow-200'>
+                  <br />
+                  sabin.shrestha.er@gmail.com</span>
               </p>
             </div>
 
