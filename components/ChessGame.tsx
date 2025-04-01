@@ -12,11 +12,11 @@ export default function ChessGame({ code }: { code: string }) {
   const [game, setGame] = useState(new Chess());
   const [currentLineIndex, setCurrentLineIndex] = useLocalStorage<number>('currentLineIndex', 0);
   const [currentLine, setCurrentLine] = useState<string[] | undefined>(currentOpening?.variations[currentLineIndex]?.line);
-  const [lineName, setLineName] = useState(currentOpening?.variations[currentLineIndex].name);
+  const [lineName, setLineName] = useState(currentOpening?.variations[currentLineIndex]?.name);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [autoPlay, setAutoPlay] = useState(false);
-  const [boardFlip, setBoardFlip] = useState<string>(currentOpening?.variations[currentLineIndex].boardflip || 'white');
+  const [boardFlip, setBoardFlip] = useState<string>(currentOpening?.variations[currentLineIndex]?.boardflip || 'white');
   const [mode, setMode] = useLocalStorage<'learn' | 'practice' | 'quiz'>('currentMode', 'learn');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);
@@ -83,12 +83,12 @@ export default function ChessGame({ code }: { code: string }) {
   };
 
   const loadLine = (lineKey: number) => {
-    const moves = currentOpening?.variations[lineKey].line;
+    const moves = currentOpening?.variations[lineKey]?.line;
     setAutoPlay(false);
     setCurrentLine(moves);
-    setBoardFlip(currentOpening?.variations[lineKey].boardflip || 'white');
-    setCurrentLineIndex(currentOpening?.variations[lineKey].index!);
-    setLineName(currentOpening?.variations[lineKey].name);
+    setBoardFlip(currentOpening?.variations[lineKey]?.boardflip || 'white');
+    setCurrentLineIndex(currentOpening?.variations[lineKey]?.index ?? 0);
+    setLineName(currentOpening?.variations[lineKey]?.name);
     setCurrentMoveIndex(0);
     setMoveHistory([]);
     setMoveValidation(null);
@@ -137,15 +137,16 @@ export default function ChessGame({ code }: { code: string }) {
 
   useEffect(() => {
     if (mode === 'practice' || mode === 'quiz') {
-      if (currentOpening?.variations[currentLineIndex].boardflip === 'black' && currentMoveIndex % 2 === 0) {
+      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'black' && currentMoveIndex % 2 === 0) {
         setTimeout(() => nextMove(), 500);
       }
 
-      if (currentOpening?.variations[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
+      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'white' && currentMoveIndex % 2 !== 0) {
         setTimeout(() => nextMove(), 500);
       }
 
-      if (currentMoveIndex + 1 >= currentLine!.length) {
+      const lineLength = currentLine?.length ?? 0;
+      if (currentMoveIndex + 1 >= lineLength) {
         setLineCompleted(true);
         handleLineCompletion();
       }
@@ -153,10 +154,10 @@ export default function ChessGame({ code }: { code: string }) {
   }, [currentLineIndex, currentMoveIndex, mode]);
 
   const nextMove = () => {
-
-    if (currentMoveIndex < currentLine!.length) {
+    const lineLength = currentLine?.length ?? 0;
+    if (currentMoveIndex < lineLength && currentLine) {
       setSoundEvent('moveOpponent');
-      const move = currentLine![currentMoveIndex];
+      const move = currentLine[currentMoveIndex];
       const gameCopy = new Chess(game.fen());
       gameCopy.move(move);
       setGame(gameCopy);
@@ -169,7 +170,7 @@ export default function ChessGame({ code }: { code: string }) {
   };
 
   const loadRandomLine = () => {
-    const randomLineIndex = Math.floor(Math.random() * currentOpening?.variations.length!);
+    const randomLineIndex = Math.floor(Math.random() * (currentOpening?.variations?.length ?? 1));
     loadLine(randomLineIndex);
   }
 
@@ -189,14 +190,17 @@ export default function ChessGame({ code }: { code: string }) {
   };
 
   useEffect(() => {
-    if (autoPlay && currentMoveIndex < currentLine!.length) {
-      setMessages([]);
-      const timer = setTimeout(() => {
-        nextMove();
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setAutoPlay(false);
+    if (autoPlay) {
+      const lineLength = currentLine?.length ?? 0;
+      if (currentMoveIndex < lineLength) {
+        setMessages([]);
+        const timer = setTimeout(() => {
+          nextMove();
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        setAutoPlay(false);
+      }
     }
   }, [autoPlay, currentMoveIndex]);
 
@@ -212,10 +216,10 @@ export default function ChessGame({ code }: { code: string }) {
       const gameCopy = new Chess(game.fen());
       const result = gameCopy.move(move);
 
-      if (currentOpening?.variations[currentLineIndex].boardflip === 'black' && currentMoveIndex % 2 === 0) {
+      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'black' && currentMoveIndex % 2 === 0) {
         return false;
       }
-      if (currentOpening?.variations[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
+      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'white' && currentMoveIndex % 2 !== 0) {
         return false;
       }
 
@@ -229,7 +233,7 @@ export default function ChessGame({ code }: { code: string }) {
         return false;
       }
 
-      const expectedMove = currentLine![currentMoveIndex];
+      const expectedMove = currentLine?.[currentMoveIndex];
       if (!expectedMove || result.san !== expectedMove) {
         setSoundEvent('incorrect');
         setMistakes(mistakes + 1);
@@ -240,7 +244,6 @@ export default function ChessGame({ code }: { code: string }) {
         });
         return false;
       }
-
 
       setMoveValidation({ source: sourceSquare, target: targetSquare, valid: true });
       setGame(gameCopy);
@@ -339,12 +342,12 @@ export default function ChessGame({ code }: { code: string }) {
         <div className="bg-gray-700 p-4 rounded-md mb-6">
           <h2 className="font-bold text-blue-400 ">{lineName}</h2>
 
-          <p className="text-xs mb-3">{currentOpening?.variations[currentLineIndex].description}</p>
+          <p className="text-xs mb-3">{currentOpening?.variations[currentLineIndex]?.description}</p>
 
           <div className="font-mono bg-gray-800 p-2 rounded">
-            {currentLine!.slice(0, currentMoveIndex).join(' ')}
-            {currentMoveIndex < currentLine!.length && (
-              <span className="text-green-400">{mode === 'quiz' ? ' ?' : ' ' + currentLine![currentMoveIndex]}</span>
+            {currentLine?.slice(0, currentMoveIndex).join(' ')}
+            {currentMoveIndex < (currentLine?.length ?? 0) && (
+              <span className="text-green-400">{mode === 'quiz' ? ' ?' : ' ' + currentLine?.[currentMoveIndex]}</span>
             )}
           </div>
         </div>
@@ -362,7 +365,7 @@ export default function ChessGame({ code }: { code: string }) {
               <button
                 className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md w-full"
                 onClick={nextMove}
-                disabled={currentMoveIndex >= currentLine!.length}
+                disabled={currentMoveIndex >= (currentLine?.length ?? 0)}
               >
                 Next Move
               </button>
