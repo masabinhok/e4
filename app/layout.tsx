@@ -28,8 +28,8 @@ const sidebarContent = [{
   title: "Record",
   url: "/record",
 }, {
-  title: "PGN",
-  url: "/pgn",
+  title: "Custom Lines",
+  url: "/custom",
 },
 {
   title: "Credit",
@@ -64,7 +64,7 @@ export default function RootLayout({
             <Image src={logo} height={40} width={40} alt="logo" className="size-24"></Image>
             <h1 className="text-2xl font-bold">e4.<span className="text-xs">learnchess</span></h1>
           </Link>
-          <div className="flex flex-col gap-2 text-xl font-bold p-5 border-r w-[150px] border-white">
+          <div className="flex flex-col gap-2 text-xl font-bold p-5 border-r w-[200px] border-white">
             {
               sidebarContent.map((item, index) => {
                 return (

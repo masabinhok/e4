@@ -6,7 +6,7 @@ import openings from '@/constants/openings'
 
 const LessonsPage = () => {
   return (
-    <main className="p-10">
+    <main className="p-10 ml-40">
       <section className='grid grid-cols-2  space-y-15 space-x-10 max-w-[1100px]'>
         {
           openings.map((lesson, index) => (

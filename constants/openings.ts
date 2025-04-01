@@ -250,21 +250,23 @@ const openings: Opening[] = [
         }
       ]
     },
+  {
+  "name": "Custom Lines",
+  "description": "These are the collection of Custom Lines that are saved by the user.",
+  "code": "custom-pgns",
+  "variations": [
     {
-      "name": "Custom PGNs",
-      "description": "These are the collection of Custom PGNs that are saved by the user.",
-      "code": "custom-pgns",
-      "variations": [
-        {
-        "name": "Practice 1",
-        "line": [
-          "e4","e5","Nf3","Nc6","Bb5","a6"],
-        "boardflip":"white",
-        "index":0,
-        "description": "This is a custom PGN that is saved by the user. You can add your own PGNs here."
-      },
-      ]
+      "name": "Scholar's Mate",
+      "line": [
+        "e4", "e5", "Qh5", "Nc6", "Bc4", "Nf6?", "Qxf7#"
+      ],
+      "boardflip": "white",
+      "index": 0,
+      "description": "This is the Scholar's Mate sequence, a quick checkmate for White. (DEFAULT). You can add your Custom Lines too."
     }
+  ]
+}
+
   ]
 
 export default openings;

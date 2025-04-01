@@ -427,7 +427,7 @@ export default function CustomPGN({ code }: { code?: string }) {
           <button
             className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md w-full"
           >
-            Play Custom PGNs
+            Play Custom Lines
           </button>
         </Link>
 
