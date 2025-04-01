@@ -327,19 +327,20 @@ export default function CustomPGN({ code }: { code?: string }) {
       return;
     }
 
+    const customPgnsFromStorage = updatedOpenings.find((opening) => opening.code === 'custom-pgns');
+
     const newPGN = {
       name: pgnName,
       line: currentLine,
       boardflip: boardFlip,
-      index: customPgns?.variations.length,
+      index: customPgnsFromStorage?.variations.length || 0,
       description: 'This is a custom PGN that is saved by the user. You can add your own PGNs here.',
     };
 
-    const updatedVariations = [...(customPgns?.variations || []), newPGN];
-    console.log(updatedVariations);
+    const updatedVariations = [...(customPgnsFromStorage?.variations || []), newPGN];
 
     // now append the new variation to the existing variations
-    const newOpenings = openings.map((opening) => {
+    const newOpenings = updatedOpenings.map((opening) => {
       if (opening.code === 'custom-pgns') {
         return {
           ...opening,
@@ -348,7 +349,8 @@ export default function CustomPGN({ code }: { code?: string }) {
       }
       return opening;
     });
-    // Save the updated openings to local storage or wherever you store them
+
+    // Save the updated openings to local storage
     setUpdatedOpenings(newOpenings as Opening[]);
 
     setPgnName('');
