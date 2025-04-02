@@ -17,7 +17,7 @@ const LessonsPage = () => {
 
               <Link href={`/lessons/${lesson.code}`} className="inline-block">
                 <button className="p-3 px-6 bg-blue-100 text-blue-800 rounded-lg font-semibold hover:bg-blue-200 transition-colors">
-                  Start Learning
+                  Practice Lines
                 </button>
               </Link>
             </div>
