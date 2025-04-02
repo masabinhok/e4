@@ -43,7 +43,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.variable} font-poppins antialiased bg-gray-900 text-gray-100`}>
         <Navigation />
-        <div className="mt-[100px] sm:mt-0 sm:ml-[200px] p-4">
+        <div className="mt-[100px] lg:mt-0 lg:ml-[200px] p-4">
           {children}
         </div>
       </body>

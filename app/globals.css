@@ -30,7 +30,7 @@
   --font-sans: "Poppins", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --radius-sm: var(--radius-small);
+  --radius-lg: var(--radius-small);
   --radius-md: var(--radius-medium);
   --radius-lg: var(--radius-large);
 }
