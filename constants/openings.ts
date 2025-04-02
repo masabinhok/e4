@@ -265,6 +265,21 @@ const openings: Opening[] = [
       "description": "This is the Scholar's Mate sequence, a quick checkmate for White. (DEFAULT). You can add your Custom Lines too."
     }
   ]
+},{
+  "name": "Recorded Lines",
+  "description": "These are the collection of recorded Lines that are recorded by the user.",
+  "code": "recorded-pgns",
+  "variations": [
+    {
+      "name": "Scholar's Mate",
+      "line": [
+        "e4", "e5", "Qh5", "Nc6", "Bc4", "Nf6?", "Qxf7#"
+      ],
+      "boardflip": "white",
+      "index": 0,
+      "description": "This is the Scholar's Mate sequence, a quick checkmate for White. (DEFAULT). You can record your Custom Lines too."
+    }
+  ]
 }
 
   ]

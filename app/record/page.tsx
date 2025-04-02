@@ -1,8 +1,11 @@
+import RecordLine from '@/components/RecordLine'
 import React from 'react'
 
 const RecordLinePage = () => {
   return (
-    <div>RecordLinePage</div>
+    <div>
+      <RecordLine />
+    </div>
   )
 }
 

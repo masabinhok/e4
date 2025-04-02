@@ -8,7 +8,7 @@ const sidebarContent = [{
   title: "Lessons",
   url: "/lessons",
 }, {
-  title: "Record",
+  title: "Record Lines",
   url: "/record",
 }, {
   title: "Custom Lines",
