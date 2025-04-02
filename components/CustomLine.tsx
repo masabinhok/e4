@@ -10,22 +10,16 @@ import { Opening } from '@/types/types';
 
 
 export default function CustomPGN({ code }: { code?: string }) {
-  // const currentOpening = openings.openings.find((opening) => opening.code === code);
   const [pgnName, setPgnName] = useState<string>('');
   const [pgn, setPgn] = useState<string>('');
   const [game, setGame] = useState(new Chess());
-  // const [currentLineIndex, setCurrentLineIndex] = useLocalStorage<number>('currentLineIndex', 0);
   const [currentLine, setCurrentLine] = useState<string[] | undefined>([]);
-  // const [lineName, setLineName] = useState(currentOpening?.variations[currentLineIndex].name);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [autoPlay, setAutoPlay] = useState(false);
   const [boardFlip, setBoardFlip] = useState<string>('white');
-  // const [mode, setMode] = useLocalStorage<'learn' | 'practice' | 'quiz'>('currentMode', 'learn');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
-  // const [lineCompleted, setLineCompleted] = useState<boolean>(false);
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
-  // const [mistakes, setMistakes] = useState<number>(0);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const [soundEvent, setSoundEvent] = useState<string | null>(null);
   const [updatedOpenings, setUpdatedOpenings] = useLocalStorage<Opening[]>('openings', openings);
@@ -84,129 +78,6 @@ export default function CustomPGN({ code }: { code?: string }) {
     }
     setMessages((prevMessages) => prevMessages.filter((_, i) => i !== index));
   };
-
-  // const toggleBoardFlip = () => {
-  //   setBoardFlip(boardFlip === 'white' ? 'black' : 'white');
-  // };
-
-  // const loadLine = (lineKey: number) => {
-  //   const moves = currentOpening?.variations[lineKey].line;
-  //   setAutoPlay(false);
-  //   setCurrentLine(moves);
-  //   setBoardFlip(currentOpening?.variations[lineKey].boardflip || 'white');
-  //   setCurrentLineIndex(currentOpening?.variations[lineKey].index!);
-  //   setLineName(currentOpening?.variations[lineKey].name);
-  //   setCurrentMoveIndex(0);
-  //   setMoveHistory([]);
-  //   setMoveValidation(null);
-  //   setMistakes(0);
-
-  //   const newGame = new Chess();
-  //   setGame(newGame);
-  // };
-
-  // const handleLineCompletion = () => {
-  //   setMessages([]);
-  //   if (lineCompleted && mode === 'practice') {
-  //     setSoundEvent('achievement');
-  //     addMessage({
-  //       content: "Congratulations! You've completed the line.",
-  //       type: 'success',
-  //       onClose: () => {
-  //         setLineCompleted(false);
-  //         loadRandomLine();
-  //         setSoundEvent('scatter');
-  //       },
-  //     });
-  //   }
-  //   if (lineCompleted && mode === 'quiz') {
-  //     setSoundEvent('lessonPass');
-  //     addMessage({
-  //       content: `Congratulations! You've completed the line. You made ${mistakes} mistakes.`,
-  //       type: 'success',
-  //       onClose: () => {
-  //         setLineCompleted(false);
-  //         setCurrentLineIndex(() => {
-  //           const randomLineIndex = Math.floor(Math.random() * currentOpening?.variations.length!);
-  //           return randomLineIndex;
-  //         });
-  //         loadRandomLine();
-  //         setSoundEvent('scatter');
-  //       },
-  //     });
-  //   }
-  // };
-
-  // const handleModeChange = (newMode: 'learn' | 'practice' | 'quiz') => {
-  //   setMode(newMode);
-  //   loadLine(currentLineIndex);
-  // };
-
-  // useEffect(() => {
-  //   if (mode === 'practice' || mode === 'quiz') {
-  //     if (currentOpening?.variations[currentLineIndex].boardflip === 'black' && currentMoveIndex % 2 === 0) {
-  //       setTimeout(() => nextMove(), 500);
-  //     }
-
-  //     if (currentOpening?.variations[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
-  //       setTimeout(() => nextMove(), 500);
-  //     }
-
-  //     if (currentMoveIndex + 1 >= currentLine!.length) {
-  //       setLineCompleted(true);
-  //       handleLineCompletion();
-  //     }
-  //   }
-  // }, [currentLineIndex, currentMoveIndex, mode]);
-
-  // const nextMove = () => {
-
-  //   if (currentMoveIndex < currentLine!.length) {
-  //     setSoundEvent('moveOpponent');
-  //     const move = currentLine![currentMoveIndex];
-  //     const gameCopy = new Chess(game.fen());
-  //     gameCopy.move(move);
-  //     setGame(gameCopy);
-  //     setMoveHistory([...moveHistory, move]);
-  //     setCurrentMoveIndex(currentMoveIndex + 1);
-  //     setMoveValidation(null);
-  //     return true;
-  //   }
-  //   return false;
-  // };
-
-  // const loadRandomLine = () => {
-  //   const randomLineIndex = Math.floor(Math.random() * currentOpening?.variations.length!);
-  //   loadLine(randomLineIndex);
-  // }
-
-  // const previousMove = () => {
-  //   if (currentMoveIndex > 0) {
-  //     setSoundEvent('moveSelf');
-  //     const newHistory = moveHistory.slice(0, -1);
-  //     const newGame = new Chess();
-  //     newHistory.forEach((move) => newGame.move(move));
-  //     setGame(newGame);
-  //     setMoveHistory(newHistory);
-  //     setCurrentMoveIndex(currentMoveIndex - 1);
-  //     setMoveValidation(null);
-  //     return true;
-  //   }
-  //   return false;
-  // };
-
-  // useEffect(() => {
-  //   if (autoPlay && currentMoveIndex < currentLine!.length) {
-  //     setMessages([]);
-  //     const timer = setTimeout(() => {
-  //       nextMove();
-  //     }, 1000);
-  //     return () => clearTimeout(timer);
-  //   } else {
-  //     setAutoPlay(false);
-  //   }
-  // }, [autoPlay, currentMoveIndex]);
-
 
 
   const loadPGN = () => {
@@ -268,12 +139,7 @@ export default function CustomPGN({ code }: { code?: string }) {
       const gameCopy = new Chess(game.fen());
       const result = gameCopy.move(move);
 
-      // if (currentOpening?.variations[currentLineIndex].boardflip === 'black' && currentMoveIndex % 2 === 0) {
-      //   return false;
-      // }
-      // if (currentOpening?.variations[currentLineIndex].boardflip === 'white' && currentMoveIndex % 2 !== 0) {
-      //   return false;
-      // }
+
 
       if (!result) {
         setSoundEvent('illegal');
@@ -284,19 +150,6 @@ export default function CustomPGN({ code }: { code?: string }) {
         });
         return false;
       }
-
-      // const expectedMove = currentLine![currentMoveIndex];
-      // if (!expectedMove || result.san !== expectedMove) {
-      //   setSoundEvent('incorrect');
-      //   setMistakes(mistakes + 1);
-      //   setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
-      //   addMessage({
-      //     content: 'Move does not match the expected line.',
-      //     type: 'error',
-      //   });
-      //   return false;
-      // }
-
 
 
 
