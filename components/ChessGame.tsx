@@ -59,6 +59,15 @@ export default function ChessGame({ code }: { code: string }) {
       case 'incorrect':
         playSound('/audio/incorrect.mp3');
         break;
+      case 'capture':
+        playSound('/audio/capture.mp3');
+        break;
+      case 'promotion':
+        playSound('/audio/promote.mp3');
+        break;
+      case 'check':
+        playSound('/audio/move-check.mp3');
+        break;
       default:
         break;
     }
@@ -249,7 +258,13 @@ export default function ChessGame({ code }: { code: string }) {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
-      setSoundEvent('moveSelf');
+
+      // Detect capture and play sound
+      if (result.captured) {
+        setSoundEvent('capture');
+      } else {
+        setSoundEvent('moveSelf');
+      }
 
       return true;
     } catch {
