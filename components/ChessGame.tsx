@@ -5,6 +5,7 @@ import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
+import { useSound } from '@/contexts/SoundContext';
 
 export default function ChessGame({ code }: { code: string }) {
   const [updatedOpenings, setUpdatedOpenings] = useLocalStorage('openings', openings);
@@ -23,57 +24,11 @@ export default function ChessGame({ code }: { code: string }) {
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
   const [mistakes, setMistakes] = useState<number>(0);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
-  const [soundEvent, setSoundEvent] = useState<string | null>(null);
+  const { playSound } = useSound();
 
   useEffect(() => {
     setIsBrowser(true);
   }, []);
-
-  useEffect(() => {
-    if (!soundEvent) return;
-
-    const playSound = (path: string) => {
-      const audio = new Audio(path);
-      audio.play();
-    };
-
-    switch (soundEvent) {
-      case 'moveSelf':
-        playSound('/audio/move-self.mp3');
-        break;
-      case 'moveOpponent':
-        playSound('/audio/move-opponent.mp3');
-        break;
-      case 'achievement':
-        playSound('/audio/achievement.mp3');
-        break;
-      case 'lessonPass':
-        playSound('/audio/lesson-pass.mp3');
-        break;
-      case 'scatter':
-        playSound('/audio/scatter.mp3');
-        break;
-      case 'illegal':
-        playSound('/audio/illegal.mp3');
-        break;
-      case 'incorrect':
-        playSound('/audio/incorrect.mp3');
-        break;
-      case 'capture':
-        playSound('/audio/capture.mp3');
-        break;
-      case 'promotion':
-        playSound('/audio/promote.mp3');
-        break;
-      case 'check':
-        playSound('/audio/move-check.mp3');
-        break;
-      default:
-        break;
-    }
-
-    setSoundEvent(null);
-  }, [soundEvent]);
 
   const addMessage = (newMessage: { content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -110,19 +65,16 @@ export default function ChessGame({ code }: { code: string }) {
   const handleLineCompletion = () => {
     setMessages([]);
     if (lineCompleted && mode === 'practice') {
-      setSoundEvent('achievement');
       addMessage({
         content: "Congratulations! You've completed the line.",
         type: 'success',
         onClose: () => {
           setLineCompleted(false);
           loadRandomLine();
-          setSoundEvent('scatter');
         },
       });
     }
     if (lineCompleted && mode === 'quiz') {
-      setSoundEvent('lessonPass');
       addMessage({
         content: `Congratulations! You've completed the line. You made ${mistakes} mistakes.`,
         type: 'success',
@@ -133,7 +85,6 @@ export default function ChessGame({ code }: { code: string }) {
             return randomLineIndex;
           });
           loadRandomLine();
-          setSoundEvent('scatter');
         },
       });
     }
@@ -165,15 +116,35 @@ export default function ChessGame({ code }: { code: string }) {
   const nextMove = () => {
     const lineLength = currentLine?.length ?? 0;
     if (currentMoveIndex < lineLength && currentLine) {
-      setSoundEvent('moveOpponent');
-      const move = currentLine[currentMoveIndex];
-      const gameCopy = new Chess(game.fen());
-      gameCopy.move(move);
-      setGame(gameCopy);
-      setMoveHistory([...moveHistory, move]);
-      setCurrentMoveIndex(currentMoveIndex + 1);
-      setMoveValidation(null);
-      return true;
+      const result = game.move(currentLine[currentMoveIndex]);
+      if (result) {
+        setGame(new Chess(game.fen()));
+        setMoveHistory([...moveHistory, result.san]);
+        playSound('moveSelf');
+        if (result.captured) {
+          playSound('capture');
+        }
+        if (result.promotion) {
+          playSound('promotion');
+        }
+        if (result.san.includes('+')) {
+          playSound('check');
+        }
+        if (result.isKingsideCastle() || result.isQueensideCastle()) {
+          playSound('castle');
+        }
+        setCurrentMoveIndex(currentMoveIndex + 1);
+        setMoveValidation(null);
+        return true;
+      }
+      playSound('illegal');
+      setMoveValidation({ source: currentLine[currentMoveIndex], target: currentLine[currentMoveIndex], valid: false });
+      setMistakes(mistakes + 1);
+      addMessage({
+        content: 'Invalid move',
+        type: 'error',
+      });
+      return false;
     }
     return false;
   };
@@ -185,15 +156,28 @@ export default function ChessGame({ code }: { code: string }) {
 
   const previousMove = () => {
     if (currentMoveIndex > 0) {
-      setSoundEvent('moveSelf');
-      const newHistory = moveHistory.slice(0, -1);
-      const newGame = new Chess();
-      newHistory.forEach((move) => newGame.move(move));
-      setGame(newGame);
-      setMoveHistory(newHistory);
-      setCurrentMoveIndex(currentMoveIndex - 1);
-      setMoveValidation(null);
-      return true;
+      const result = game.move(currentLine![currentMoveIndex - 1]);
+      if (result) {
+        setGame(new Chess(game.fen()));
+        setMoveHistory(moveHistory.slice(0, -1));
+        setCurrentMoveIndex(currentMoveIndex - 1);
+        setMoveValidation(null);
+        playSound('moveSelf');
+        if (result.captured) {
+          playSound('capture');
+        }
+        if (result.isKingsideCastle() || result.isQueensideCastle()) {
+          playSound('castle');
+        }
+        if (result.san.includes('+')) {
+          playSound('check');
+        }
+        if (result.promotion) {
+          playSound('promotion');
+        }
+        return true;
+      }
+      return false;
     }
     return false;
   };
@@ -222,54 +206,39 @@ export default function ChessGame({ code }: { code: string }) {
         promotion: 'q',
       };
 
-      const gameCopy = new Chess(game.fen());
-      const result = gameCopy.move(move);
-
-      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'black' && currentMoveIndex % 2 === 0) {
-        return false;
+      const result = game.move(move);
+      if (result) {
+        setGame(new Chess(game.fen()));
+        setMoveHistory([...moveHistory, result.san]);
+        playSound('moveSelf');
+        if (result.captured) {
+          playSound('capture');
+        }
+        if (result.promotion) {
+          playSound('promotion');
+        }
+        if (result.san.includes('+')) {
+          playSound('check');
+        }
+        if (result.isKingsideCastle() || result.isQueensideCastle()) {
+          playSound('castle');
+        }
+        setCurrentMoveIndex(currentMoveIndex + 1);
+        setMoveValidation(null);
+        return true;
       }
-      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'white' && currentMoveIndex % 2 !== 0) {
-        return false;
-      }
-
-      if (!result) {
-        setSoundEvent('illegal');
-        setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
-        addMessage({
-          content: 'Invalid move',
-          type: 'error',
-        });
-        return false;
-      }
-
-      const expectedMove = currentLine?.[currentMoveIndex];
-      if (!expectedMove || result.san !== expectedMove) {
-        setSoundEvent('incorrect');
-        setMistakes(mistakes + 1);
-        setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
-        addMessage({
-          content: 'Move does not match the expected line.',
-          type: 'error',
-        });
-        return false;
-      }
-
-      setMoveValidation({ source: sourceSquare, target: targetSquare, valid: true });
-      setGame(gameCopy);
-      setMoveHistory([...moveHistory, result.san]);
-      setCurrentMoveIndex(currentMoveIndex + 1);
-
-      // Detect capture and play sound
-      if (result.captured) {
-        setSoundEvent('capture');
-      } else {
-        setSoundEvent('moveSelf');
-      }
-
-      return true;
-    } catch {
-      setSoundEvent('illegal');
+      playSound('illegal');
       setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
+      setMistakes(mistakes + 1);
+      addMessage({
+        content: 'Invalid move',
+        type: 'error',
+      });
+      return false;
+    } catch (error) {
+      playSound('illegal');
+      setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
+      setMistakes(mistakes + 1);
       addMessage({
         content: 'Invalid move',
         type: 'error',
