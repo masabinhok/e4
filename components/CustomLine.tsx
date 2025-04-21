@@ -129,6 +129,10 @@ export default function CustomPGN({ code }: { code?: string }) {
         playSound('moveSelf');
       }
 
+      if (result.isKingsideCastle() || result.isQueensideCastle()) {
+        playSound('castle')
+      }
+
       if (game.inCheck()) {
         playSound('check');
       }

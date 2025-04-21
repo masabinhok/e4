@@ -82,6 +82,11 @@ export default function RecordLine() {
         playSound('moveSelf');
       }
 
+
+      if (result.isKingsideCastle() || result.isQueensideCastle()) {
+        playSound('castle')
+      }
+
       if (gameCopy.inCheck()) {
         playSound('check');
       }
