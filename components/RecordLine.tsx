@@ -180,21 +180,6 @@ export default function RecordLine() {
     return false;
   };
 
-  const nextMove = () => {
-    const lineLength = currentLine?.length ?? 0;
-    if (currentMoveIndex < lineLength && currentLine) {
-      playSound('moveOpponent');
-      const move = currentLine[currentMoveIndex];
-      const gameCopy = new Chess(game.fen());
-      gameCopy.move(move);
-      setGame(gameCopy);
-      setMoveHistory([...moveHistory, move]);
-      setCurrentMoveIndex(currentMoveIndex + 1);
-      setMoveValidation(null);
-      return true;
-    }
-    return false;
-  };
 
   return (
     <div
@@ -285,6 +270,20 @@ export default function RecordLine() {
             Play Recorded Lines
           </button>
         </Link>
+        <button
+          onClick={() => {
+            const recordedPgnsFromStorage = updatedOpenings.find((opening) => {
+              return opening.code === 'recorded-pgns'
+            })
+            recordedPgnsFromStorage?.variations.forEach((variation) => {
+              console.log(variation.line)
+            })
+
+          }}
+          className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 mt-3  rounded-md w-full"
+        >
+          Print Recorded Lines
+        </button>
 
       </div>
     </div >
