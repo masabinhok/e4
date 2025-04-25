@@ -125,7 +125,10 @@ export default function CustomPGN({ code }: { code?: string }) {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
-      if (result.captured) {
+      if (gameCopy.inCheck()) {
+        playSound('check');
+      }
+      else if (result.captured) {
         playSound('capture');
       }
       else {
@@ -136,9 +139,6 @@ export default function CustomPGN({ code }: { code?: string }) {
         playSound('castle');
       }
 
-      if (game.inCheck()) {
-        playSound('check');
-      }
 
       return true;
     } catch {

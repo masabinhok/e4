@@ -136,12 +136,22 @@ export default function ChessGame({ code }: { code: string }) {
       setMoveHistory([...moveHistory, move]);
       setCurrentMoveIndex(currentMoveIndex + 1);
       setMoveValidation(null);
-      if (result.captured) {
+
+
+      if (gameCopy.inCheck()) {
+        playSound('check');
+      }
+      else if (result.captured) {
         playSound('capture');
       }
       else {
-        playSound('moveOpponent');
+        playSound('moveSelf');
       }
+
+      if (result.isKingsideCastle() || result.isQueensideCastle()) {
+        playSound('castle');
+      }
+
       return true;
     }
     return false;
@@ -231,7 +241,10 @@ export default function ChessGame({ code }: { code: string }) {
       setCurrentMoveIndex(currentMoveIndex + 1);
 
 
-      if (result.captured) {
+      if (gameCopy.inCheck()) {
+        playSound('check');
+      }
+      else if (result.captured) {
         playSound('capture');
       }
       else {
@@ -242,9 +255,7 @@ export default function ChessGame({ code }: { code: string }) {
         playSound('castle');
       }
 
-      if (game.inCheck()) {
-        playSound('check');
-      }
+
       return true;
     } catch {
       playSound('illegal');
