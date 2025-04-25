@@ -71,7 +71,7 @@ export default function ChessGame({ code }: { code: string }) {
       setTimeout(() => {
         playSound('achievement');
       }, 1)
-      
+
       addMessage({
         content: "Congratulations! You've completed the line.",
         type: 'success',
@@ -128,14 +128,19 @@ export default function ChessGame({ code }: { code: string }) {
   const nextMove = () => {
     const lineLength = currentLine?.length ?? 0;
     if (currentMoveIndex < lineLength && currentLine) {
-      playSound('moveOpponent');
       const move = currentLine[currentMoveIndex];
       const gameCopy = new Chess(game.fen());
-      gameCopy.move(move);
+      const result = gameCopy.move(move);
       setGame(gameCopy);
       setMoveHistory([...moveHistory, move]);
       setCurrentMoveIndex(currentMoveIndex + 1);
       setMoveValidation(null);
+      if (result.captured) {
+        playSound('capture');
+      }
+      else {
+        playSound('moveOpponent');
+      }
       return true;
     }
     return false;
@@ -221,8 +226,22 @@ export default function ChessGame({ code }: { code: string }) {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
-      playSound('moveSelf');
 
+
+      if (result.captured) {
+        playSound('capture');
+      }
+      else {
+        playSound('moveSelf');
+      }
+
+      if (result.isKingsideCastle() || result.isQueensideCastle()) {
+        playSound('castle');
+      }
+
+      if (game.inCheck()) {
+        playSound('check');
+      }
       return true;
     } catch {
       playSound('illegal');

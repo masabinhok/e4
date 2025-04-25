@@ -76,7 +76,20 @@ export default function RecordLine() {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
-      playSound('moveSelf');
+      if (result.captured) {
+        playSound('capture');
+      }
+      else {
+        playSound('moveSelf');
+      }
+
+      if (result.isKingsideCastle() || result.isQueensideCastle()) {
+        playSound('castle');
+      }
+
+      if (game.inCheck()) {
+        playSound('check');
+      }
 
       return true;
     } catch {
