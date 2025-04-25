@@ -250,6 +250,83 @@ const openings: Opening[] = [
         }
       ]
     },
+    {
+      "name": "Ruy Lopez",
+      "description": "The Ruy Lopez is a classical and elegant opening for White, named after a 16th-century Spanish priest who wielded a bishop like a rapier. ",
+      "code": "ruy-lopez",
+      "variations": [
+  {
+    "name": "Ruy Lopez 01",
+    "line": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "d6", "O-O", "b5", "Bb3", "Bg4", "h3", "Bxf3", "Qxf3", "f6", "c3"],
+    "boardflip": "white",
+    "index": 2,
+    "description": "This is a recorded PGN that is saved by the user. You can record your own PGNs here."
+  },
+  {
+    "name": "Ruy Lopez 02",
+    "line": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "d6", "O-O", "b5", "Bb3", "Bg4", "h3", "Bh5", "Nxe5", "Bxd1", "Bxf7+", "Ke7", "Nxc6+", "Kxf7", "Nxd8+", "Rxd8", "Rxd1"],
+    "boardflip": "white",
+    "index": 3,
+    "description": "This is a recorded PGN that is saved by the user. You can record your own PGNs here."
+  },
+  {
+    "name": "Ruy Lopez Nf6",
+    "line": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "d6", "O-O", "b5", "Bb3", "Nf6", "c3", "Nxe4", "Bd5"],
+    "boardflip": "white",
+    "index": 4,
+    "description": "This is a recorded PGN that is saved by the user. You can record your own PGNs here."
+  },
+  {
+    "name": "Ruy Lopez FL, Scholars",
+    "line": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "d6", "O-O", "b5", "Bb3", "Nf6", "Ng5", "d5", "exd5", "Nxd5", "Nxf7", "Kxf7", "Qf3+", "Ke8", "Bxd5", "Nd4", "Qf7#"],
+    "boardflip": "white",
+    "index": 5,
+    "description": "This is a recorded PGN that is saved by the user. You can record your own PGNs here."
+  },
+  {
+    "name": "Ruy Lopez tradeoffs",
+    "line": ["e4", "e5", "Nf3", "Nc6", "Bb5", "d6", "d4", "exd4", "Nxd4", "Bd7", "Nc3", "Nxd4", "Qxd4", "Bxb5", "Nxb5", "Nf6", "e5", "dxe5", "Qxe5+", "Qe7", "Nxc7+", "Kd8", "Qxe7+", "Bxe7", "Nxa8"],
+    "boardflip": "white",
+    "index": 6,
+    "description": "This is a recorded PGN that is saved by the user. You can record your own PGNs here."
+  },
+  {
+    "name": "Ruy Lopez back to italian",
+    "line": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nd4", "Nxd4", "exd4", "O-O", "a6", "Bc4", "Bc5", "Bxf7+", "Kxf7", "Qh5+", "g6", "Qxc5"],
+    "boardflip": "white",
+    "index": 7,
+    "description": "This is a recorded PGN that is saved by the user. You can record your own PGNs here."
+  },
+  {
+    "name": "Ruy Lopez Bishop Sac",
+    "line": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nd4", "Nxd4", "exd4", "O-O", "a6", "Bc4", "b5", "Bxf7+", "Kxf7", "Qh5+", "g6", "Qd5+", "Ke8", "Qxa8"],
+    "boardflip": "white",
+    "index": 8,
+    "description": "This is a recorded PGN that is saved by the user. You can record your own PGNs here."
+  },
+  {
+    "name": "Ruy Lopez 03",
+    "line": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "d4", "exd4", "O-O", "b5", "Bb3", "Bc5", "e5", "Ne4", "Qe2"],
+    "boardflip": "white",
+    "index": 9,
+    "description": "This is a recorded PGN that is saved by the user. You can record your own PGNs here."
+  },
+  {
+    "name": "Ruy Lopez 04",
+    "line": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "d4", "exd4", "O-O", "b5", "Bb3", "Bc5", "e5", "Ng4", "c3", "dxc3", "Qd5", "Qe7", "Nxc3", "O-O", "Bg5", "Qe8", "Qxc5"],
+    "boardflip": "white",
+    "index": 10,
+    "description": "This is a recorded PGN that is saved by the user. You can record your own PGNs here."
+  },
+  {
+    "name": "Ruy Lopez Best Response",
+    "line": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "d4", "exd4", "O-O", "Be7", "e5", "Ne4", "Nxd4", "Nxe5", "Re1", "Nc5", "Rxe5", "Nxa4", "Nf5", "O-O", "Nxe7+", "Kh8", "Qh5", "d6", "Qxh7+", "Kxh7", "Rh5#"],
+    "boardflip": "white",
+    "index": 11,
+    "description": "This is a recorded PGN that is saved by the user. You can record your own PGNs here."
+  }
+]
+    },
   {
   "name": "Custom Lines",
   "description": "These are the collection of Custom Lines that are saved by the user.",

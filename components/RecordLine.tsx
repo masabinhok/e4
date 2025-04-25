@@ -21,9 +21,10 @@ export default function RecordLine() {
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
+  const [updatedOpenings, setUpdatedOpenings] = useLocalStorage<Opening[]>('openings', openings);
   const { playSound } = useSound();
 
-  const [updatedOpenings, setUpdatedOpenings] = useLocalStorage<Opening[]>('openings', openings);
+
 
   const toggleBoardFlip = () => {
     setBoardFlip(boardFlip === 'white' ? 'black' : 'white');
@@ -61,7 +62,6 @@ export default function RecordLine() {
       const result = gameCopy.move(move);
 
 
-
       if (!result) {
         playSound('illegal');
         setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
@@ -90,6 +90,7 @@ export default function RecordLine() {
       if (result.isKingsideCastle() || result.isQueensideCastle()) {
         playSound('castle');
       }
+
 
 
 
@@ -182,21 +183,6 @@ export default function RecordLine() {
     return false;
   };
 
-  const nextMove = () => {
-    const lineLength = currentLine?.length ?? 0;
-    if (currentMoveIndex < lineLength && currentLine) {
-      playSound('moveOpponent');
-      const move = currentLine[currentMoveIndex];
-      const gameCopy = new Chess(game.fen());
-      gameCopy.move(move);
-      setGame(gameCopy);
-      setMoveHistory([...moveHistory, move]);
-      setCurrentMoveIndex(currentMoveIndex + 1);
-      setMoveValidation(null);
-      return true;
-    }
-    return false;
-  };
 
   return (
     <div
@@ -287,6 +273,20 @@ export default function RecordLine() {
             Play Recorded Lines
           </button>
         </Link>
+        <button
+          onClick={() => {
+            const recordedPgnsFromStorage = updatedOpenings.find((opening) => {
+              return opening.code === 'recorded-pgns'
+            })
+            recordedPgnsFromStorage?.variations.forEach((variation) => {
+              console.log(variation.line)
+            })
+
+          }}
+          className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 mt-3  rounded-md w-full"
+        >
+          Print Recorded Lines
+        </button>
 
       </div>
     </div >

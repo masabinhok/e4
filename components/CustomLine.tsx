@@ -7,7 +7,9 @@ import Link from 'next/link';
 import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Opening } from '@/types/types';
+
 import { useSound } from '@/context/SoundContext';
+
 
 
 export default function CustomPGN({ code }: { code?: string }) {
@@ -23,8 +25,9 @@ export default function CustomPGN({ code }: { code?: string }) {
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
 
-  const { playSound } = useSound();
+
   const [updatedOpenings, setUpdatedOpenings] = useLocalStorage<Opening[]>('openings', openings);
+  const { playSound } = useSound();
 
   const customPgns = openings.find((opening) => opening.code === 'custom-pgns');
 
@@ -125,6 +128,7 @@ export default function CustomPGN({ code }: { code?: string }) {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
+
       if (gameCopy.inCheck()) {
         playSound('check');
       }
@@ -138,6 +142,7 @@ export default function CustomPGN({ code }: { code?: string }) {
       if (result.isKingsideCastle() || result.isQueensideCastle()) {
         playSound('castle');
       }
+
 
 
       return true;

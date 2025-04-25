@@ -5,7 +5,9 @@ import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { useSound } from '@/context/SoundContext';
+
+import { useSound } from '@/contexts/SoundContext';
+
 
 export default function ChessGame({ code }: { code: string }) {
   const [updatedOpenings, setUpdatedOpenings] = useLocalStorage('openings', openings);
@@ -28,10 +30,15 @@ export default function ChessGame({ code }: { code: string }) {
 
   const getNewGame = useCallback(() => new Chess(), []);
 
+
+
+
+
+
+
   useEffect(() => {
     setIsBrowser(true);
   }, []);
-
 
 
   const addMessage = (newMessage: { content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }) => {
@@ -69,9 +76,11 @@ export default function ChessGame({ code }: { code: string }) {
 
     setMessages([]);
     if (lineCompleted && mode === 'practice') {
+
       setTimeout(() => {
         playSound('achievement');
       }, 1)
+
 
       addMessage({
         content: "Congratulations! You've completed the line.",
@@ -84,9 +93,11 @@ export default function ChessGame({ code }: { code: string }) {
       });
     }
     if (lineCompleted && mode === 'quiz') {
+
       setTimeout(() => {
         playSound('lessonPass');
       }, 1)
+
       addMessage({
         content: `Congratulations! You've completed the line. You made ${mistakes} mistakes.`,
         type: 'success',
@@ -151,6 +162,7 @@ export default function ChessGame({ code }: { code: string }) {
       if (result.isKingsideCastle() || result.isQueensideCastle()) {
         playSound('castle');
       }
+
 
       return true;
     }
@@ -239,7 +251,6 @@ export default function ChessGame({ code }: { code: string }) {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
-
 
       if (gameCopy.inCheck()) {
         playSound('check');
