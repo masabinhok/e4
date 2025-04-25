@@ -7,7 +7,7 @@ import Link from 'next/link';
 import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Opening } from '@/types/types';
-import { useSound } from '@/context/SoundContext';
+import { useSound } from '@/contexts/SoundContext';
 
 export default function RecordLine() {
   const [pgnName, setPgnName] = useState<string>('');

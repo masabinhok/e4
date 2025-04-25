@@ -3,8 +3,7 @@ import "./globals.css";
 import { Poppins } from "next/font/google";
 import Navigation from "@/components/Navigation";
 
-import { SoundProvider } from "@/context/SoundContext";
-
+import { SoundProvider } from "@/contexts/SoundContext";
 
 
 const poppins = Poppins({

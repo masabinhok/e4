@@ -5,7 +5,6 @@ import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
-
 import { useSound } from '@/contexts/SoundContext';
 
 
