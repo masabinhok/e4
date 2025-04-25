@@ -7,6 +7,7 @@ import Link from 'next/link';
 import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Opening } from '@/types/types';
+import { useSound } from '@/context/SoundContext';
 
 
 export default function CustomPGN({ code }: { code?: string }) {
@@ -21,51 +22,18 @@ export default function CustomPGN({ code }: { code?: string }) {
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
-  const [soundEvent, setSoundEvent] = useState<string | null>(null);
+
+  const { playSound } = useSound();
   const [updatedOpenings, setUpdatedOpenings] = useLocalStorage<Opening[]>('openings', openings);
 
   const customPgns = openings.find((opening) => opening.code === 'custom-pgns');
 
+  
   useEffect(() => {
     setIsBrowser(true);
   }, []);
 
-  useEffect(() => {
-    if (!soundEvent) return;
 
-    const playSound = (path: string) => {
-      const audio = new Audio(path);
-      audio.play();
-    };
-
-    switch (soundEvent) {
-      case 'moveSelf':
-        playSound('/audio/move-self.mp3');
-        break;
-      case 'moveOpponent':
-        playSound('/audio/move-opponent.mp3');
-        break;
-      case 'achievement':
-        playSound('/audio/achievement.mp3');
-        break;
-      case 'lessonPass':
-        playSound('/audio/lesson-pass.mp3');
-        break;
-      case 'scatter':
-        playSound('/audio/scatter.mp3');
-        break;
-      case 'illegal':
-        playSound('/audio/illegal.mp3');
-        break;
-      case 'incorrect':
-        playSound('/audio/incorrect.mp3');
-        break;
-      default:
-        break;
-    }
-
-    setSoundEvent(null);
-  }, [soundEvent]);
 
   const addMessage = (newMessage: { content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -90,7 +58,7 @@ export default function CustomPGN({ code }: { code?: string }) {
       moves.forEach((move) => {
         const result = gameCopy.move(move);
         if (!result) {
-          setSoundEvent('illegal');
+          playSound('illegal');
           setMoveValidation({ source: '', target: '', valid: false });
           addMessage({
             content: 'Invalid move',
@@ -115,7 +83,7 @@ export default function CustomPGN({ code }: { code?: string }) {
       }
     }
     catch (error) {
-      setSoundEvent('illegal');
+      playSound('illegal');
       setMoveValidation({ source: '', target: '', valid: false });
       addMessage({
         content: 'Invalid PGN format',
@@ -142,7 +110,7 @@ export default function CustomPGN({ code }: { code?: string }) {
 
 
       if (!result) {
-        setSoundEvent('illegal');
+        playSound('illegal');
         setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
         addMessage({
           content: 'Invalid move',
@@ -157,11 +125,11 @@ export default function CustomPGN({ code }: { code?: string }) {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
-      setSoundEvent('moveSelf');
+      playSound('moveSelf');
 
       return true;
     } catch {
-      setSoundEvent('illegal');
+      playSound('illegal');
       setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
       addMessage({
         content: 'Invalid move',

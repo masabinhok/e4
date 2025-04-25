@@ -5,6 +5,7 @@ import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
+import { useSound } from '@/context/SoundContext';
 
 export default function ChessGame({ code }: { code: string }) {
   const [updatedOpenings, setUpdatedOpenings] = useLocalStorage('openings', openings);
@@ -23,48 +24,13 @@ export default function ChessGame({ code }: { code: string }) {
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
   const [mistakes, setMistakes] = useState<number>(0);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
-  const [soundEvent, setSoundEvent] = useState<string | null>(null);
+  const { playSound } = useSound();
 
   useEffect(() => {
     setIsBrowser(true);
   }, []);
 
-  useEffect(() => {
-    if (!soundEvent) return;
 
-    const playSound = (path: string) => {
-      const audio = new Audio(path);
-      audio.play();
-    };
-
-    switch (soundEvent) {
-      case 'moveSelf':
-        playSound('/audio/move-self.mp3');
-        break;
-      case 'moveOpponent':
-        playSound('/audio/move-opponent.mp3');
-        break;
-      case 'achievement':
-        playSound('/audio/achievement.mp3');
-        break;
-      case 'lessonPass':
-        playSound('/audio/lesson-pass.mp3');
-        break;
-      case 'scatter':
-        playSound('/audio/scatter.mp3');
-        break;
-      case 'illegal':
-        playSound('/audio/illegal.mp3');
-        break;
-      case 'incorrect':
-        playSound('/audio/incorrect.mp3');
-        break;
-      default:
-        break;
-    }
-
-    setSoundEvent(null);
-  }, [soundEvent]);
 
   const addMessage = (newMessage: { content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -99,21 +65,27 @@ export default function ChessGame({ code }: { code: string }) {
   };
 
   const handleLineCompletion = () => {
+
     setMessages([]);
     if (lineCompleted && mode === 'practice') {
-      setSoundEvent('achievement');
+      setTimeout(() => {
+        playSound('achievement');
+      }, 1)
+      
       addMessage({
         content: "Congratulations! You've completed the line.",
         type: 'success',
         onClose: () => {
           setLineCompleted(false);
           loadRandomLine();
-          setSoundEvent('scatter');
+          playSound('scatter');
         },
       });
     }
     if (lineCompleted && mode === 'quiz') {
-      setSoundEvent('lessonPass');
+      setTimeout(() => {
+        playSound('lessonPass');
+      }, 1)
       addMessage({
         content: `Congratulations! You've completed the line. You made ${mistakes} mistakes.`,
         type: 'success',
@@ -124,7 +96,7 @@ export default function ChessGame({ code }: { code: string }) {
             return randomLineIndex;
           });
           loadRandomLine();
-          setSoundEvent('scatter');
+          playSound('scatter');
         },
       });
     }
@@ -156,7 +128,7 @@ export default function ChessGame({ code }: { code: string }) {
   const nextMove = () => {
     const lineLength = currentLine?.length ?? 0;
     if (currentMoveIndex < lineLength && currentLine) {
-      setSoundEvent('moveOpponent');
+      playSound('moveOpponent');
       const move = currentLine[currentMoveIndex];
       const gameCopy = new Chess(game.fen());
       gameCopy.move(move);
@@ -176,7 +148,7 @@ export default function ChessGame({ code }: { code: string }) {
 
   const previousMove = () => {
     if (currentMoveIndex > 0) {
-      setSoundEvent('moveSelf');
+      playSound('moveSelf');
       const newHistory = moveHistory.slice(0, -1);
       const newGame = new Chess();
       newHistory.forEach((move) => newGame.move(move));
@@ -224,7 +196,7 @@ export default function ChessGame({ code }: { code: string }) {
       }
 
       if (!result) {
-        setSoundEvent('illegal');
+        playSound('illegal');
         setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
         addMessage({
           content: 'Invalid move',
@@ -235,7 +207,7 @@ export default function ChessGame({ code }: { code: string }) {
 
       const expectedMove = currentLine?.[currentMoveIndex];
       if (!expectedMove || result.san !== expectedMove) {
-        setSoundEvent('incorrect');
+        playSound('incorrect');
         setMistakes(mistakes + 1);
         setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
         addMessage({
@@ -249,11 +221,11 @@ export default function ChessGame({ code }: { code: string }) {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
-      setSoundEvent('moveSelf');
+      playSound('moveSelf');
 
       return true;
     } catch {
-      setSoundEvent('illegal');
+      playSound('illegal');
       setMoveValidation({ source: sourceSquare, target: targetSquare, valid: false });
       addMessage({
         content: 'Invalid move',
