@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
@@ -25,6 +25,8 @@ export default function ChessGame({ code }: { code: string }) {
   const [mistakes, setMistakes] = useState<number>(0);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const { playSound } = useSound();
+
+  const getNewGame = useCallback(() => new Chess(), []);
 
   useEffect(() => {
     setIsBrowser(true);
@@ -60,8 +62,7 @@ export default function ChessGame({ code }: { code: string }) {
     setMoveValidation(null);
     setMistakes(0);
 
-    const newGame = new Chess();
-    setGame(newGame);
+    setGame(getNewGame());
   };
 
   const handleLineCompletion = () => {
@@ -157,7 +158,7 @@ export default function ChessGame({ code }: { code: string }) {
       const newHistory = moveHistory.slice(0, -1);
       const newGame = new Chess();
       newHistory.forEach((move) => newGame.move(move));
-      setGame(newGame);
+      setGame(getNewGame())
       setMoveHistory(newHistory);
       setCurrentMoveIndex(currentMoveIndex - 1);
       setMoveValidation(null);
@@ -180,6 +181,8 @@ export default function ChessGame({ code }: { code: string }) {
       }
     }
   }, [autoPlay, currentMoveIndex]);
+
+
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
     if (autoPlay) return false;
