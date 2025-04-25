@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import Navigation from "@/components/Navigation";
-import { SoundProvider } from "@/contexts/SoundContext";
+
+import { SoundProvider } from "@/context/SoundContext";
+
+
 
 const poppins = Poppins({
   subsets: ["latin"],

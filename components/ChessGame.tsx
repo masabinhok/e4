@@ -1,11 +1,13 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
+
 import { useSound } from '@/contexts/SoundContext';
+
 
 export default function ChessGame({ code }: { code: string }) {
   const [updatedOpenings, setUpdatedOpenings] = useLocalStorage('openings', openings);
@@ -25,6 +27,10 @@ export default function ChessGame({ code }: { code: string }) {
   const [mistakes, setMistakes] = useState<number>(0);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const { playSound } = useSound();
+
+  const getNewGame = useCallback(() => new Chess(), []);
+
+
 
 
 
@@ -63,14 +69,19 @@ export default function ChessGame({ code }: { code: string }) {
     setMoveValidation(null);
     setMistakes(0);
 
-    const newGame = new Chess();
-    setGame(newGame);
+    setGame(getNewGame());
   };
 
   const handleLineCompletion = () => {
+
     setMessages([]);
     if (lineCompleted && mode === 'practice') {
-      playSound('achievement');
+
+      setTimeout(() => {
+        playSound('achievement');
+      }, 1)
+
+
       addMessage({
         content: "Congratulations! You've completed the line.",
         type: 'success',
@@ -82,7 +93,11 @@ export default function ChessGame({ code }: { code: string }) {
       });
     }
     if (lineCompleted && mode === 'quiz') {
-      playSound('lessonPass');
+
+      setTimeout(() => {
+        playSound('lessonPass');
+      }, 1)
+
       addMessage({
         content: `Congratulations! You've completed the line. You made ${mistakes} mistakes.`,
         type: 'success',
@@ -128,18 +143,27 @@ export default function ChessGame({ code }: { code: string }) {
       const move = currentLine[currentMoveIndex];
       const gameCopy = new Chess(game.fen());
       const result = gameCopy.move(move);
-
-  
       setGame(gameCopy);
       setMoveHistory([...moveHistory, move]);
       setCurrentMoveIndex(currentMoveIndex + 1);
       setMoveValidation(null);
-      if (result.captured) {
+
+
+      if (gameCopy.inCheck()) {
+        playSound('check');
+      }
+      else if (result.captured) {
         playSound('capture');
       }
       else {
-        playSound('moveOpponent');
+        playSound('moveSelf');
       }
+
+      if (result.isKingsideCastle() || result.isQueensideCastle()) {
+        playSound('castle');
+      }
+
+
       return true;
     }
     return false;
@@ -156,7 +180,7 @@ export default function ChessGame({ code }: { code: string }) {
       const newHistory = moveHistory.slice(0, -1);
       const newGame = new Chess();
       newHistory.forEach((move) => newGame.move(move));
-      setGame(newGame);
+      setGame(getNewGame())
       setMoveHistory(newHistory);
       setCurrentMoveIndex(currentMoveIndex - 1);
       setMoveValidation(null);
@@ -179,6 +203,8 @@ export default function ChessGame({ code }: { code: string }) {
       }
     }
   }, [autoPlay, currentMoveIndex]);
+
+
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
     if (autoPlay) return false;
@@ -226,10 +252,13 @@ export default function ChessGame({ code }: { code: string }) {
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
 
-      // Detect capture and play sound
-      if (result.captured) {
+      if (gameCopy.inCheck()) {
+        playSound('check');
+      }
+      else if (result.captured) {
         playSound('capture');
-      } else {
+      }
+      else {
         playSound('moveSelf');
       }
 
@@ -237,9 +266,6 @@ export default function ChessGame({ code }: { code: string }) {
         playSound('castle');
       }
 
-      if (game.inCheck()) {
-        playSound('check');
-      }
 
       return true;
     } catch {

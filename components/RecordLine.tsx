@@ -7,7 +7,7 @@ import Link from 'next/link';
 import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Opening } from '@/types/types';
-import { useSound } from '@/contexts/SoundContext';
+import { useSound } from '@/context/SoundContext';
 
 export default function RecordLine() {
   const [pgnName, setPgnName] = useState<string>('');
@@ -76,20 +76,23 @@ export default function RecordLine() {
       setGame(gameCopy);
       setMoveHistory([...moveHistory, result.san]);
       setCurrentMoveIndex(currentMoveIndex + 1);
-      if (result.captured) {
-        playSound('capture');
-      } else {
-        playSound('moveSelf');
-      }
-
-
-      if (result.isKingsideCastle() || result.isQueensideCastle()) {
-        playSound('castle')
-      }
 
       if (gameCopy.inCheck()) {
         playSound('check');
       }
+      else if (result.captured) {
+        playSound('capture');
+      }
+      else {
+        playSound('moveSelf');
+      }
+
+      if (result.isKingsideCastle() || result.isQueensideCastle()) {
+        playSound('castle');
+      }
+
+
+
 
       return true;
     } catch {
