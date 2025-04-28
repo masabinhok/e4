@@ -6,6 +6,8 @@ import Message from './Message';
 import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useSound } from '@/contexts/SoundContext';
+import Button from './Button';
+import Link from 'next/link'
 
 
 export default function ChessGame({ code }: { code: string }) {
@@ -293,15 +295,21 @@ export default function ChessGame({ code }: { code: string }) {
       onAuxClick={() => {
         setMoveValidation(null);
       }}
-      className="flex flex-col items-center lg:flex-row bg-gray-900 text-gray-100 min-h-screen"
+      className="flex flex-col items-center lg:flex-row bg-gray-900 text-gray-100 min-h-screen relative"
     >
+      <button
+        className="border border-gray-500 px-10 py-2 mt-2 w-fit rounded-md absolute -top-1 left-4"
+        onClick={() => toggleBoardFlip()}
+      >
+        Flip board
+      </button>
       <div className="space-y-2 fixed top-4 right-4 z-50">
         {messages.map((msg, index) => (
           <Message key={index} message={msg.content} type={msg.type} onClose={() => removeMessage(index)} />
         ))}
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center p-4 ">
         {isBrowser ? (
           <Chessboard
             position={game.fen()}
@@ -418,12 +426,15 @@ export default function ChessGame({ code }: { code: string }) {
               </button>
             </>
           )}
-          <button
-            className="border border-gray-500 px-4 py-2 mt-2 rounded-md w-full"
-            onClick={() => toggleBoardFlip()}
-          >
-            Flip board
-          </button>
+          <div>
+
+          </div>
+          <div className='flex  w-full items-center justify-center'>
+            <Link href={`/record?code=${code}`} className="inline-block">
+            <Button text="Contribute a Variation" />
+            </Link>
+          </div>
+
         </div>
       </div>
     </div>

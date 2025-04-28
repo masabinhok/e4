@@ -8,8 +8,11 @@ import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Opening } from '@/types/types';
 import { useSound } from '@/contexts/SoundContext';
+import { useSearchParams } from 'next/navigation';
 
 export default function RecordLine() {
+  const searchParams = useSearchParams();
+  const code = searchParams.get('code') || 'recorded-pgns';
   const [pgnName, setPgnName] = useState<string>('');
   const [pgn, setPgn] = useState<string>('');
   const [game, setGame] = useState(new Chess());
@@ -23,7 +26,7 @@ export default function RecordLine() {
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const [updatedOpenings, setUpdatedOpenings] = useLocalStorage<Opening[]>('openings', openings);
   const { playSound } = useSound();
-
+  const [isContributed, setIsContributed] = useLocalStorage<boolean>('isContributed', false);
 
 
   const toggleBoardFlip = () => {
@@ -124,7 +127,7 @@ export default function RecordLine() {
     }
 
 
-    const recordedPgnsFromStorage = updatedOpenings.find((opening) => opening.code === 'recorded-pgns');
+    const recordedPgnsFromStorage = updatedOpenings.find((opening) => opening.code === code);
 
     const newPGN = {
       name: pgnName,
@@ -138,7 +141,7 @@ export default function RecordLine() {
 
     // now append the new variation to the existing variations
     const newOpenings = updatedOpenings.map((opening) => {
-      if (opening.code === 'recorded-pgns') {
+      if (opening.code === code) {
         return {
           ...opening,
           variations: updatedVariations,
@@ -152,6 +155,7 @@ export default function RecordLine() {
 
     setPgnName('');
     setPgn('');
+    setIsContributed(true);
     addMessage({
       content: 'PGN saved successfully',
       type: 'success',
@@ -186,8 +190,14 @@ export default function RecordLine() {
 
   return (
     <div
-      className="flex flex-col lg:flex-row bg-gray-900 text-gray-100  min-h-screen"
+      className="flex flex-col lg:flex-row bg-gray-900 text-gray-100  items-center  min-h-screen relative"
     >
+      <button
+        className="border border-gray-500 px-10 py-2 mt-2 w-fit rounded-md absolute -top-1 left-4"
+        onClick={() => toggleBoardFlip()}
+      >
+        Flip board
+      </button>
       <div className="space-y-2 fixed top-4 right-4 z-50">
         {messages.map((msg, index) => (
           <Message key={index} message={msg.content} type={msg.type} onClose={() => removeMessage(index)} />
@@ -198,7 +208,8 @@ export default function RecordLine() {
         onAuxClick={() => {
           setMoveValidation(null);
         }}
-        className="flex-1 flex items-center justify-center p-4">
+        className="flex-1 flex items-center justify-center p-4 ">
+        
         {isBrowser ? (
           <Chessboard
             position={game.fen()}
@@ -257,23 +268,28 @@ export default function RecordLine() {
               Reset
             </button>
           </div>
-
-
-          <button
-            className="border border-gray-500 px-4 py-2  rounded-md w-full"
-            onClick={() => toggleBoardFlip()}
-          >
-            Flip board
-          </button>
         </div>
-        <Link href="/lessons/recorded-pgns" className='flex flex-col gap-4 w-full'>
+        <Link href={`/lessons/recorded-pgns`} className='flex flex-col gap-4 w-full'>
           <button
             className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md w-full"
           >
             Play Recorded Lines
           </button>
         </Link>
-        <button
+        {
+          isContributed && (<Link href={`/lessons/${code}`} className='flex flex-col gap-4 mt-2  w-full'>
+            <button
+              onClick={() => {
+                setIsContributed(false);
+              }}
+              className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-md w-full"
+            >
+              Visit Latest Contribution
+            </button>
+          </Link>)
+        }
+
+        {/* <button
           onClick={() => {
             const recordedPgnsFromStorage = updatedOpenings.find((opening) => {
               return opening.code === 'recorded-pgns'
@@ -286,7 +302,8 @@ export default function RecordLine() {
           className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 mt-3  rounded-md w-full"
         >
           Print Recorded Lines
-        </button>
+        </button> */}
+
 
       </div>
     </div >

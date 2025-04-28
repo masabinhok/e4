@@ -23,6 +23,20 @@ const LessonsPage = () => {
             </div>
           ))
         }
+
+        <div>
+          <h1 className="text-2xl lg:text-3xl text-blue-400 font-bold mb-4">Add New Opening</h1>
+          <p className="text-gray-600 mb-6">
+        You can add a new opening by clicking the button below. This will allow you to contribute a new opening for everyone to use.
+          </p>
+
+          <Link href='lessons/add' className="inline-block">
+            <button className="p-3 px-6 bg-blue-400 text-white rounded-lg font-semibold hover:bg-blue-500 transition-colors">
+              Contribute
+            </button>
+          </Link>
+        </div>
+
       </section>
     </main>
   )

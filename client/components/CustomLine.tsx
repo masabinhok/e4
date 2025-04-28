@@ -157,6 +157,10 @@ export default function CustomPGN({ code }: { code?: string }) {
     }
   };
 
+  const toggleBoardFlip = () => {
+    setBoardFlip((prev) => (prev === 'white' ? 'black' : 'white'));
+  }
+
   const savePGN = () => {
     if (!pgnName || !currentLine) {
       addMessage({
@@ -212,8 +216,14 @@ export default function CustomPGN({ code }: { code?: string }) {
 
   return (
     <div
-      className="flex flex-col lg:flex-row bg-gray-900 text-gray-100  min-h-screen"
+      className="flex flex-col lg:flex-row bg-gray-900 text-gray-100  min-h-screen relative"
     >
+      <button
+        className="border border-gray-500 px-10 py-2 mt-2 w-fit rounded-md absolute z-10 -top-1 left-4"
+        onClick={() => toggleBoardFlip()}
+      >
+        Flip board
+      </button>
       <div className="space-y-2 fixed top-4 right-4 z-50">
         {messages.map((msg, index) => (
           <Message key={index} message={msg.content} type={msg.type} onClose={() => removeMessage(index)} />
@@ -224,7 +234,8 @@ export default function CustomPGN({ code }: { code?: string }) {
         onAuxClick={() => {
           setMoveValidation(null);
         }}
-        className="flex-1 flex items-center justify-center p-4">
+        className="flex-1 flex items-center justify-center p-4 relative">
+      
         {isBrowser ? (
           <Chessboard
             position={game.fen()}
