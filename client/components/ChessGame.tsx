@@ -1,22 +1,53 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
-import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useSound } from '@/contexts/SoundContext';
 import Button from './Button';
 import Link from 'next/link'
+import { Opening } from '@/types/types';
 
 
 export default function ChessGame({ code }: { code: string }) {
-  const [updatedOpenings, setUpdatedOpenings] = useLocalStorage('openings', openings);
-  const currentOpening = updatedOpenings.find((opening) => opening.code === code);
+  const [currentOpening, setCurrentOpening] = useState<Opening | null>(null);
+  useEffect(() => {
+    const fetchOpening = async (code: string) => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/${code}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch opening');
+        }
+
+        const data = await res.json();
+        console.log(data);
+        setCurrentOpening(data);
+      }
+      catch (error) {
+        console.error('Error fetching opening:', error);
+      }
+    }
+    fetchOpening(code);
+  }, []);
+
+
+  useEffect(() => {
+    if (currentOpening) {
+      loadLine(currentLineIndex); // Load the first line properly
+    }
+  }, [currentOpening]);
+  
   const [game, setGame] = useState(new Chess());
   const [currentLineIndex, setCurrentLineIndex] = useLocalStorage<number>('currentLineIndex', 0);
-  const [currentLine, setCurrentLine] = useState<string[] | undefined>(currentOpening?.variations[currentLineIndex]?.line);
-  const [lineName, setLineName] = useState(currentOpening?.variations[currentLineIndex]?.name);
+  const [currentLine, setCurrentLine] = useState<string[] | undefined>(currentOpening?.variations[currentLineIndex]?.moves);
+  const [lineName, setLineName] = useState(currentOpening?.variations[currentLineIndex]?.title);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [autoPlay, setAutoPlay] = useState(false);
@@ -30,14 +61,6 @@ export default function ChessGame({ code }: { code: string }) {
   const { playSound } = useSound();
 
   const getNewGame = useCallback(() => new Chess(), []);
-
-
-
-
-
-
-
-
 
   useEffect(() => {
     setIsBrowser(true);
@@ -61,12 +84,12 @@ export default function ChessGame({ code }: { code: string }) {
   };
 
   const loadLine = (lineKey: number) => {
-    const moves = currentOpening?.variations[lineKey]?.line;
+    const moves = currentOpening?.variations[lineKey]?.moves;
     setAutoPlay(false);
     setCurrentLine(moves);
     setBoardFlip(currentOpening?.variations[lineKey]?.boardflip || 'white');
     setCurrentLineIndex(currentOpening?.variations[lineKey]?.index ?? 0);
-    setLineName(currentOpening?.variations[lineKey]?.name);
+    setLineName(currentOpening?.variations[lineKey]?.title);
     setCurrentMoveIndex(0);
     setMoveHistory([]);
     setMoveValidation(null);
@@ -106,10 +129,11 @@ export default function ChessGame({ code }: { code: string }) {
         type: 'success',
         onClose: () => {
           setLineCompleted(false);
-          setCurrentLineIndex(() => {
-            const randomLineIndex = Math.floor(Math.random() * currentOpening?.variations.length!);
+          setCurrentLineIndex(prev => {
+            const randomLineIndex = Math.floor(Math.random() * (currentOpening?.variations.length ?? 1));
             return randomLineIndex;
           });
+
           loadRandomLine();
           playSound('scatter');
         },
@@ -292,6 +316,7 @@ export default function ChessGame({ code }: { code: string }) {
     };
   };
 
+
   return (
     <div
       onAuxClick={() => {
@@ -355,8 +380,8 @@ export default function ChessGame({ code }: { code: string }) {
                 onChange={(e) => loadLine(e.target.selectedIndex)}
               >
                 {currentOpening?.variations.map((line, index) => (
-                  <option key={index} value={line.name}>
-                    {line.name}
+                  <option key={index} value={line.title}>
+                    {line.title}
                   </option>
                 ))}
               </select>

@@ -4,7 +4,6 @@ import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import Link from 'next/link';
-import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Opening } from '@/types/types';
 import { useSound } from '@/contexts/SoundContext';
@@ -16,7 +15,6 @@ export default function RecordLine() {
   const [pgnName, setPgnName] = useState<string>('');
   const [pgn, setPgn] = useState<string>('');
   const [game, setGame] = useState(new Chess());
-  const [currentLine, setCurrentLine] = useState<string[] | undefined>([]);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [autoPlay, setAutoPlay] = useState(false);
@@ -24,7 +22,7 @@ export default function RecordLine() {
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
-  const [updatedOpenings, setUpdatedOpenings] = useLocalStorage<Opening[]>('openings', openings);
+  const [openings, setOpenings] = useLocalStorage<Opening[]>('openings', []);
   const { playSound } = useSound();
   const [isContributed, setIsContributed] = useLocalStorage<boolean>('isContributed', false);
 
@@ -127,7 +125,7 @@ export default function RecordLine() {
     }
 
 
-    const recordedPgnsFromStorage = updatedOpenings.find((opening) => opening.code === code);
+    const recordedPgnsFromStorage = openings.find((opening) => opening.code === code);
 
     const newPGN = {
       name: pgnName,
@@ -140,7 +138,7 @@ export default function RecordLine() {
     const updatedVariations = [...(recordedPgnsFromStorage?.variations || []), newPGN];
 
     // now append the new variation to the existing variations
-    const newOpenings = updatedOpenings.map((opening) => {
+    const newOpenings = openings.map((opening) => {
       if (opening.code === code) {
         return {
           ...opening,
@@ -151,7 +149,7 @@ export default function RecordLine() {
     });
 
     // Save the updated openings to local storage
-    setUpdatedOpenings(newOpenings as Opening[]);
+    setOpenings(newOpenings as Opening[]);
 
     setPgnName('');
     setPgn('');
@@ -209,7 +207,7 @@ export default function RecordLine() {
           setMoveValidation(null);
         }}
         className="flex-1 flex items-center justify-center p-4 ">
-        
+
         {isBrowser ? (
           <Chessboard
             position={game.fen()}

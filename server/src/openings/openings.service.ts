@@ -16,4 +16,8 @@ export class OpeningsService {
   async findAll(): Promise<Opening[]>{
     return this.openingModel.find().populate('variations').exec();
   }
+
+  async findOne(code: string) : Promise<Opening | null> {
+    return this.openingModel.findOne({ code }).populate('variations').exec();
+  }
 }

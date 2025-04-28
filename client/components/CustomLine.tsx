@@ -4,7 +4,6 @@ import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import Link from 'next/link';
-import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Opening } from '@/types/types';
 
@@ -26,11 +25,8 @@ export default function CustomPGN({ code }: { code?: string }) {
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
 
 
-  const [updatedOpenings, setUpdatedOpenings] = useLocalStorage<Opening[]>('openings', openings);
+  const [openings, setOpenings] = useLocalStorage<Opening[]>('openings', []);
   const { playSound } = useSound();
-
-  const customPgns = openings.find((opening) => opening.code === 'custom-pgns');
-
 
   useEffect(() => {
     setIsBrowser(true);
@@ -170,7 +166,7 @@ export default function CustomPGN({ code }: { code?: string }) {
       return;
     }
 
-    const customPgnsFromStorage = updatedOpenings.find((opening) => opening.code === 'custom-pgns');
+    const customPgnsFromStorage = openings.find((opening) => opening.code === 'custom-pgns');
 
     const newPGN = {
       name: pgnName,
@@ -183,7 +179,7 @@ export default function CustomPGN({ code }: { code?: string }) {
     const updatedVariations = [...(customPgnsFromStorage?.variations || []), newPGN];
 
     // now append the new variation to the existing variations
-    const newOpenings = updatedOpenings.map((opening) => {
+    const newOpenings = openings.map((opening) => {
       if (opening.code === 'custom-pgns') {
         return {
           ...opening,
@@ -194,8 +190,7 @@ export default function CustomPGN({ code }: { code?: string }) {
     });
 
     // Save the updated openings to local storage
-    setUpdatedOpenings(newOpenings as Opening[]);
-
+    setOpenings
     setPgnName('');
     setPgn('');
     addMessage({
@@ -235,7 +230,7 @@ export default function CustomPGN({ code }: { code?: string }) {
           setMoveValidation(null);
         }}
         className="flex-1 flex items-center justify-center p-4 relative">
-      
+
         {isBrowser ? (
           <Chessboard
             position={game.fen()}
