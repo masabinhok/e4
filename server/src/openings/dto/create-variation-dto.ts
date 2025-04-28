@@ -1,4 +1,4 @@
-import { ArrayNotEmpty, IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { BoardFlip } from "../schemas/variation.schema";
 
 export class CreateVariationDto {
@@ -9,6 +9,10 @@ export class CreateVariationDto {
   @IsArray()
   @ArrayNotEmpty()
   moves: string[]; // Array of moves in the variation, e.g., ["e4", "c6", "d4", "d5", "e5"]
+
+  @IsOptional()
+  @IsNumber()
+  index: number;
 
   @IsString()
   @IsNotEmpty()

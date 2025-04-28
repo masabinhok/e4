@@ -13,6 +13,9 @@ export class Variation extends Document {
   @Prop({ required: true })
   title: string;  // Title of the variation, e.g., "Caro-Kann: Advance Variation"
 
+  @Prop({required: true,})
+  index:number;
+
   @Prop({ type: [String] })
   moves: string[];  // A list of moves, e.g., ["e4", "c6", "d4", "d5", "e5"]
 

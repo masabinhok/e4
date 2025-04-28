@@ -1,9 +1,30 @@
 'use client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import Link from 'next/link'
-import openings from '@/constants/openings'
+import useLocalStorage from '@/hooks/useLocalStorage'
+import { Opening } from '@/types/types'
 
 const LessonsPage = () => {
+  const [openings, setOpenings] = useLocalStorage<Opening[]>('openings', []);
+
+  useEffect(() => {
+    const fetchOpenings = async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch openings')
+      }
+
+      const data = await res.json();
+      setOpenings(data);
+    }
+    fetchOpenings();
+  }, [])
   return (
     <main className="p-4 lg:p-10 lg:ml-40">
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-[1100px] max-lg:p-5">
