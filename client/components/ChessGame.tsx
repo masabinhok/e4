@@ -37,6 +37,8 @@ export default function ChessGame({ code }: { code: string }) {
 
 
 
+
+
   useEffect(() => {
     setIsBrowser(true);
   }, []);
@@ -431,7 +433,7 @@ export default function ChessGame({ code }: { code: string }) {
           </div>
           <div className='flex  w-full items-center justify-center'>
             <Link href={`/record?code=${code}`} className="inline-block">
-            <Button text="Contribute a Variation" />
+              <Button text="Contribute a Variation" />
             </Link>
           </div>
 

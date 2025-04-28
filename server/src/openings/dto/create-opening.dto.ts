@@ -11,7 +11,10 @@ export class CreateOpeningDto {
   @IsString()
   description: string;
 
-  
+  @IsString()
+  @IsNotEmpty()
+  code: string;
+
   @IsOptional()
   @IsArray()
   @Type (()=> CreateVariationDto)

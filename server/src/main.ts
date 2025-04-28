@@ -7,7 +7,7 @@ async function bootstrap() {
 
   //enable global validation, this will validate all incoming requests based on the DTOs defined in the application.
   app.useGlobalPipes(new ValidationPipe());
-
+  app.enableCors();
   await app.listen(process.env.PORT ?? 5000);
 }
 bootstrap();

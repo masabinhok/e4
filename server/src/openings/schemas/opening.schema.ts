@@ -11,8 +11,11 @@ export class Opening extends Document {
   @Prop()
   description: string;
 
+  @Prop({required: true, unique: true})
+  code: string;
+
   @Prop({ type: [Variation], default: [] })  // Variations are now embedded as an array
-  variations: Variation[];
+  variations?: Variation[];
 }
 
 export const OpeningSchema = SchemaFactory.createForClass(Opening);
