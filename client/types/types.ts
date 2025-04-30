@@ -12,3 +12,6 @@ export type Opening = {
   code: string;
   variations: OpeningVariation[];
 };
+
+
+export type BoardFlip = "white" | "black";
