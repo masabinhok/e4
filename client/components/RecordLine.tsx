@@ -8,11 +8,14 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { Opening } from '@/types/types';
 import { useSound } from '@/contexts/SoundContext';
 import { useSearchParams } from 'next/navigation';
+import { Rss } from 'lucide-react';
 
 export default function RecordLine() {
   const searchParams = useSearchParams();
   const code = searchParams.get('code') || 'recorded-pgns';
+
   const [pgnName, setPgnName] = useState<string>('');
+  const [pgnDescription, setPgnDescription] = useState<string>('');
   const [pgn, setPgn] = useState<string>('');
   const [game, setGame] = useState(new Chess());
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
@@ -115,7 +118,7 @@ export default function RecordLine() {
     setMoveValidation(null);
   }
 
-  const savePGN = () => {
+  const savePGN = async () => {
     if (!pgnName || !moveHistory) {
       addMessage({
         content: 'Please enter a name and play some moves.',
@@ -124,32 +127,25 @@ export default function RecordLine() {
       return;
     }
 
-
-    const recordedPgnsFromStorage = openings.find((opening) => opening.code === code);
-
-    const newPGN = {
-      name: pgnName,
-      line: moveHistory,
-      boardflip: boardFlip,
-      index: recordedPgnsFromStorage?.variations.length || 0,
-      description: 'This is a recorded PGN that is saved by the user. You can record your own PGNs here.',
-    };
-
-    const updatedVariations = [...(recordedPgnsFromStorage?.variations || []), newPGN];
-
-    // now append the new variation to the existing variations
-    const newOpenings = openings.map((opening) => {
-      if (opening.code === code) {
-        return {
-          ...opening,
-          variations: updatedVariations,
-        };
-      }
-      return opening;
+    const newVariation = {
+      title: pgnName,
+      description: pgnDescription,
+      boardFlip: boardFlip,
+      moves: moveHistory,
+    }
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/contribute/${code}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newVariation),
     });
+    if (!res.ok) {
+      throw new Error('Failed to contribute variation');
+    }
 
-    // Save the updated openings to local storage
-    setOpenings(newOpenings as Opening[]);
+    const data = await res.json();
+    console.log(data);
 
     setPgnName('');
     setPgn('');
@@ -236,8 +232,12 @@ export default function RecordLine() {
           </div>
           <div className='flex flex-col gap-4 w-full mt-4'>
             <label className='flex flex-col w-full' htmlFor="pgn" >
-              <span>Name your recording</span>
+              <span>Name your variation.</span>
               <input type="text" id='pgn' value={pgnName} onChange={(e: ChangeEvent<HTMLInputElement>) => setPgnName(e.target.value)} className='w-full p-2 outline-none bg-white rounded-sm mt-2 px-4 placeholder-gray-500 text-sm text-black' placeholder='e.g. Recorded Line 1' />
+            </label>
+            <label className='flex flex-col w-full' htmlFor="pgn" >
+              <span>Describe it.</span>
+              <textarea id='pgn' value={pgnDescription} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setPgnDescription(e.target.value)} className='w-full p-2 outline-none bg-white rounded-sm mt-2 px-4 placeholder-gray-500 text-sm text-black' placeholder='e.g. This is a solid response to e4...' />
             </label>
             <button
               onClick={(savePGN)}
