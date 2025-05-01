@@ -1,7 +1,7 @@
 export type OpeningVariation = {
-  name: string;
+  title: string;
   index: number;
-  line: string[];
+  moves: string[];
   boardflip: "white" | "black";
   description: string;
 };
@@ -12,3 +12,6 @@ export type Opening = {
   code: string;
   variations: OpeningVariation[];
 };
+
+
+export type BoardFlip = "white" | "black";

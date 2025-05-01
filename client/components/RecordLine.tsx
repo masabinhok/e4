@@ -4,27 +4,26 @@ import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import Link from 'next/link';
-import openings from '@/constants/openings';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { Opening } from '@/types/types';
 import { useSound } from '@/contexts/SoundContext';
 import { useSearchParams } from 'next/navigation';
+import { BoardFlip } from '@/types/types';
+
 
 export default function RecordLine() {
   const searchParams = useSearchParams();
   const code = searchParams.get('code') || 'recorded-pgns';
   const [pgnName, setPgnName] = useState<string>('');
+  const [pgnDescription, setPgnDescription] = useState<string>('');
   const [pgn, setPgn] = useState<string>('');
   const [game, setGame] = useState(new Chess());
-  const [currentLine, setCurrentLine] = useState<string[] | undefined>([]);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [autoPlay, setAutoPlay] = useState(false);
-  const [boardFlip, setBoardFlip] = useState<string>('white');
+  const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
-  const [updatedOpenings, setUpdatedOpenings] = useLocalStorage<Opening[]>('openings', openings);
   const { playSound } = useSound();
   const [isContributed, setIsContributed] = useLocalStorage<boolean>('isContributed', false);
 
@@ -93,10 +92,6 @@ export default function RecordLine() {
       if (result.isKingsideCastle() || result.isQueensideCastle()) {
         playSound('castle');
       }
-
-
-
-
       return true;
     } catch {
       playSound('illegal');
@@ -117,7 +112,7 @@ export default function RecordLine() {
     setMoveValidation(null);
   }
 
-  const savePGN = () => {
+  const savePGN = async () => {
     if (!pgnName || !moveHistory) {
       addMessage({
         content: 'Please enter a name and play some moves.',
@@ -126,32 +121,25 @@ export default function RecordLine() {
       return;
     }
 
-
-    const recordedPgnsFromStorage = updatedOpenings.find((opening) => opening.code === code);
-
-    const newPGN = {
-      name: pgnName,
-      line: moveHistory,
+    const newVariation = {
+      title: pgnName,
+      description: pgnDescription,
+      moves: moveHistory,
       boardflip: boardFlip,
-      index: recordedPgnsFromStorage?.variations.length || 0,
-      description: 'This is a recorded PGN that is saved by the user. You can record your own PGNs here.',
-    };
-
-    const updatedVariations = [...(recordedPgnsFromStorage?.variations || []), newPGN];
-
-    // now append the new variation to the existing variations
-    const newOpenings = updatedOpenings.map((opening) => {
-      if (opening.code === code) {
-        return {
-          ...opening,
-          variations: updatedVariations,
-        };
-      }
-      return opening;
+    } 
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/contribute/${code ? code : 'recorded-pgns'}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newVariation),
     });
+    if (!res.ok) {
+      throw new Error('Failed to contribute variation');
+    }
 
-    // Save the updated openings to local storage
-    setUpdatedOpenings(newOpenings as Opening[]);
+    const data = await res.json();
+    console.log(data);
 
     setPgnName('');
     setPgn('');
@@ -209,7 +197,7 @@ export default function RecordLine() {
           setMoveValidation(null);
         }}
         className="flex-1 flex items-center justify-center p-4 ">
-        
+
         {isBrowser ? (
           <Chessboard
             position={game.fen()}
@@ -238,8 +226,12 @@ export default function RecordLine() {
           </div>
           <div className='flex flex-col gap-4 w-full mt-4'>
             <label className='flex flex-col w-full' htmlFor="pgn" >
-              <span>Name your recording</span>
+              <span>Name your variation.</span>
               <input type="text" id='pgn' value={pgnName} onChange={(e: ChangeEvent<HTMLInputElement>) => setPgnName(e.target.value)} className='w-full p-2 outline-none bg-white rounded-sm mt-2 px-4 placeholder-gray-500 text-sm text-black' placeholder='e.g. Recorded Line 1' />
+            </label>
+            <label className='flex flex-col w-full' htmlFor="pgn" >
+              <span>Describe it.</span>
+              <textarea id='pgn' value={pgnDescription} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setPgnDescription(e.target.value)} className='w-full p-2 outline-none bg-white rounded-sm mt-2 px-4 placeholder-gray-500 text-sm text-black' placeholder='e.g. This is a solid response to e4...' />
             </label>
             <button
               onClick={(savePGN)}
