@@ -8,6 +8,9 @@ import { useSound } from '@/contexts/SoundContext';
 import Button from './Button';
 import Link from 'next/link'
 import { BoardFlip, Opening } from '@/types/types';
+import Image from 'next/image';
+import flipBoard from '@/public/flip.svg';
+
 
 export default function ChessGame({ code }: { code: string }) {
   const [currentOpening, setCurrentOpening] = useState<Opening | null>(null);
@@ -318,12 +321,6 @@ export default function ChessGame({ code }: { code: string }) {
       }}
       className="flex flex-col items-center lg:flex-row bg-gray-900 text-gray-100 min-h-screen relative"
     >
-      <button
-        className="border border-gray-500 px-10 py-2 mt-2 w-fit rounded-md absolute -top-1 left-4"
-        onClick={toggleBoardFlip}
-      >
-        Flip board
-      </button>
       <div className="space-y-2 fixed top-4 right-4 z-50">
         {messages.map((msg, index) => (
           <Message key={index} message={msg.content} type={msg.type} onClose={() => removeMessage(index)} />
@@ -347,7 +344,11 @@ export default function ChessGame({ code }: { code: string }) {
       </div>
 
       <div className="w-full lg:w-96 bg-gray-800 p-6 overflow-y-auto h-full">
-        <h1 className="text-2xl font-bold text-blue-400 mb-6">{currentOpening?.name}</h1>
+        <div className='flex items-center gap-5 justify-between'>
+          <h1 className="text-2xl font-bold text-blue-400 mb-6">{currentOpening?.name}</h1>
+          <Image onClick={toggleBoardFlip} src={flipBoard} alt='flipboardicon' height={40} width={40}  className='cursor-pointer mb-5'/>
+        </div>
+
 
         <div className="mb-6">
           <label className="block text-sm font-medium mb-2">Select Mode:</label>

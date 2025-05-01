@@ -8,6 +8,8 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { useSound } from '@/contexts/SoundContext';
 import { useSearchParams } from 'next/navigation';
 import { BoardFlip } from '@/types/types';
+import Image from 'next/image';
+import flipBoard from '@/public/flip.svg';
 
 
 export default function RecordLine() {
@@ -126,7 +128,7 @@ export default function RecordLine() {
       description: pgnDescription,
       moves: moveHistory,
       boardflip: boardFlip,
-    } 
+    }
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/contribute/${code ? code : 'recorded-pgns'}`, {
       method: 'POST',
       headers: {
@@ -180,12 +182,6 @@ export default function RecordLine() {
     <div
       className="flex flex-col lg:flex-row bg-gray-900 text-gray-100  items-center  min-h-screen relative"
     >
-      <button
-        className="border border-gray-500 px-10 py-2 mt-2 w-fit rounded-md absolute -top-1 left-4"
-        onClick={() => toggleBoardFlip()}
-      >
-        Flip board
-      </button>
       <div className="space-y-2 fixed top-4 right-4 z-50">
         {messages.map((msg, index) => (
           <Message key={index} message={msg.content} type={msg.type} onClose={() => removeMessage(index)} />
@@ -214,7 +210,10 @@ export default function RecordLine() {
       </div>
 
       <div className="w-full lg:w-96 bg-gray-800 p-6 overflow-y-auto h-full max-h- flex justify-start items-start  flex-col my-12 mr-4 ">
-        <h1 className="text-2xl font-bold text-blue-400 mb-6">Record Lines</h1>
+        <div className='flex items-center gap-5 justify-between w-full'>
+          <h1 className="text-2xl font-bold text-blue-400 mb-6">Record Lines</h1>
+          <Image onClick={toggleBoardFlip} src={flipBoard} alt='flipboardicon' height={40} width={40} className='cursor-pointer mb-5' />
+        </div>
         <div className="bg-gray-700 p-4 rounded-md mb-6 w-full">
           <h2 className="font-bold text-blue-400 ">Moves</h2>
 
