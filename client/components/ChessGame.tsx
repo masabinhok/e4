@@ -345,11 +345,11 @@ export default function ChessGame({ code }: { code: string }) {
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-extrabold text-blue-400 tracking-tight">{currentOpening?.name}</h1>
           <button
-            className=" bg-gray-700 hover:bg-blue-500 transition p-2 rounded-full shadow-lg"
+            className=" bg-blue-500 hover:brightness-110 transition p-2 rounded-full shadow-lg"
             onClick={toggleBoardFlip}
             aria-label="Flip Board"
           >
-            <Image src={flipBoard} alt="Flip board" width={28} height={28} />
+            <Image src={flipBoard} alt="Flip board" width={28} height={28} className='invert' />
           </button>
 
         </div>
