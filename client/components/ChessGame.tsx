@@ -315,147 +315,123 @@ export default function ChessGame({ code }: { code: string }) {
   }
 
   return (
-    <div
-      onAuxClick={() => {
-        setMoveValidation(null);
-      }}
-      className="flex flex-col items-center lg:flex-row bg-gray-900 text-gray-100 min-h-screen relative"
-    >
-      <div className="space-y-2 fixed top-4 right-4 z-50">
-        {messages.map((msg, index) => (
-          <Message key={index} message={msg.content} type={msg.type} onClose={() => removeMessage(index)} />
+    <div className=" flex flex-col lg:flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 relative">
+      {/* Toasts */}
+      <div className="fixed top-6 right-6 z-50 space-y-2">
+        {messages.map((msg, idx) => (
+          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(idx)} />
         ))}
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4 ">
-        {isBrowser ? (
+      {/* Chessboard */}
+      <div className="flex-1 flex items-center justify-center p-6 relative">
+        <div className="relative">
           <Chessboard
             position={game.fen()}
             onPieceDrop={onDrop}
-            boardWidth={Math.min(window.innerWidth * 0.7, 600)}
-            customDarkSquareStyle={{ backgroundColor: '#4a5568' }}
-            customLightSquareStyle={{ backgroundColor: '#718096' }}
+            boardWidth={Math.min(window.innerWidth * 0.85, 520)}
+            customDarkSquareStyle={{ backgroundColor: '#334155' }}
+            customLightSquareStyle={{ backgroundColor: '#cbd5e1' }}
             customSquareStyles={getSquareStyles()}
-            boardOrientation={boardFlip === 'black' ? 'black' : 'white'}
+            boardOrientation={boardFlip}
+            animationDuration={200}
           />
-        ) : (
-          <section className="w-2xl flex items-center justify-center font-bold text-7xl text-blue-400">LOADING...</section>
-        )}
+        </div>
       </div>
 
-      <div className="w-full lg:w-96 bg-gray-800 p-6 overflow-y-auto h-full">
-        <div className='flex items-center gap-5 justify-between'>
-          <h1 className="text-2xl font-bold text-blue-400 mb-6">{currentOpening?.name}</h1>
-          <Image onClick={toggleBoardFlip} src={flipBoard} alt='flipboardicon' height={40} width={40}  className='cursor-pointer mb-5'/>
-        </div>
-
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Select Mode:</label>
-          <select
-            className="w-full capitalize bg-gray-700 border border-gray-600 rounded-md p-2"
-            value={mode}
-            onChange={(e) => handleModeChange(e.target.value as 'learn' | 'practice' | 'quiz')}
+      {/* Controls/Info Panel */}
+      <aside className="w-full lg:w-[430px] bg-gray-800/95 p-8 flex flex-col gap-5 shadow-xl rounded-t-3xl lg:rounded-t-none lg:rounded-l-3xl">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-2xl font-extrabold text-blue-400 tracking-tight">{currentOpening?.name}</h1>
+          <button
+            className=" bg-gray-700 hover:bg-blue-500 transition p-2 rounded-full shadow-lg"
+            onClick={toggleBoardFlip}
+            aria-label="Flip Board"
           >
-            {['learn', 'practice', 'quiz'].map((line, index) => (
-              <option className="capitalize" key={index} value={line}>
-                {line}
-              </option>
-            ))}
-          </select>
+            <Image src={flipBoard} alt="Flip board" width={28} height={28} />
+          </button>
+
         </div>
 
+        {/* Mode Tabs */}
+        <div className="flex gap-2 mb-4">
+          {['learn', 'practice', 'quiz'].map(modeOption => (
+            <button
+              key={modeOption}
+              className={`px-4 py-2 rounded-full font-semibold transition ${mode === modeOption ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-blue-500'
+                }`}
+              onClick={() => handleModeChange(modeOption as 'learn' | 'practice' | 'quiz')}
+            >
+              {modeOption.charAt(0).toUpperCase() + modeOption.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Variation Selector */}
         {(mode === 'learn' || mode === 'practice') && (
-          <>
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">Select Variation:</label>
-              <select
-                className="w-full bg-gray-700 border border-gray-600 rounded-md p-2"
-                value={lineName}
-                onChange={(e) => loadLine(e.target.selectedIndex)}
-              >
-                {currentOpening?.variations.map((line, index) => (
-                  <option key={index} value={line.title}>
-                    {line.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </>
+          <div>
+            <label className="block text-sm font-medium mb-1">Variation</label>
+            <select
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 mb-2"
+              value={lineName}
+              onChange={e => loadLine(e.target.selectedIndex)}
+            >
+              {currentOpening?.variations.map((v, i) => (
+                <option key={i} value={v.title}>{v.title}</option>
+              ))}
+            </select>
+          </div>
         )}
 
-        <div className="bg-gray-700 p-4 rounded-md mb-6">
-          <h2 className="font-bold text-blue-400 ">{lineName}</h2>
-
-          <p className="text-xs mb-3">{currentOpening?.variations[currentLineIndex]?.description}</p>
-
-          <div className="font-mono bg-gray-800 p-2 rounded">
-            {currentLine?.slice(0, currentMoveIndex).join(' ')}
-            {currentMoveIndex < (currentLine?.length ?? 0) && (
-              <span className="text-green-400">{mode === 'quiz' ? ' ?' : ' ' + currentLine?.[currentMoveIndex]}</span>
-            )}
+        {/* Line Info & Progress */}
+        <div className="bg-gray-700 p-4 rounded-xl mb-4 shadow-inner">
+          <h2 className="font-bold text-blue-400 mb-1">{lineName}</h2>
+          <p className="text-xs text-gray-300 mb-2">{currentOpening?.variations[currentLineIndex]?.description}</p>
+          <div className="flex items-center gap-2">
+            <div className="font-mono text-base bg-gray-800 p-2 rounded flex-1 whitespace-nowrap overflow-x-auto">
+              {currentLine?.slice(0, currentMoveIndex).join(' ')}
+              {currentMoveIndex < (currentLine?.length ?? 0) && (
+                <span className="text-green-400">{mode === 'quiz' ? ' ?' : ' ' + currentLine?.[currentMoveIndex]}</span>
+              )}
+            </div>
+            <span className="ml-2 text-xs text-gray-400">
+              {currentMoveIndex}/{currentLine?.length ?? 0}
+            </span>
+          </div>
+          {/* Progress bar */}
+          <div className="h-2 bg-gray-600 rounded mt-2">
+            <div
+              className="h-2 bg-blue-500 rounded transition-all"
+              style={{ width: `${((currentMoveIndex / (currentLine?.length || 1)) * 100).toFixed(1)}%` }}
+            />
           </div>
         </div>
 
-        <div className="flex space-x-3 space-y-3 mb-6 flex-wrap">
+        {/* Controls */}
+        <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
           {mode === 'learn' && (
-            <div className="flex space-x-3 w-full">
-              <button
-                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md w-full"
-                onClick={previousMove}
-                disabled={currentMoveIndex === 0}
-              >
-                Previous Move
-              </button>
-              <button
-                className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md w-full"
-                onClick={nextMove}
-                disabled={currentMoveIndex >= (currentLine?.length ?? 0)}
-              >
-                Next Move
-              </button>
-            </div>
+            <>
+              <Button onClick={previousMove} disabled={currentMoveIndex === 0} text="Previous" icon="←" />
+              <Button onClick={nextMove} disabled={currentMoveIndex >= (currentLine?.length ?? 0)} text="Next" icon="→" />
+            </>
           )}
-
           {(mode === 'learn' || mode === 'practice') && (
             <>
-              <div className="flex space-x-3 w-full">
-                <button
-                  className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-md w-full"
-                  onClick={() => setAutoPlay(!autoPlay)}
-                >
-                  {autoPlay ? 'Pause' : 'Autoplay'}
-                </button>
-                <button
-                  className=" bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md w-full"
-                  onClick={() => {
-                    loadLine(currentLineIndex);
-                  }}
-                >
-                  Reset
-                </button>
-              </div>
+              <Button onClick={() => setAutoPlay(!autoPlay)} text={autoPlay ? "Pause" : "Autoplay"} icon={autoPlay ? "⏸" : "▶"} />
+              <Button onClick={() => loadLine(currentLineIndex)} text="Reset" icon="⟳" />
             </>
           )}
-
           {mode === 'quiz' && (
-            <>
-              <button
-                onClick={loadRandomLine}
-                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md w-full"
-              >
-                Random Line
-              </button>
-            </>
+            <Button onClick={loadRandomLine} text="Random Line" icon="🎲" />
           )}
-          <div></div>
-          <div className='flex  w-full items-center justify-center'>
-            <Link href={`/record?code=${code}`} className="inline-block">
-              <Button text="Contribute a Variation" />
-            </Link>
-          </div>
         </div>
-      </div>
+
+        {/* Contribute Button */}
+        <Link href={`/record?code=${code}`} className="mt-4">
+          <Button text="Contribute a Variation" icon="✍️" />
+        </Link>
+      </aside>
     </div>
   );
 }
