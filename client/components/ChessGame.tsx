@@ -43,7 +43,7 @@ export default function ChessGame({ code }: { code: string }) {
   const [currentMoveIndex, setCurrentMoveIndex] = useState<number>(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [autoPlay, setAutoPlay] = useState(false);
-  const [boardFlip, setBoardFlip] = useState<BoardFlip>('white');
+  const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
   const [mode, setMode] = useLocalStorage<'learn' | 'practice' | 'quiz'>('currentMode', 'learn');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);

@@ -5,15 +5,14 @@ import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import Link from 'next/link';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { Opening } from '@/types/types';
 import { useSound } from '@/contexts/SoundContext';
 import { useSearchParams } from 'next/navigation';
-import { Rss } from 'lucide-react';
+import { BoardFlip } from '@/types/types';
+
 
 export default function RecordLine() {
   const searchParams = useSearchParams();
   const code = searchParams.get('code') || 'recorded-pgns';
-
   const [pgnName, setPgnName] = useState<string>('');
   const [pgnDescription, setPgnDescription] = useState<string>('');
   const [pgn, setPgn] = useState<string>('');
@@ -21,11 +20,10 @@ export default function RecordLine() {
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [autoPlay, setAutoPlay] = useState(false);
-  const [boardFlip, setBoardFlip] = useState<string>('white');
+  const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
-  const [openings, setOpenings] = useLocalStorage<Opening[]>('openings', []);
   const { playSound } = useSound();
   const [isContributed, setIsContributed] = useLocalStorage<boolean>('isContributed', false);
 
@@ -94,10 +92,6 @@ export default function RecordLine() {
       if (result.isKingsideCastle() || result.isQueensideCastle()) {
         playSound('castle');
       }
-
-
-
-
       return true;
     } catch {
       playSound('illegal');
@@ -130,10 +124,10 @@ export default function RecordLine() {
     const newVariation = {
       title: pgnName,
       description: pgnDescription,
-      boardFlip: boardFlip,
       moves: moveHistory,
-    }
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/contribute/${code}`, {
+      boardflip: boardFlip,
+    } 
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/contribute/${code ? code : 'recorded-pgns'}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

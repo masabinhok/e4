@@ -5,7 +5,7 @@ import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import Link from 'next/link';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { Opening } from '@/types/types';
+import { BoardFlip, Opening } from '@/types/types';
 
 import { useSound } from '@/contexts/SoundContext';
 
@@ -19,7 +19,7 @@ export default function CustomPGN({ code }: { code?: string }) {
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [autoPlay, setAutoPlay] = useState(false);
-  const [boardFlip, setBoardFlip] = useState<string>('white');
+  const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
