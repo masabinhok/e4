@@ -116,7 +116,13 @@ export default function ChessGame({ code }: { code: string }) {
     }
   }, [currentMoveIndex, currentLine]);
 
-  const handleLineCompletion = () => {
+  const loadRandomLine = () => {
+    if (!currentOpening?.variations?.length) return;
+    const randomLineIndex = Math.floor(Math.random() * currentOpening.variations.length);
+    loadLine(randomLineIndex);
+  };
+
+  const handleLineCompletion = useCallback(() => {
     setMessages([]);
     if (lineCompleted && mode === 'practice') {
       setTimeout(() => {
@@ -152,30 +158,16 @@ export default function ChessGame({ code }: { code: string }) {
         },
       });
     }
-  };
+  }, [lineCompleted, mode, playSound, mistakes, currentOpening?.variations, loadRandomLine, setCurrentLineIndex]);
 
   const handleModeChange = (newMode: 'learn' | 'practice' | 'quiz') => {
     setMode(newMode);
     loadLine(currentLineIndex);
   };
 
-  useEffect(() => {
-    if (mode === 'practice' || mode === 'quiz') {
-      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'black' && currentMoveIndex % 2 === 0) {
-        setTimeout(() => nextMove(), 500);
-      }
-      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'white' && currentMoveIndex % 2 !== 0) {
-        setTimeout(() => nextMove(), 500);
-      }
-      const lineLength = currentLine?.length;
-      if (lineLength && currentMoveIndex + 1 >= lineLength) {
-        setLineCompleted(true);
-        handleLineCompletion();
-      }
-    }
-  }, [currentLineIndex, currentMoveIndex, mode, currentOpening, currentLine]);
 
-  const nextMove = () => {
+
+  const nextMove = useCallback(() => {
     const lineLength = currentLine?.length ?? 0;
     if (currentMoveIndex < lineLength && currentLine) {
       const move = currentLine[currentMoveIndex];
@@ -203,13 +195,25 @@ export default function ChessGame({ code }: { code: string }) {
       return true;
     }
     return false;
-  };
+  }, [currentLine, currentMoveIndex, game, moveHistory, playSound]);
 
-  const loadRandomLine = () => {
-    if (!currentOpening?.variations?.length) return;
-    const randomLineIndex = Math.floor(Math.random() * currentOpening.variations.length);
-    loadLine(randomLineIndex);
-  };
+
+
+  useEffect(() => {
+    if (mode === 'practice' || mode === 'quiz') {
+      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'black' && currentMoveIndex % 2 === 0) {
+        setTimeout(() => nextMove(), 500);
+      }
+      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'white' && currentMoveIndex % 2 !== 0) {
+        setTimeout(() => nextMove(), 500);
+      }
+      const lineLength = currentLine?.length;
+      if (lineLength && currentMoveIndex + 1 >= lineLength) {
+        setLineCompleted(true);
+        handleLineCompletion();
+      }
+    }
+  }, [currentLineIndex, currentMoveIndex, mode, currentOpening, currentLine, nextMove]);
 
   const previousMove = () => {
     if (currentMoveIndex > 0) {
@@ -239,7 +243,7 @@ export default function ChessGame({ code }: { code: string }) {
         setAutoPlay(false);
       }
     }
-  }, [autoPlay, currentMoveIndex, currentLine]);
+  }, [autoPlay, currentMoveIndex, currentLine, nextMove]);
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
     if (autoPlay) return false;
@@ -429,7 +433,7 @@ export default function ChessGame({ code }: { code: string }) {
                 return null;
               })}
               <span className=' text-red-500 rounded-full'>
-!
+                !
               </span>
             </div>
 
