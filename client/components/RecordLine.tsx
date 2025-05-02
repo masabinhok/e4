@@ -221,6 +221,7 @@ export default function RecordLine() {
             boardWidth={Math.min(window.innerWidth * 0.85, 520)}
             customDarkSquareStyle={{ backgroundColor: '#334155' }}
             customLightSquareStyle={{ backgroundColor: '#cbd5e1' }}
+            customSquareStyles={getSquareStyles()}
             boardOrientation={boardFlip}
           />
         ) : (
