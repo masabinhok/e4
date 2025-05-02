@@ -228,7 +228,7 @@ export default function RecordLine() {
               <span>Name your variation.</span>
               <input type="text" id='pgn' value={pgnName} onChange={(e: ChangeEvent<HTMLInputElement>) => setPgnName(e.target.value)} className='w-full p-2 outline-none bg-white rounded-sm mt-2 px-4 placeholder-gray-500 text-sm text-black' placeholder='e.g. Recorded Line 1' />
             </label>
-            <label className='flex flex-col w-full' htmlFor="pgn" >
+            <label className='flex flex-col w-full' htmlFor="description" >
               <span>Describe it.</span>
               <textarea id='pgn' value={pgnDescription} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setPgnDescription(e.target.value)} className='w-full p-2 outline-none bg-white rounded-sm mt-2 px-4 placeholder-gray-500 text-sm text-black' placeholder='e.g. This is a solid response to e4...' />
             </label>

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent, useRef } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
@@ -20,8 +20,10 @@ export default function CustomPGN({ code }: { code?: string }) {
   const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
-  const [openings, setOpenings] = useLocalStorage<Opening[]>('openings', []);
+  const [description, setDescription] = useState<string>('');
   const { playSound } = useSound();
+
+  const movesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsBrowser(true);
@@ -86,7 +88,7 @@ export default function CustomPGN({ code }: { code?: string }) {
     setMessages((prevMessages) => prevMessages.filter((_, i) => i !== index));
   };
 
-   const onDrop = (sourceSquare: string, targetSquare: string) => {
+  const onDrop = (sourceSquare: string, targetSquare: string) => {
     try {
       const move = {
         from: sourceSquare,
@@ -97,20 +99,19 @@ export default function CustomPGN({ code }: { code?: string }) {
       const gameCopy = new Chess(game.fen());
       const result = gameCopy.move(move);
 
-    
+
 
       if (!result) {
         playSound('illegal');
-       
+
         addMessage({
           content: 'Invalid move',
           type: 'error',
         });
         return false;
       }
-    
+
       setGame(gameCopy);
-      setCurrentMoveIndex(currentMoveIndex + 1);
 
       if (gameCopy.inCheck()) {
         playSound('check');
@@ -138,8 +139,18 @@ export default function CustomPGN({ code }: { code?: string }) {
   };
 
 
+  useEffect(() => {
+    if (movesContainerRef.current) {
+      movesContainerRef.current.lastElementChild?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'end'
+      })
+    }
+  }, [currentLine, currentMoveIndex])
 
-  const savePGN = () => {
+
+  const savePGN = async () => {
 
     if (!pgn) {
       addMessage({ content: 'No moves to save', type: 'error' });
@@ -151,19 +162,37 @@ export default function CustomPGN({ code }: { code?: string }) {
       return;
     }
 
+    if (!description  ) {
+      addMessage({ content: 'Please describe your custom loaded pgn', type: 'error' });
+      return;
+    }
+
     const newPGN = {
       title: pgnName,
       moves: currentLine,
       boardflip: boardFlip,
-      index: openings.find(o => o.code === 'custom-pgns')?.variations.length || 0,
-      description: 'Custom PGN saved by user',
+      description: description
     };
 
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/contribute/custom-pgns`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newPGN),
+    });
 
+    if (!res.ok) {
+      throw new Error('Failed to save PGN');
+    }
 
+    const data = await res.json();
+    console.log('PGN saved:', data);
     setPgnName('');
+    setDescription('');
     setPgn('');
     setCurrentLine([]);
+    setCurrentMoveIndex(0);
     addMessage({ content: 'PGN saved successfully', type: 'success' });
   };
 
@@ -178,7 +207,7 @@ export default function CustomPGN({ code }: { code?: string }) {
       <div className="flex-1 flex items-center justify-center p-6 relative">
         {isBrowser ? (
           <Chessboard
-          onPieceDrop={onDrop}
+            onPieceDrop={onDrop}
             position={game.fen()}
             boardWidth={Math.min(window.innerWidth * 0.85, 520)}
             customDarkSquareStyle={{ backgroundColor: '#334155' }}
@@ -215,17 +244,39 @@ export default function CustomPGN({ code }: { code?: string }) {
 
         </div>
 
-        <div className="bg-gray-700 p-4 rounded-xl">
-          <div className="font-mono bg-gray-800 p-2 rounded overflow-x-auto">
-            {currentLine.slice(0, currentMoveIndex).join(' ')}
-            <span className="text-green-400">
-              {currentMoveIndex < currentLine.length && ` ${currentLine[currentMoveIndex]}`}
+        <div className="bg-gray-700 p-4 rounded-xl mb-4 shadow-inner">
+          <div className="flex items-center gap-2">
+            <div ref={movesContainerRef} className="font-mono text-base bg-gray-800 p-2 rounded flex-1 whitespace-nowrap overflow-x-hidden">
+              {currentLine?.map((move, i) => {
+                // Show moves up to and including the current move index
+                if (i < currentMoveIndex - 1) {
+                  return <span key={i}>{move} </span>;
+                }
+                // Highlight the last played move in yellow
+                if (i === currentMoveIndex - 1) {
+                  return (
+                    <span key={i} className="text-yellow-400 font-bold">
+                      {move}{' '}
+                    </span>
+                  );
+                }
+                // Show the next move as green (quiz/learn mode)
+                return null;
+              })}
+              <span className=' text-red-500 rounded-full'>
+                !
+              </span>
+            </div>
+
+            <span className="ml-2 text-xs text-gray-400">
+              {currentMoveIndex}/{currentLine?.length ?? 0}
             </span>
           </div>
-          <div className="h-2 bg-gray-600 mt-2">
+          {/* Progress bar */}
+          <div className="h-2 bg-gray-600 rounded mt-2">
             <div
-              className="h-2 bg-blue-500 transition-all"
-              style={{ width: `${(currentMoveIndex / currentLine.length * 100).toFixed(1)}%` }}
+              className="h-2 bg-blue-500 rounded transition-all"
+              style={{ width: `${((currentMoveIndex / (currentLine?.length || 1)) * 100).toFixed(1)}%` }}
             />
           </div>
         </div>
@@ -239,11 +290,18 @@ export default function CustomPGN({ code }: { code?: string }) {
             className="w-full p-2 bg-white rounded-lg px-4 text-black"
             placeholder="Name your variation"
           />
-          <Button onClick={savePGN} disabled={!pgnName} text='Save PGN' icon="#" />
+          <label htmlFor="description" className="text-sm font-semibold text-gray-200">Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full p-2 bg-white rounded-lg px-4 text-black"
+            placeholder="Describe your variation"
+          />
+          <Button onClick={savePGN}  text='Save PGN' icon="#" />
         </div>
 
         <Link href="/lessons/custom-pgns">
-          <Button text='View Saved PGNs' icon="@"/>
+          <Button text='View Saved PGNs' icon="@" />
         </Link>
       </aside>
     </div>
