@@ -202,7 +202,7 @@ export default function ChessGame({ code }: { code: string }) {
       const newHistory = moveHistory.slice(0, -1);
       const newGame = new Chess();
       newHistory.forEach((move) => newGame.move(move));
-      setGame(getNewGame());
+      setGame(newGame);
       setMoveHistory(newHistory);
       setCurrentMoveIndex(currentMoveIndex - 1);
       setMoveValidation(null);
