@@ -340,18 +340,18 @@ export default function ChessGame({ code }: { code: string }) {
 
       {/* Chessboard */}
       <div className="flex-1 flex items-center justify-center p-6 relative">
-        <div className="relative">
+        {isBrowser ? (
           <Chessboard
-            position={game.fen()}
             onPieceDrop={onDrop}
+            position={game.fen()}
             boardWidth={Math.min(window.innerWidth * 0.85, 520)}
             customDarkSquareStyle={{ backgroundColor: '#334155' }}
             customLightSquareStyle={{ backgroundColor: '#cbd5e1' }}
-            customSquareStyles={getSquareStyles()}
             boardOrientation={boardFlip}
-            animationDuration={200}
           />
-        </div>
+        ) : (
+          <div className="text-7xl text-blue-400">LOADING...</div>
+        )}
       </div>
 
       {/* Controls/Info Panel */}
