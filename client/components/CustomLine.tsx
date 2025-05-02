@@ -9,6 +9,7 @@ import { BoardFlip, Opening } from '@/types/types';
 import flipBoard from '@/public/flip.svg';
 import { useSound } from '@/contexts/SoundContext';
 import Image from 'next/image';
+import Button from './Button';
 
 export default function CustomPGN({ code }: { code?: string }) {
   const [pgnName, setPgnName] = useState<string>('');
@@ -50,7 +51,7 @@ export default function CustomPGN({ code }: { code?: string }) {
   };
 
   useEffect(() => {
-    if(!pgn) return;
+    if (!pgn) return;
     if (currentMoveIndex < currentLine.length) {
       const timer = setTimeout(() => {
         const move = currentLine[currentMoveIndex];
@@ -65,11 +66,11 @@ export default function CustomPGN({ code }: { code?: string }) {
       }, 100);
       return () => clearTimeout(timer);
     }
-  else {
+    else {
       addMessage({ content: 'PGN loaded successfully', type: 'success' });
       setTimeout(() => {
         playSound('achievement');
-      },1)
+      }, 1)
     }
   }, [currentMoveIndex, currentLine]);
 
@@ -83,6 +84,57 @@ export default function CustomPGN({ code }: { code?: string }) {
       messageToRemove.onClose();
     }
     setMessages((prevMessages) => prevMessages.filter((_, i) => i !== index));
+  };
+
+   const onDrop = (sourceSquare: string, targetSquare: string) => {
+    try {
+      const move = {
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: 'q',
+      };
+
+      const gameCopy = new Chess(game.fen());
+      const result = gameCopy.move(move);
+
+    
+
+      if (!result) {
+        playSound('illegal');
+       
+        addMessage({
+          content: 'Invalid move',
+          type: 'error',
+        });
+        return false;
+      }
+    
+      setGame(gameCopy);
+      setCurrentMoveIndex(currentMoveIndex + 1);
+
+      if (gameCopy.inCheck()) {
+        playSound('check');
+      }
+      else if (result.captured) {
+        playSound('capture');
+      }
+      else {
+        playSound('moveSelf');
+      }
+
+      if (result.isKingsideCastle && result.isKingsideCastle()) {
+        playSound('castle');
+      }
+
+      return true;
+    } catch {
+      playSound('illegal');
+      addMessage({
+        content: 'Invalid move',
+        type: 'error',
+      });
+      return false;
+    }
   };
 
 
@@ -126,6 +178,7 @@ export default function CustomPGN({ code }: { code?: string }) {
       <div className="flex-1 flex items-center justify-center p-6 relative">
         {isBrowser ? (
           <Chessboard
+          onPieceDrop={onDrop}
             position={game.fen()}
             boardWidth={Math.min(window.innerWidth * 0.85, 520)}
             customDarkSquareStyle={{ backgroundColor: '#334155' }}
@@ -146,6 +199,7 @@ export default function CustomPGN({ code }: { code?: string }) {
           >
             <Image src={flipBoard} alt="Flip board" width={28} height={28} className="invert" />
           </button>
+
         </div>
 
         <div className="flex flex-col gap-4">
@@ -156,12 +210,9 @@ export default function CustomPGN({ code }: { code?: string }) {
             className="w-full p-2 bg-white rounded-lg px-4 text-black"
             placeholder="Paste PGN here"
           />
-          <button
-            onClick={loadPGN}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full"
-          >
-            Load & Verify PGN
-          </button>
+
+          <Button onClick={loadPGN} disabled={!pgn} text='Load & Verify PGN' icon="!" />
+
         </div>
 
         <div className="bg-gray-700 p-4 rounded-xl">
@@ -188,18 +239,11 @@ export default function CustomPGN({ code }: { code?: string }) {
             className="w-full p-2 bg-white rounded-lg px-4 text-black"
             placeholder="Name your variation"
           />
-          <button
-            onClick={savePGN}
-            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-full"
-          >
-            Save for Practice
-          </button>
+          <Button onClick={savePGN} disabled={!pgnName} text='Save PGN' icon="#" />
         </div>
 
         <Link href="/lessons/custom-pgns">
-          <button className="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full">
-            Practice Saved Lines
-          </button>
+          <Button text='View Saved PGNs' icon="@"/>
         </Link>
       </aside>
     </div>
