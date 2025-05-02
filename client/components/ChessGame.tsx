@@ -72,7 +72,7 @@ export default function ChessGame({ code }: { code: string }) {
       setLineName(currentOpening.variations[currentLineIndex].title);
       setBoardFlip(currentOpening.variations[currentLineIndex].boardflip || 'white');
     }
-  }, [currentOpening, currentLineIndex]);
+  }, [currentOpening, currentLineIndex, setBoardFlip]);
 
   const addMessage = (newMessage: { content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -90,7 +90,7 @@ export default function ChessGame({ code }: { code: string }) {
     setBoardFlip(boardFlip === 'white' ? 'black' : 'white');
   };
 
-  const loadLine = (lineKey: number) => {
+  const loadLine = useCallback((lineKey: number) => {
     if (!currentOpening?.variations[lineKey]) return;
     const moves = currentOpening.variations[lineKey].moves;
     setAutoPlay(false);
@@ -103,7 +103,7 @@ export default function ChessGame({ code }: { code: string }) {
     setMoveValidation(null);
     setMistakes(0);
     setGame(getNewGame());
-  };
+  }, [currentOpening?.variations, getNewGame, setBoardFlip, setCurrentLineIndex]);
 
 
   useEffect(() => {
@@ -116,7 +116,13 @@ export default function ChessGame({ code }: { code: string }) {
     }
   }, [currentMoveIndex, currentLine]);
 
-  const handleLineCompletion = () => {
+  const loadRandomLine = useCallback(() => {
+    if (!currentOpening?.variations?.length) return;
+    const randomLineIndex = Math.floor(Math.random() * currentOpening.variations.length);
+    loadLine(randomLineIndex);
+  }, [loadLine, currentOpening?.variations]);
+
+  const handleLineCompletion = useCallback(() => {
     setMessages([]);
     if (lineCompleted && mode === 'practice') {
       setTimeout(() => {
@@ -143,7 +149,7 @@ export default function ChessGame({ code }: { code: string }) {
         type: 'success',
         onClose: () => {
           setLineCompleted(false);
-          setCurrentLineIndex(prev => {
+          setCurrentLineIndex(() => {
             const randomLineIndex = Math.floor(Math.random() * (currentOpening?.variations.length ?? 1));
             return randomLineIndex;
           });
@@ -152,30 +158,16 @@ export default function ChessGame({ code }: { code: string }) {
         },
       });
     }
-  };
+  }, [lineCompleted, mode, playSound, mistakes, currentOpening?.variations, loadRandomLine, setCurrentLineIndex]);
 
   const handleModeChange = (newMode: 'learn' | 'practice' | 'quiz') => {
     setMode(newMode);
     loadLine(currentLineIndex);
   };
 
-  useEffect(() => {
-    if (mode === 'practice' || mode === 'quiz') {
-      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'black' && currentMoveIndex % 2 === 0) {
-        setTimeout(() => nextMove(), 500);
-      }
-      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'white' && currentMoveIndex % 2 !== 0) {
-        setTimeout(() => nextMove(), 500);
-      }
-      const lineLength = currentLine?.length;
-      if (lineLength && currentMoveIndex + 1 >= lineLength) {
-        setLineCompleted(true);
-        handleLineCompletion();
-      }
-    }
-  }, [currentLineIndex, currentMoveIndex, mode, currentOpening, currentLine]);
 
-  const nextMove = () => {
+
+  const nextMove = useCallback(() => {
     const lineLength = currentLine?.length ?? 0;
     if (currentMoveIndex < lineLength && currentLine) {
       const move = currentLine[currentMoveIndex];
@@ -203,13 +195,25 @@ export default function ChessGame({ code }: { code: string }) {
       return true;
     }
     return false;
-  };
+  }, [currentLine, currentMoveIndex, game, moveHistory, playSound]);
 
-  const loadRandomLine = () => {
-    if (!currentOpening?.variations?.length) return;
-    const randomLineIndex = Math.floor(Math.random() * currentOpening.variations.length);
-    loadLine(randomLineIndex);
-  };
+
+
+  useEffect(() => {
+    if (mode === 'practice' || mode === 'quiz') {
+      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'black' && currentMoveIndex % 2 === 0) {
+        setTimeout(() => nextMove(), 500);
+      }
+      if (currentOpening?.variations[currentLineIndex]?.boardflip === 'white' && currentMoveIndex % 2 !== 0) {
+        setTimeout(() => nextMove(), 500);
+      }
+      const lineLength = currentLine?.length;
+      if (lineLength && currentMoveIndex + 1 >= lineLength) {
+        setLineCompleted(true);
+        handleLineCompletion();
+      }
+    }
+  }, [currentLineIndex, currentMoveIndex, mode, currentOpening, currentLine, nextMove, handleLineCompletion]);
 
   const previousMove = () => {
     if (currentMoveIndex > 0) {
@@ -239,7 +243,7 @@ export default function ChessGame({ code }: { code: string }) {
         setAutoPlay(false);
       }
     }
-  }, [autoPlay, currentMoveIndex, currentLine]);
+  }, [autoPlay, currentMoveIndex, currentLine, nextMove]);
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
     if (autoPlay) return false;
@@ -340,18 +344,19 @@ export default function ChessGame({ code }: { code: string }) {
 
       {/* Chessboard */}
       <div className="flex-1 flex items-center justify-center p-6 relative">
-        <div className="relative">
+        {isBrowser ? (
           <Chessboard
-            position={game.fen()}
             onPieceDrop={onDrop}
+            position={game.fen()}
             boardWidth={Math.min(window.innerWidth * 0.85, 520)}
             customDarkSquareStyle={{ backgroundColor: '#334155' }}
             customLightSquareStyle={{ backgroundColor: '#cbd5e1' }}
             customSquareStyles={getSquareStyles()}
             boardOrientation={boardFlip}
-            animationDuration={200}
           />
-        </div>
+        ) : (
+          <div className="text-7xl text-blue-400">LOADING...</div>
+        )}
       </div>
 
       {/* Controls/Info Panel */}
@@ -429,7 +434,7 @@ export default function ChessGame({ code }: { code: string }) {
                 return null;
               })}
               <span className=' text-red-500 rounded-full'>
-!
+                !
               </span>
             </div>
 

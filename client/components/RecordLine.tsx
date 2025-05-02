@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, ChangeEvent, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
@@ -18,11 +18,9 @@ export default function RecordLine() {
   const code = searchParams.get('code') || 'recorded-pgns';
   const [pgnName, setPgnName] = useState<string>('');
   const [pgnDescription, setPgnDescription] = useState<string>('');
-  const [pgn, setPgn] = useState<string>('');
   const [game, setGame] = useState(new Chess());
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
-  const [autoPlay, setAutoPlay] = useState(false);
   const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
@@ -59,7 +57,6 @@ export default function RecordLine() {
 
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
-    if (autoPlay) return false;
     try {
       const move = {
         from: sourceSquare,
@@ -174,7 +171,7 @@ export default function RecordLine() {
     console.log(data);
 
     setPgnName('');
-    setPgn('');
+    setPgnDescription('');
     setIsContributed(true);
     addMessage({
       content: 'PGN saved successfully',
@@ -224,6 +221,7 @@ export default function RecordLine() {
             boardWidth={Math.min(window.innerWidth * 0.85, 520)}
             customDarkSquareStyle={{ backgroundColor: '#334155' }}
             customLightSquareStyle={{ backgroundColor: '#cbd5e1' }}
+            customSquareStyles={getSquareStyles()}
             boardOrientation={boardFlip}
           />
         ) : (

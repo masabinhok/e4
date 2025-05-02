@@ -1,17 +1,17 @@
 'use client';
-import { useState, useEffect, ChangeEvent, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import Link from 'next/link';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { BoardFlip, Opening } from '@/types/types';
+import { BoardFlip } from '@/types/types';
 import flipBoard from '@/public/flip.svg';
 import { useSound } from '@/contexts/SoundContext';
 import Image from 'next/image';
 import Button from './Button';
 
-export default function CustomPGN({ code }: { code?: string }) {
+export default function CustomPGN() {
   const [pgnName, setPgnName] = useState<string>('');
   const [pgn, setPgn] = useState<string>('');
   const [game, setGame] = useState(new Chess());
@@ -42,44 +42,52 @@ export default function CustomPGN({ code }: { code?: string }) {
         .map(m => m.trim())
         .filter(Boolean);
 
-      const gameCopy = new Chess();
+      // Validate moves first
+      const validationGame = new Chess();
       moves.forEach(move => {
-        if (!gameCopy.move(move)) throw new Error('Invalid move');
+        if (!validationGame.move(move)) throw new Error(`Invalid move: ${move}`);
       });
 
       setMessages([]);
       setGame(new Chess());
       setCurrentLine(moves);
       setCurrentMoveIndex(0);
+
+      // Use a local game object for playback
+      const gameCopy = new Chess();
+
+      const playNextMove = (index: number) => {
+        if (index >= moves.length) {
+          addMessage({ content: 'PGN loaded successfully', type: 'success' });
+          setTimeout(() => playSound('achievement'), 1);
+          return;
+        }
+
+        setTimeout(() => {
+          const move = moves[index];
+          const result = gameCopy.move(move);
+
+          // Update React state with the latest position
+          setGame(new Chess(gameCopy.fen()));
+          setCurrentMoveIndex(index + 1);
+
+          if (gameCopy.inCheck()) playSound('check');
+          else if (result.captured) playSound('capture');
+          else playSound('moveSelf');
+
+          playNextMove(index + 1);
+        }, 100);
+      };
+
+      playNextMove(0);
+
     } catch (error) {
       playSound('illegal');
-      addMessage({ content: 'Invalid PGN format', type: 'error' });
+      addMessage({ content: `Invalid PGN format: ${error}`, type: 'error' });
     }
   };
 
-  useEffect(() => {
-    if (!pgn) return;
-    if (currentMoveIndex < currentLine.length) {
-      const timer = setTimeout(() => {
-        const move = currentLine[currentMoveIndex];
-        const gameCopy = new Chess(game.fen());
-        const result = gameCopy.move(move);
-        setGame(gameCopy);
-        setCurrentMoveIndex(prev => prev + 1);
 
-        if (gameCopy.inCheck()) playSound('check');
-        else if (result.captured) playSound('capture');
-        else playSound('moveSelf');
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-    else {
-      addMessage({ content: 'PGN loaded successfully', type: 'success' });
-      setTimeout(() => {
-        playSound('achievement');
-      }, 1)
-    }
-  }, [currentMoveIndex, currentLine]);
 
   const addMessage = (newMessage: { content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);

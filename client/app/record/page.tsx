@@ -1,10 +1,12 @@
 import RecordLine from '@/components/RecordLine'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 const RecordLinePage = () => {
   return (
     <div>
-      <RecordLine />
+      <Suspense fallback={<div>Loading...</div>}>
+        <RecordLine />
+      </Suspense>
     </div>
   )
 }
