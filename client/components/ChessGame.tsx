@@ -72,7 +72,7 @@ export default function ChessGame({ code }: { code: string }) {
       setLineName(currentOpening.variations[currentLineIndex].title);
       setBoardFlip(currentOpening.variations[currentLineIndex].boardflip || 'white');
     }
-  }, [currentOpening, currentLineIndex]);
+  }, [currentOpening, currentLineIndex, setBoardFlip]);
 
   const addMessage = (newMessage: { content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
