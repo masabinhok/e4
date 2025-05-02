@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, ChangeEvent, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
