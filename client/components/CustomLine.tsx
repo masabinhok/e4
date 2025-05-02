@@ -147,7 +147,7 @@ export default function CustomPGN({ code }: { code?: string }) {
         inline: 'end'
       })
     }
-  }, [currentLine, currentMoveIndex])
+  }, [currentMoveIndex])
 
 
   const savePGN = async () => {
@@ -294,7 +294,7 @@ export default function CustomPGN({ code }: { code?: string }) {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-2 bg-white rounded-lg px-4 text-black"
+            className="w-full p-2 bg-white resize-none rounded-lg px-4 text-black"
             placeholder="Describe your variation"
           />
           <Button onClick={savePGN}  text='Save PGN' icon="#" />
