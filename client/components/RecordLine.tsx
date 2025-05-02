@@ -235,10 +235,11 @@ export default function RecordLine() {
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-extrabold text-blue-400">Record Lines</h1>
           <button
-            className="bg-blue-500 p-2 rounded-full shadow-lg"
+            className=" bg-blue-500 hover:brightness-110 transition p-2 rounded-full shadow-lg cursor-pointer"
             onClick={toggleBoardFlip}
+            aria-label="Flip Board"
           >
-            <Image src={flipBoard} alt="Flip board" width={28} height={28} className="invert" />
+            <Image src={flipBoard} alt="Flip board" width={28} height={28} className='invert' />
           </button>
         </div>
 

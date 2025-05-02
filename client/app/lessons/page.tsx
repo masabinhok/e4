@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 import Link from 'next/link'
 import useLocalStorage from '@/hooks/useLocalStorage'
 import { Opening } from '@/types/types'
+import Button from '@/components/Button'
 
 const LessonsPage = () => {
   const [openings, setOpenings] = useLocalStorage<Opening[]>('openings', []);
@@ -34,9 +35,7 @@ const LessonsPage = () => {
             <p className="text-gray-600 mb-6 line-clamp-2">{lesson.description}</p>
 
             <Link href={`/lessons/${lesson.code}`} className="inline-block">
-              <button className="p-3 px-6 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 rounded-lg font-semibold hover:from-blue-200 hover:to-blue-300 transition-all">
-                Practice Lines
-              </button>
+              <Button text='Practice Lines' />
             </Link>
           </div>
         ))}
@@ -49,9 +48,7 @@ const LessonsPage = () => {
           </p>
 
           <Link href="/lessons/add" className="inline-block">
-            <button className="p-3 px-6 bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-lg font-semibold hover:from-blue-500 hover:to-blue-600 transition-all">
-              ✨ Contribute
-            </button>
+            <Button text="Contribute" icon="✨" />
           </Link>
         </div>
 

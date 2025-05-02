@@ -23,6 +23,11 @@ export default function CustomPGN({ code }: { code?: string }) {
   const [description, setDescription] = useState<string>('');
   const { playSound } = useSound();
 
+
+  const toggleBoardFlip = () => {
+    setBoardFlip(boardFlip === 'white' ? 'black' : 'white');
+  };
+
   const movesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -162,7 +167,7 @@ export default function CustomPGN({ code }: { code?: string }) {
       return;
     }
 
-    if (!description  ) {
+    if (!description) {
       addMessage({ content: 'Please describe your custom loaded pgn', type: 'error' });
       return;
     }
@@ -223,10 +228,11 @@ export default function CustomPGN({ code }: { code?: string }) {
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-extrabold text-blue-400">Custom Lines</h1>
           <button
-            className="bg-blue-500 p-2 rounded-full shadow-lg"
-            onClick={() => setBoardFlip(prev => prev === 'white' ? 'black' : 'white')}
+            className=" bg-blue-500 hover:brightness-110 transition p-2 rounded-full shadow-lg cursor-pointer"
+            onClick={toggleBoardFlip}
+            aria-label="Flip Board"
           >
-            <Image src={flipBoard} alt="Flip board" width={28} height={28} className="invert" />
+            <Image src={flipBoard} alt="Flip board" width={28} height={28} className='invert' />
           </button>
 
         </div>
@@ -297,7 +303,7 @@ export default function CustomPGN({ code }: { code?: string }) {
             className="w-full p-2 bg-white resize-none rounded-lg px-4 text-black"
             placeholder="Describe your variation"
           />
-          <Button onClick={savePGN}  text='Save PGN' icon="#" />
+          <Button onClick={savePGN} text='Save PGN' icon="#" />
         </div>
 
         <Link href="/lessons/custom-pgns">
