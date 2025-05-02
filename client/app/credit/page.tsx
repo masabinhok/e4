@@ -43,12 +43,12 @@ const CreditPage = () => {
 
           <div className='space-y-4'>
             <h1 className='text-2xl md:text-3xl font-bold text-gray-200'>
-              Hi, I'm Sabin Shrestha
+              Hi, I&apos;m Sabin Shrestha
             </h1>
 
             <div className='space-y-3 text-gray-400'>
               <p>
-                I'm a chess enthusiast rated around 1200. Like many players, I wanted to improve my opening repertoire, but found video tutorials boring and existing practice tools either lacking or too expensive.
+                I&apos;m a chess enthusiast rated around 1200. Like many players, I wanted to improve my opening repertoire, but found video tutorials boring and existing practice tools either lacking or too expensive.
               </p>
 
               <p>
@@ -56,7 +56,7 @@ const CreditPage = () => {
               </p>
 
               <p>
-                This project is completely free and open for everyone to use. While it's still a work in progress, I believe it can help fellow chess players improve their game without breaking the bank.
+                This project is completely free and open for everyone to use. While it&apos;s still a work in progress, I believe it can help fellow chess players improve their game without breaking the bank.
               </p>
 
               <p className='font-medium text-blue-400'>

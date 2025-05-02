@@ -90,7 +90,7 @@ export default function ChessGame({ code }: { code: string }) {
     setBoardFlip(boardFlip === 'white' ? 'black' : 'white');
   };
 
-  const loadLine = (lineKey: number) => {
+  const loadLine = useCallback((lineKey: number) => {
     if (!currentOpening?.variations[lineKey]) return;
     const moves = currentOpening.variations[lineKey].moves;
     setAutoPlay(false);
@@ -103,7 +103,7 @@ export default function ChessGame({ code }: { code: string }) {
     setMoveValidation(null);
     setMistakes(0);
     setGame(getNewGame());
-  };
+  }, [currentOpening?.variations, getNewGame, setBoardFlip, setCurrentLineIndex]);
 
 
   useEffect(() => {
@@ -116,11 +116,11 @@ export default function ChessGame({ code }: { code: string }) {
     }
   }, [currentMoveIndex, currentLine]);
 
-  const loadRandomLine = () => {
+  const loadRandomLine = useCallback(() => {
     if (!currentOpening?.variations?.length) return;
     const randomLineIndex = Math.floor(Math.random() * currentOpening.variations.length);
     loadLine(randomLineIndex);
-  };
+  }, [loadLine, currentOpening?.variations]);
 
   const handleLineCompletion = useCallback(() => {
     setMessages([]);
@@ -213,7 +213,7 @@ export default function ChessGame({ code }: { code: string }) {
         handleLineCompletion();
       }
     }
-  }, [currentLineIndex, currentMoveIndex, mode, currentOpening, currentLine, nextMove]);
+  }, [currentLineIndex, currentMoveIndex, mode, currentOpening, currentLine, nextMove, handleLineCompletion]);
 
   const previousMove = () => {
     if (currentMoveIndex > 0) {

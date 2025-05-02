@@ -5,7 +5,7 @@ import { Chessboard } from 'react-chessboard';
 import Message from './Message';
 import Link from 'next/link';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { BoardFlip, Opening } from '@/types/types';
+import { BoardFlip } from '@/types/types';
 import flipBoard from '@/public/flip.svg';
 import { useSound } from '@/contexts/SoundContext';
 import Image from 'next/image';
@@ -54,7 +54,7 @@ export default function CustomPGN() {
       setCurrentMoveIndex(0);
 
       // Use a local game object for playback
-      let gameCopy = new Chess();
+      const gameCopy = new Chess();
 
       const playNextMove = (index: number) => {
         if (index >= moves.length) {
