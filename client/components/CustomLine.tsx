@@ -11,7 +11,7 @@ import { useSound } from '@/contexts/SoundContext';
 import Image from 'next/image';
 import Button from './Button';
 
-export default function CustomPGN({ code }: { code?: string }) {
+export default function CustomPGN() {
   const [pgnName, setPgnName] = useState<string>('');
   const [pgn, setPgn] = useState<string>('');
   const [game, setGame] = useState(new Chess());
@@ -53,7 +53,8 @@ export default function CustomPGN({ code }: { code?: string }) {
       setCurrentMoveIndex(0);
     } catch (error) {
       playSound('illegal');
-      addMessage({ content: 'Invalid PGN format', type: 'error' });
+      addMessage({ content: `Invalid PGN format, ${error}`, type: 'error' });
+      
     }
   };
 
