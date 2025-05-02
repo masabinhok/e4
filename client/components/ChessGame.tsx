@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
@@ -14,6 +14,10 @@ import flipBoard from '@/public/flip.svg';
 
 export default function ChessGame({ code }: { code: string }) {
   const [currentOpening, setCurrentOpening] = useState<Opening | null>(null);
+
+  const movesContainerRef = useRef<HTMLDivElement>(null);
+
+
 
   useEffect(() => {
     const fetchOpening = async (code: string) => {
@@ -100,6 +104,17 @@ export default function ChessGame({ code }: { code: string }) {
     setMistakes(0);
     setGame(getNewGame());
   };
+
+
+  useEffect(() => {
+    if (movesContainerRef.current) {
+      movesContainerRef.current.lastElementChild?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'end',
+      })
+    }
+  }, [currentMoveIndex, currentLine]);
 
   const handleLineCompletion = () => {
     setMessages([]);
@@ -389,12 +404,35 @@ export default function ChessGame({ code }: { code: string }) {
           <h2 className="font-bold text-blue-400 mb-1">{lineName}</h2>
           <p className="text-xs text-gray-300 mb-2">{currentOpening?.variations[currentLineIndex]?.description}</p>
           <div className="flex items-center gap-2">
-            <div className="font-mono text-base bg-gray-800 p-2 rounded flex-1 whitespace-nowrap overflow-x-auto">
-              {currentLine?.slice(0, currentMoveIndex).join(' ')}
-              {currentMoveIndex < (currentLine?.length ?? 0) && (
-                <span className="text-green-400">{mode === 'quiz' ? ' ?' : ' ' + currentLine?.[currentMoveIndex]}</span>
-              )}
+            <div ref={movesContainerRef} className="font-mono text-base bg-gray-800 p-2 rounded flex-1 whitespace-nowrap overflow-x-hidden">
+              {currentLine?.map((move, i) => {
+                // Show moves up to and including the current move index
+                if (i < currentMoveIndex - 1) {
+                  return <span key={i}>{move} </span>;
+                }
+                // Highlight the last played move in yellow
+                if (i === currentMoveIndex - 1) {
+                  return (
+                    <span key={i} className="text-yellow-400 font-bold">
+                      {move}{' '}
+                    </span>
+                  );
+                }
+                // Show the next move as green (quiz/learn mode)
+                if (i === currentMoveIndex) {
+                  return (
+                    <span key={i} className="text-green-400">
+                      {mode === 'quiz' ? ' ?' : ' ' + move}
+                    </span>
+                  );
+                }
+                return null;
+              })}
+              <span className=' text-red-500 rounded-full'>
+!
+              </span>
             </div>
+
             <span className="ml-2 text-xs text-gray-400">
               {currentMoveIndex}/{currentLine?.length ?? 0}
             </span>
