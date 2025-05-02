@@ -18,7 +18,6 @@ export default function RecordLine() {
   const code = searchParams.get('code') || 'recorded-pgns';
   const [pgnName, setPgnName] = useState<string>('');
   const [pgnDescription, setPgnDescription] = useState<string>('');
-  const [pgn, setPgn] = useState<string>('');
   const [game, setGame] = useState(new Chess());
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
@@ -174,7 +173,7 @@ export default function RecordLine() {
     console.log(data);
 
     setPgnName('');
-    setPgn('');
+    setPgnDescription('');
     setIsContributed(true);
     addMessage({
       content: 'PGN saved successfully',
