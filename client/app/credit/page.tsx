@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import Image from 'next/image';
-import sabinOg from "../../public/sabin-og.svg";
+import sabinOg from "../../public/sabin-og.jpg";
 import Link from 'next/link';
 
 const CreditPage = () => {
@@ -12,17 +12,17 @@ const CreditPage = () => {
           <div className='flex-shrink-0 flex flex-col items-center justify-center gap-3'>
             <div className='rounded-full border-4 border-blue-100 p-1'>
               <Image
+
                 src={sabinOg}
                 alt='Sabin Shrestha'
                 width={160}
                 height={160}
-                className='rounded-full object-cover'
+                className='rounded-full object-cover w-auto h-auto'
                 priority
               />
 
 
             </div>
-            <span className='text-sm'>STATE OF THE ART "GHIBLI"</span>
             <div className='flex flex-col gap-1 items-center justify-center text-yellow-200'>
               <Link href="https://www.chess.com/member/sabinshrestha9">
                 <span className='text-xs'>sabinshrestha9 -chess.com</span>
