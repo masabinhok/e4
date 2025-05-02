@@ -143,7 +143,7 @@ export default function ChessGame({ code }: { code: string }) {
         type: 'success',
         onClose: () => {
           setLineCompleted(false);
-          setCurrentLineIndex(prev => {
+          setCurrentLineIndex(() => {
             const randomLineIndex = Math.floor(Math.random() * (currentOpening?.variations.length ?? 1));
             return randomLineIndex;
           });
