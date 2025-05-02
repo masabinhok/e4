@@ -21,7 +21,6 @@ export default function RecordLine() {
   const [game, setGame] = useState(new Chess());
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
-  const [autoPlay, setAutoPlay] = useState(false);
   const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
@@ -58,7 +57,6 @@ export default function RecordLine() {
 
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
-    if (autoPlay) return false;
     try {
       const move = {
         from: sourceSquare,
