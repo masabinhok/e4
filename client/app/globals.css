@@ -78,9 +78,6 @@ body {
   border-radius: var(--radius-md);
 }
 
-button {
-  cursor: pointer;
-}
 
 
 button:hover {

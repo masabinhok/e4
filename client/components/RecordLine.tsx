@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent, useRef } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import Message from './Message';
@@ -10,6 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { BoardFlip } from '@/types/types';
 import Image from 'next/image';
 import flipBoard from '@/public/flip.svg';
+import Button from './Button';
 
 
 export default function RecordLine() {
@@ -28,6 +29,10 @@ export default function RecordLine() {
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const { playSound } = useSound();
   const [isContributed, setIsContributed] = useLocalStorage<boolean>('isContributed', false);
+  const movesContainerRef = useRef<HTMLDivElement>(null);
+
+
+
 
 
   const toggleBoardFlip = () => {
@@ -106,6 +111,16 @@ export default function RecordLine() {
     }
   };
 
+  useEffect(() => {
+    if (movesContainerRef.current) {
+      movesContainerRef.current.lastElementChild?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'end',
+      })
+    }
+  }, [currentMoveIndex])
+
 
   const resetGame = () => {
     setGame(new Chess());
@@ -115,13 +130,28 @@ export default function RecordLine() {
   }
 
   const savePGN = async () => {
-    if (!pgnName || !moveHistory) {
+    if (!moveHistory.length) {
       addMessage({
-        content: 'Please enter a name and play some moves.',
+        content: 'Please play some moves to record.',
         type: 'error',
       });
       return;
     }
+    if (!pgnName) {
+      addMessage({
+        content: 'Please enter a name.',
+        type: 'error',
+      });
+      return;
+    }
+    if (!pgnDescription) {
+      addMessage({
+        content: 'Please describe your recording.',
+        type: 'error',
+      });
+      return;
+    }
+
 
     const newVariation = {
       title: pgnName,
@@ -179,124 +209,118 @@ export default function RecordLine() {
 
 
   return (
-    <div
-      className="flex flex-col lg:flex-row bg-gray-900 text-gray-100  items-center  min-h-screen relative"
-    >
-      <div className="space-y-2 fixed top-4 right-4 z-50">
-        {messages.map((msg, index) => (
-          <Message key={index} message={msg.content} type={msg.type} onClose={() => removeMessage(index)} />
+    <div className="flex flex-col lg:flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 relative">
+      <div className="fixed top-6 right-6 z-50 space-y-2">
+        {messages.map((msg, idx) => (
+          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(idx)} />
         ))}
       </div>
 
-      <div
-        onAuxClick={() => {
-          setMoveValidation(null);
-        }}
-        className="flex-1 flex items-center justify-center p-4 ">
-
+      <div className="flex-1 flex items-center justify-center p-6 relative">
         {isBrowser ? (
           <Chessboard
-            position={game.fen()}
             onPieceDrop={onDrop}
-            boardWidth={Math.min(window.innerWidth * 0.7, 600)}
-            customDarkSquareStyle={{ backgroundColor: '#4a5568' }}
-            customLightSquareStyle={{ backgroundColor: '#718096' }}
-            customSquareStyles={getSquareStyles()}
-            boardOrientation={boardFlip === 'black' ? 'black' : 'white'}
+            position={game.fen()}
+            boardWidth={Math.min(window.innerWidth * 0.85, 520)}
+            customDarkSquareStyle={{ backgroundColor: '#334155' }}
+            customLightSquareStyle={{ backgroundColor: '#cbd5e1' }}
+            boardOrientation={boardFlip}
           />
         ) : (
-          <section className="w-2xl flex items-center justify-center font-bold text-7xl text-blue-400">LOADING...</section>
+          <div className="text-7xl text-blue-400">LOADING...</div>
         )}
       </div>
 
-      <div className="w-full lg:w-96 bg-gray-800 p-6 overflow-y-auto h-full max-h- flex justify-start items-start  flex-col my-12 mr-4 ">
-        <div className='flex items-center gap-5 justify-between w-full'>
-          <h1 className="text-2xl font-bold text-blue-400 mb-6">Record Lines</h1>
-          <Image onClick={toggleBoardFlip} src={flipBoard} alt='flipboardicon' height={40} width={40} className='cursor-pointer mb-5' />
+      <aside className="w-full lg:w-[430px] bg-gray-800/95 p-8 flex flex-col gap-5 shadow-xl rounded-t-3xl lg:rounded-l-3xl">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-2xl font-extrabold text-blue-400">Record Lines</h1>
+          <button
+            className=" bg-blue-500 hover:brightness-110 transition p-2 rounded-full shadow-lg cursor-pointer"
+            onClick={toggleBoardFlip}
+            aria-label="Flip Board"
+          >
+            <Image src={flipBoard} alt="Flip board" width={28} height={28} className='invert' />
+          </button>
         </div>
-        <div className="bg-gray-700 p-4 rounded-md mb-6 w-full">
-          <h2 className="font-bold text-blue-400 ">Moves</h2>
 
-          <div className="font-mono bg-gray-800 p-2 rounded min-h-[40px] mt-1">
-            {moveHistory!.slice(0, currentMoveIndex).join(' ')}
-            {currentMoveIndex < moveHistory!.length && (
-              <span className="text-green-400">{moveHistory![currentMoveIndex]}</span>
-            )}
+
+        <div className="bg-gray-700 p-4 rounded-xl  shadow-inner">
+          <div className="flex items-center gap-2">
+            <div ref={movesContainerRef} className="font-mono text-base bg-gray-800 p-2 rounded flex-1 whitespace-nowrap overflow-x-hidden">
+              {moveHistory?.map((move, i) => {
+                // Show moves up to and including the current move index
+                if (i < currentMoveIndex - 1) {
+                  return <span key={i}>{move} </span>;
+                }
+                // Highlight the last played move in yellow
+                if (i === currentMoveIndex - 1) {
+                  return (
+                    <span key={i} className="text-yellow-400 font-bold">
+                      {move}{' '}
+                    </span>
+                  );
+                }
+                // Show the next move as green (quiz/learn mode)
+                return null;
+              })}
+              <span className=' text-red-500 rounded-full'>
+                !
+              </span>
+            </div>
+
+            <span className="ml-2 text-xs text-gray-400">
+              {currentMoveIndex}/{moveHistory?.length ?? 0}
+            </span>
           </div>
-          <div className='flex flex-col gap-4 w-full mt-4'>
-            <label className='flex flex-col w-full' htmlFor="pgn" >
-              <span>Name your variation.</span>
-              <input type="text" id='pgn' value={pgnName} onChange={(e: ChangeEvent<HTMLInputElement>) => setPgnName(e.target.value)} className='w-full p-2 outline-none bg-white rounded-sm mt-2 px-4 placeholder-gray-500 text-sm text-black' placeholder='e.g. Recorded Line 1' />
-            </label>
-            <label className='flex flex-col w-full' htmlFor="pgn" >
-              <span>Describe it.</span>
-              <textarea id='pgn' value={pgnDescription} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setPgnDescription(e.target.value)} className='w-full p-2 outline-none bg-white rounded-sm mt-2 px-4 placeholder-gray-500 text-sm text-black' placeholder='e.g. This is a solid response to e4...' />
-            </label>
-            <button
-              onClick={(savePGN)}
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md w-full"
-            >
-              Save PGN
-            </button>
+          {/* Progress bar */}
+          <div className="h-2 bg-gray-600 rounded mt-2">
+            <div
+              className="h-2 bg-blue-500 rounded transition-all"
+              style={{ width: `${((currentMoveIndex / (moveHistory?.length || 1)) * 100).toFixed(1)}%` }}
+            />
           </div>
         </div>
-        <div className="flex space-x-3 space-y-3 mb-6 flex-wrap w-full">
+
+        <div className="flex space-x-3 space-y-3  flex-wrap w-full">
 
           <div className="flex space-x-3 w-full -mr-3">
-            <button
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md w-full"
-              onClick={previousMove}
-              disabled={currentMoveIndex === 0}
-            >
-              Previous Move
-            </button>
-            <button
-              className=" bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md w-full"
-              onClick={() => {
-                resetGame();
-              }}
-            >
-              Reset
-            </button>
+            <Button onClick={previousMove} disabled={currentMoveIndex === 0} text="Previous" icon="←" />
+            <Button onClick={resetGame} text="Reset" icon="⟳" />
           </div>
         </div>
-        <Link href={`/lessons/recorded-pgns`} className='flex flex-col gap-4 w-full'>
-          <button
-            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md w-full"
-          >
-            Play Recorded Lines
-          </button>
-        </Link>
-        {
-          isContributed && (<Link href={`/lessons/${code}`} className='flex flex-col gap-4 mt-2  w-full'>
-            <button
-              onClick={() => {
+
+        <div className="flex flex-col gap-4">
+          <label htmlFor="name" className="text-sm font-semibold text-gray-200">Opening Name</label>
+          <input
+            type="text"
+            value={pgnName}
+            onChange={(e) => setPgnName(e.target.value)}
+            className="w-full p-2 bg-white rounded-lg px-4 text-black"
+            placeholder="Name your variation"
+          />
+          <label htmlFor="description" className="text-sm font-semibold text-gray-200">Description</label>
+          <textarea
+            value={pgnDescription}
+            onChange={(e) => setPgnDescription(e.target.value)}
+            className="w-full p-2 bg-white resize-none rounded-lg px-4 text-black"
+            placeholder="Describe your variation"
+          />
+          <Button onClick={savePGN} text='Save PGN' icon="#" />
+        </div>
+        <div className='flex flex-col w-full gap-2'>
+          <Link href={`/lessons/recorded-pgns`} className='flex flex-col gap-4 w-full'>
+            <Button text="Play Recorded Lines" icon="→" />
+          </Link>
+          {
+            isContributed && (<Link href={`/lessons/${code}`} >
+              <Button text="Visit Latest Contribution" icon="→" onClick={() => {
                 setIsContributed(false);
-              }}
-              className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-md w-full"
-            >
-              Visit Latest Contribution
-            </button>
-          </Link>)
-        }
+              }} />
+            </Link>)
+          }
+        </div>
 
-        {/* <button
-          onClick={() => {
-            const recordedPgnsFromStorage = updatedOpenings.find((opening) => {
-              return opening.code === 'recorded-pgns'
-            })
-            recordedPgnsFromStorage?.variations.forEach((variation) => {
-              console.log(variation.line)
-            })
-
-          }}
-          className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 mt-3  rounded-md w-full"
-        >
-          Print Recorded Lines
-        </button> */}
-
-
-      </div>
+      </aside>
     </div >
   );
 }

@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import Link from "next/link";
 
 export default function Home() {
@@ -9,9 +10,7 @@ export default function Home() {
       </p>
 
       <Link href="/lessons" className="inline-block">
-        <button className="p-3 px-6 bg-blue-100 text-blue-800 rounded-lg font-semibold hover:bg-blue-200 transition-colors">
-          Explore Lessons
-        </button>
+        <Button text="Explore Lessons" />
       </Link>
     </main>
   );
