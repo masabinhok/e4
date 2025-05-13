@@ -27,7 +27,7 @@ const LessonsPage = () => {
     fetchOpenings();
   }, [setOpenings])
   return (
-    <main className="p-4 lg:p-10 lg:ml-40">
+    <main className="p-4 lg:p-10 lg:ml-40 lg:mt-30 max-lg:mt-5 border-t border-gray-800">
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-[1100px] max-lg:p-5">
         {openings.map((lesson, index) => (
           <div key={index} className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all">
