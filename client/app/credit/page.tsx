@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import Image from 'next/image';
-import sabinOg from "../../public/sabin-og.jpg";
+import sabinOg from "../../public/sabin-og.png";
 import Link from 'next/link';
 
 const CreditPage = () => {
