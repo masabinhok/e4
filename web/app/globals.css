@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/* 🌍 Global Theme Variables */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #2563eb;
+  /* Blue-600 */
+  --secondary: #9333ea;
+  /* Purple-600 */
+  --accent: #eab308;
+  /* Yellow-500 */
+  --border-color: #d1d5db;
+  /* Gray-300 */
+
+  --radius-small: 4px;
+  --radius-medium: 8px;
+  --radius-large: 16px;
+}
+
+/* 🎨 Tailwind v4 Theming */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-border: var(--border-color);
+
+  --font-sans: "Poppins", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-lg: var(--radius-small);
+  --radius-md: var(--radius-medium);
+  --radius-lg: var(--radius-large);
+}
+
+/* 🌙 Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --primary: #3b82f6;
+    /* Blue-500 */
+    --secondary: #a855f7;
+    /* Purple-500 */
+    --accent: #facc15;
+    /* Yellow-400 */
+    --border-color: #4b5563;
+    /* Gray-600 */
+  }
+}
+
+/* 🏗️ Base Styles */
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 📏 Utility Enhancements */
+.container {
+  max-width: 1200px;
+  padding: 1rem;
+}
+
+.border-radius-sm {
+  border-radius: var(--radius-sm);
+}
+
+.border-radius-md {
+  border-radius: var(--radius-md);
+}
+
+
+
+button:hover {
+  opacity: 0.9;
+}
+
+.border-radius-lg {
+  border-radius: var(--radius-lg);
+}
