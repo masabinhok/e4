@@ -111,6 +111,10 @@ const CreditPage = () => {
                 className='px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700 text-sm transition'>
                 TypeScript
               </a>
+              <a href="https://nestjs.com/" target="_blank" rel="noopener noreferrer"
+                className='px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700 text-sm transition'>
+                Nest.js
+              </a>
             </div>
           </div>
         </div>

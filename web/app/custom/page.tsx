@@ -5,7 +5,7 @@ import { Chessboard } from 'react-chessboard';
 import Message from '@/components/Message';
 import Link from 'next/link';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { BoardFlip } from '@/types/types';
+import { BoardFlip } from '../../types/types';
 import flipBoard from '@/public/icons/flip.svg';
 import Image from 'next/image';
 import Button from '@/components/Button';

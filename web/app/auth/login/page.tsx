@@ -3,11 +3,14 @@
 import { useState } from 'react';
 import Button from '@/components/Button';
 import { Eye, EyeOff } from 'lucide-react';
+import { login } from '@/services/auth';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -15,7 +18,15 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // todo: api call
+    try {
+      console.log('hi')
+      await login(formData.username, formData.password);
+      console.log('hi')
+      router.push('/');
+    } catch (err) {
+      console.error('Login failed', err);
+      setError('Login Failed');
+    }
   };
 
   return (
@@ -25,18 +36,18 @@ export default function Login() {
         className="shadow-xl rounded-2xl p-10 w-md"
       >
         <h2 className="text-2xl font-bold text-center mb-8 text-blue-600">
-        ♟️ Login to e4
+          ♟️ Login to e4
         </h2>
 
         <div className="mb-6">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email Address
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            Username
           </label>
           <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="you@example.com"
+            type="text"
+            name="username"
+            id="username"
+            placeholder="masabinhok"
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition duration-200 text-base"
             required

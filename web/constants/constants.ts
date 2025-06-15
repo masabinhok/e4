@@ -5,7 +5,7 @@ export const sidebarContent = [{
   title: "Record Lines",
   url: "/record",
 }, {
-  title: "Custom Lines",
+  title: "Add PGNs",
   url: "/custom",
 },
 {

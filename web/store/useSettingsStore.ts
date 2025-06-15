@@ -1,5 +1,4 @@
-import { Mode } from "@/types/types";
-import { BlobOptions } from "buffer";
+import { Mode } from "../types/types";
 import { create } from "zustand";
 
 

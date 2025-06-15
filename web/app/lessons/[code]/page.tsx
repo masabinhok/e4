@@ -8,7 +8,7 @@ import Button from '@/components/Button';
 import Link from 'next/link'
 import Image from 'next/image';
 import flipBoard from '@/public/icons/flip.svg';
-import { BoardFlip, Opening } from '@/types/types';
+import { BoardFlip, Opening } from '../../../types/types';
 import { useSoundStore } from '@/store/useSoundStore';
 
 
@@ -31,6 +31,29 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
   const [mistakes, setMistakes] = useState<number>(0);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const playSound = useSoundStore((s) => s.playSound);
+
+
+  useEffect(() => {
+    const fetchCurrentOpening = async () => {
+      let fetchUrl = `${process.env.NEXT_PUBLIC_API_URL}${(code === 'recorded-lines' || code === 'custom-pgns') ? '/users' : '/openings'}/${code}`
+      console.log(fetchUrl);
+      await fetch(fetchUrl, {
+        method: 'GET',
+        headers: {
+          content: 'Application/json'
+        },
+      }).then(res => {
+        if (!res.ok) {
+          throw new Error('Network Error')
+        }
+        return res.json();
+      }).then(data => {
+        console.log(data)
+        setCurrentOpening(data);
+      })
+    }
+    fetchCurrentOpening();
+  }, [])
 
 
   const movesContainerRef = useRef<HTMLDivElement>(null);
