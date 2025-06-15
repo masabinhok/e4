@@ -62,7 +62,7 @@ export class AuthService {
     const { username, password } = signUpDto;
 
     //check for existing user
-    const existingUser = await this.usersService.findOneByUsername(username);
+    const existingUser = await this.usersService.findUserByUsername(username);
     //if exists, throw exception
     if (existingUser) {
       throw new BadRequestException(
@@ -100,7 +100,7 @@ export class AuthService {
     const { username, password } = loginDto;
 
     //check if the user exists
-    const existingUser = await this.usersService.findOneByUsername(username);
+    const existingUser = await this.usersService.findUserByUsername(username);
     if (!existingUser) {
       throw new BadRequestException(`Invalid Username`);
     }
@@ -121,7 +121,7 @@ export class AuthService {
   }
 
   async refresh(userId: string, rt: string) {
-    const user = await this.usersService.findOneById(userId);
+    const user = await this.usersService.findUserById(userId);
 
     if (!user || !user.refreshToken) {
       throw new ForbiddenException('Access Denied');
