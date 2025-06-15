@@ -3,6 +3,11 @@ export type Mode = 'practice' | 'quiz' | 'learn'
 export type BoardFlip = 'white' | 'black'
 
 
+export type User = {
+  username: string;
+  _id: string;
+}
+
 export type OpeningVariation = {
   title: string;
   index: number;

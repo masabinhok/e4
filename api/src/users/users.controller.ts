@@ -5,5 +5,4 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-}
+} 

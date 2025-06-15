@@ -5,6 +5,7 @@ import Button from '@/components/Button';
 import { Eye, EyeOff } from 'lucide-react';
 import { login } from '@/services/auth';
 import { useRouter } from 'next/navigation';
+import { parseError } from '@/utils/parseError';
 
 export default function Login() {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -19,13 +20,11 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      console.log('hi')
       await login(formData.username, formData.password);
-      console.log('hi')
       router.push('/');
-    } catch (err) {
-      console.error('Login failed', err);
-      setError('Login Failed');
+    } catch (err: any) {
+      console.log(error);
+      setError(parseError(err));
     }
   };
 

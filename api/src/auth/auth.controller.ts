@@ -41,8 +41,16 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(@GetUser('id') userId: string) {
-    return this.authService.logout(userId as string);
+  async logout(@GetUser('id') userId: string, @Res({passthrough: true}) res: Response) {
+    await this.authService.logout(userId as string);
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: true,
+    });
+    return {
+      message: 'Logged Out Successfully.'
+    }
   }
 
   @UseGuards(RtGuard)

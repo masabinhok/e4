@@ -3,7 +3,6 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { UserDocument } from 'src/users/schema/user.schema';
@@ -103,13 +102,13 @@ export class AuthService {
     //check if the user exists
     const existingUser = await this.usersService.findOneByUsername(username);
     if (!existingUser) {
-      throw new UnauthorizedException(`Invalid Username`);
+      throw new BadRequestException(`Invalid Username`);
     }
 
     const isPassValid = await bcrypt.compare(password, existingUser.passHash);
 
     if (!isPassValid) {
-      throw new UnauthorizedException('Invalid Password');
+      throw new BadRequestException('Invalid Password');
     }
 
     // user exists and pass is valid too, we have to login the user...

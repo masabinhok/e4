@@ -5,18 +5,21 @@ type ButtonProps = {
   icon?: React.ReactNode;
   disabled?: boolean;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  type?: string;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
+
 
 export default function Button({
   text,
   icon,
   disabled = false,
   onClick,
+  type,
   ...props
 }: ButtonProps) {
   return (
     <button
-      type="button"
+      type={type}
       onClick={onClick}
       disabled={disabled}
       aria-disabled={disabled}

@@ -5,13 +5,14 @@ import Button from '@/components/Button';
 import { Eye, EyeOff } from 'lucide-react';
 import { signUp } from '@/services/auth';
 import { useRouter } from 'next/navigation';
+import { parseError } from '@/utils/parseError';
+
 
 export default function Signup() {
   const [formData, setFormData] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const router = useRouter();
-
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,14 +20,16 @@ export default function Signup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
       await signUp(formData.username, formData.password);
       router.push('/auth/login');
-    } catch (err) {
-      console.error('SignUp failed', err);
-      setError('SignUp Failed');
-    }
-  };
+    } catch (err: any) {
+      const message = parseError(err);
+      setError(message);
+    };
+  }
+
 
   return (
     <div className="flex items-center justify-center">
