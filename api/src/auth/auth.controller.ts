@@ -6,6 +6,7 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { Request, Response } from 'express';
 import { ObjectId } from 'mongoose';
 import { UserId } from 'src/types/types';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -41,21 +42,28 @@ export class AuthController {
     return { messsage: 'Login Successful' };
   }
 
-  // @Post('logout')
-  // async logout(@Req() req: Request, @Res({passthrough: true}) res: Response) {
+  @UseGuards(AuthGuard)
+  @Post('logout')
+  async logout(@Req() req: Request, @Res({passthrough: true}) res: Response) {
+    const userId = req['userId'];
+    console.log(userId);
+    await this.authService.logout(userId);
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: true,
+    });
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: true,
+    });
+    return {
+      message: 'Logged Out Successfully.'
+    }
+  }
 
-  //   await this.authService.logout(userId);
-
-  //   res.clearCookie('access_token', {
-  //     httpOnly: true,
-  //     sameSite: 'lax',
-  //     secure: true,
-  //   });
-  //   return {
-  //     message: 'Logged Out Successfully.'
-  //   }
-  // }
-
+  @UseGuards(AuthGuard)
   @Post('refresh')
   async refresh(
     @Req() req: Request,

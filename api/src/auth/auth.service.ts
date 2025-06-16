@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { UsersService } from 'src/users/users.service';
+import { Types } from 'mongoose'
 
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -137,9 +138,11 @@ export class AuthService {
   async logout(userId: UserId): Promise<{
     message: string;
   }> {
-    await this.refreshTokenModel.deleteOne({
-      userId: userId
-    });
+    const deletedToken = await this.refreshTokenModel.findOneAndDelete({
+      userId:   new Types.ObjectId(userId)
+    })
+    
+    console.log(deletedToken);
     return {
       message: 'Successfully logged out user.',
     };
