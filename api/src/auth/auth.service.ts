@@ -137,7 +137,9 @@ export class AuthService {
   async logout(userId: UserId): Promise<{
     message: string;
   }> {
-    await this.usersService.removeRefreshToken(userId);
+    await this.refreshTokenModel.deleteOne({
+      userId: userId
+    });
     return {
       message: 'Successfully logged out user.',
     };

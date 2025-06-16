@@ -42,17 +42,4 @@ export class UsersService {
     }
     return user;
   }
-
-  async removeRefreshToken(userId: UserId): Promise<{
-    message: string;
-    user: User | null;
-  }> {
-    const loggedOutUser = await this.userModel.findByIdAndUpdate(userId, {
-      refreshToken: null,
-    });
-    return {
-      message: 'Refresh Token set to NULL',
-      user: loggedOutUser,
-    };
-  }
 }

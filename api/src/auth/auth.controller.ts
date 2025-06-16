@@ -41,18 +41,20 @@ export class AuthController {
     return { messsage: 'Login Successful' };
   }
 
-  @Post('logout')
-  async logout(@GetUser('id') userId: UserId, @Res({passthrough: true}) res: Response) {
-    await this.authService.logout(userId);
-    res.clearCookie('access_token', {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: true,
-    });
-    return {
-      message: 'Logged Out Successfully.'
-    }
-  }
+  // @Post('logout')
+  // async logout(@Req() req: Request, @Res({passthrough: true}) res: Response) {
+
+  //   await this.authService.logout(userId);
+
+  //   res.clearCookie('access_token', {
+  //     httpOnly: true,
+  //     sameSite: 'lax',
+  //     secure: true,
+  //   });
+  //   return {
+  //     message: 'Logged Out Successfully.'
+  //   }
+  // }
 
   @Post('refresh')
   async refresh(
