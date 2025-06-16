@@ -10,7 +10,7 @@ async function bootstrap() {
     credentials: true, // allow sending cookies
   });
 
-  app.use(cookieParser())
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({

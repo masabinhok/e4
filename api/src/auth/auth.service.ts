@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { UsersService } from 'src/users/users.service';
-import { Types } from 'mongoose'
+import { Types } from 'mongoose';
 
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -14,13 +14,14 @@ import { LoginDto } from './dtos/login.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { RefreshToken } from './schemas/refresh-token.schema';
 import { Model } from 'mongoose';
-import {v4 as uuidv4} from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
 import { UserId } from 'src/types/types';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(RefreshToken.name) private refreshTokenModel: Model<RefreshToken>,
+    @InjectModel(RefreshToken.name)
+    private refreshTokenModel: Model<RefreshToken>,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
@@ -31,32 +32,31 @@ export class AuthService {
     return hash;
   }
 
-  async getTokens(
-    userId: UserId
-  ): Promise<{
+  async getTokens(userId: UserId): Promise<{
     access_token: string;
     refresh_token: string;
   }> {
-    const access_token = this.jwtService.sign({userId}, {expiresIn: '1h'});
-    const refresh_token  = uuidv4();
+    const access_token = this.jwtService.sign({ userId }, { expiresIn: '1h' });
+    const refresh_token = uuidv4();
     return {
-      access_token, refresh_token
-    }
+      access_token,
+      refresh_token,
+    };
   }
 
-  async storeRefreshToken(userId: UserId, rt: string ){
+  async storeRefreshToken(userId: UserId, rt: string) {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 7);
 
     await this.refreshTokenModel.create({
       userId,
       token: rt,
-      expiryDate
-    })
+      expiryDate,
+    });
   }
 
   async signUp(signUpDto: SignUpDto): Promise<{
-    message: string
+    message: string;
   }> {
     //get user info from client
     const { username, password } = signUpDto;
@@ -65,9 +65,7 @@ export class AuthService {
     const existingUser = await this.usersService.findUserByUsername(username);
     //if exists, throw exception
     if (existingUser) {
-      throw new BadRequestException(
-        'Username already in use.',
-      );
+      throw new BadRequestException('Username already in use.');
     }
     //if not hash the password
     const hashedPassword = await this.generateHash(password);
@@ -82,8 +80,8 @@ export class AuthService {
     }
 
     return {
-      message: "User created successfully!"
-    }
+      message: 'User created successfully!',
+    };
   }
 
   async login(loginDto: LoginDto): Promise<{
@@ -105,44 +103,42 @@ export class AuthService {
       throw new UnauthorizedException('Invalid Password');
     }
 
-    const tokens = await this.getTokens(
-      existingUser._id as UserId);
-    await this.storeRefreshToken(existingUser._id as UserId, tokens.refresh_token);
+    const tokens = await this.getTokens(existingUser._id as UserId);
+    await this.storeRefreshToken(
+      existingUser._id as UserId,
+      tokens.refresh_token,
+    );
     return tokens;
   }
 
   async refreshTokens(rt: string): Promise<{
-    access_token: string, 
-    refresh_token: string}>{
+    access_token: string;
+    refresh_token: string;
+  }> {
+    const token = await this.refreshTokenModel.findOne({
+      token: rt,
+      expiryDate: { $gte: new Date(Date.now()) },
+    });
 
-      const token = await this.refreshTokenModel.findOne({
-        token: rt,
-        expiryDate: { $gte: new Date(Date.now())},
-      })
+    if (!token) {
+      throw new UnauthorizedException('Invalid Refresh Token');
+    }
 
-      if(!token){
-        throw new UnauthorizedException('Invalid Refresh Token');
-      }
-
-      const tokens = await this.getTokens(
-        token.userId);
-      await this.storeRefreshToken(token.userId, tokens.refresh_token);
-      await this.refreshTokenModel.findOneAndDelete({
-        _id: token._id
-      })
-      return tokens;
+    const tokens = await this.getTokens(token.userId);
+    await this.storeRefreshToken(token.userId, tokens.refresh_token);
+    await this.refreshTokenModel.findOneAndDelete({
+      _id: token._id,
+    });
+    return tokens;
   }
-
-  
 
   async logout(userId: UserId): Promise<{
     message: string;
   }> {
     const deletedToken = await this.refreshTokenModel.findOneAndDelete({
-      userId:   new Types.ObjectId(userId)
-    })
-    
-    console.log(deletedToken);
+      userId: new Types.ObjectId(userId),
+    });
+
     return {
       message: 'Successfully logged out user.',
     };

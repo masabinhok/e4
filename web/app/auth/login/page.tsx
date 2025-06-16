@@ -23,7 +23,6 @@ export default function Login() {
       await login(formData.username, formData.password);
       router.push('/');
     } catch (err: any) {
-      console.log(error);
       setError(parseError(err));
     }
   };

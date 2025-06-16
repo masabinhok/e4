@@ -29,8 +29,8 @@ export const login = async(username: string, password: string) =>{
 
 export const fetchUser = async()=>{
   try{
-    const response = await axiosInstance.get('/users/me');
-    console.log(response);
+    await axiosInstance.get('/users/me');
+    //TODO: SET USER
   }
   catch(err: any){
     throw err;
