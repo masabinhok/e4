@@ -10,9 +10,6 @@ export class User {
   @Prop({ required: true })
   passHash: string;
 
-  @Prop()
-  refreshToken?: string;
-
   @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }])
   recordedLines?: Variation[];
 

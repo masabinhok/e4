@@ -1,10 +1,10 @@
-import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { LoginDto } from './dtos/login.dto';
-import { RtGuard } from './guards/rt.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { ObjectId } from 'mongoose';
 
 @Controller('auth')
 export class AuthController {
@@ -41,8 +41,8 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(@GetUser('id') userId: string, @Res({passthrough: true}) res: Response) {
-    await this.authService.logout(userId as string);
+  async logout(@GetUser('id') userId, @Res({passthrough: true}) res: Response) {
+    await this.authService.logout(userId);
     res.clearCookie('access_token', {
       httpOnly: true,
       sameSite: 'lax',
@@ -53,14 +53,15 @@ export class AuthController {
     }
   }
 
-  @UseGuards(RtGuard)
   @Post('refresh')
   async refresh(
-    @GetUser('id') userId: string,
-    @GetUser('refreshToken') rt: string,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const tokens = await this.authService.refresh(userId, rt);
+    const refreshToken = req.cookies['refresh_token'];
+    console.log(refreshToken);
+    const tokens = await this.authService.refreshTokens(refreshToken);
+    console.log(tokens)
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
       secure: true,

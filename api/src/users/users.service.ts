@@ -7,7 +7,7 @@ import { Model } from 'mongoose';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async findUserById(userId: string): Promise<UserDocument | null> {
+  async findUserById(userId): Promise<UserDocument | null> {
     const user = await this.userModel.findById(userId);
     return user ? user : null;
   }
@@ -31,7 +31,7 @@ export class UsersService {
     return user;
   }
 
-  async updateRtHash(userId: string, rtHash: string): Promise<UserDocument> {
+  async updateRtHash(userId, rtHash: string): Promise<UserDocument> {
     const user = await this.userModel.findByIdAndUpdate(userId, {
       refreshToken: rtHash,
     });
@@ -42,7 +42,7 @@ export class UsersService {
     return user;
   }
 
-  async removeRefreshToken(userId: string): Promise<{
+  async removeRefreshToken(userId): Promise<{
     message: string;
     user: UserDocument | null;
   }> {

@@ -1,62 +1,60 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/sign-up.dto';
-import { UserDocument } from 'src/users/schema/user.schema';
 import { UsersService } from 'src/users/users.service';
 
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dtos/login.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { RefreshToken } from './schemas/refresh-token.schema';
+import { Model, ObjectId } from 'mongoose';
+import {v4 as uuidv4} from 'uuid'
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectModel(RefreshToken.name) private refreshTokenModel: Model<RefreshToken>,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
 
-  async generateHash(password: string): Promise<string> {
+  async generateHash(val: string): Promise<string> {
     const salt = await bcrypt.genSalt();
-    const hash = await bcrypt.hash(password, salt);
+    const hash = await bcrypt.hash(val, salt);
     return hash;
   }
 
   async getTokens(
-    userId: string,
-    username: string,
+    userId
   ): Promise<{
     access_token: string;
     refresh_token: string;
   }> {
-    const payload = {
-      sub: userId,
-      username,
-    };
-    const [access_token, refresh_token] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: process.env.ACCESS_TOKEN_SECRET,
-        expiresIn: '15m',
-      }),
-      this.jwtService.signAsync(payload, {
-        secret: process.env.REFRESH_TOKEN_SECRET,
-        expiresIn: '7d',
-      }),
-    ]);
-    return { access_token, refresh_token };
+    const access_token = this.jwtService.sign({userId}, {expiresIn: '1h'});
+    const refresh_token  = uuidv4();
+    return {
+      access_token, refresh_token
+    }
   }
 
-  async updateRtHash(userId: string, rt: string): Promise<UserDocument | null> {
-    const hash = await this.generateHash(rt);
-    return this.usersService.updateRtHash(userId, hash);
+  async storeRefreshToken(userId, rt: string ){
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 7);
+
+    await this.refreshTokenModel.create({
+      userId,
+      token: rt,
+      expiryDate
+    })
   }
 
   async signUp(signUpDto: SignUpDto): Promise<{
-    message: string;
-    user: UserDocument;
+    message: string
   }> {
     //get user info from client
     const { username, password } = signUpDto;
@@ -66,7 +64,7 @@ export class AuthService {
     //if exists, throw exception
     if (existingUser) {
       throw new BadRequestException(
-        'User already exists! Either Login or choose a different username!',
+        'Username already in use.',
       );
     }
     //if not hash the password
@@ -81,15 +79,9 @@ export class AuthService {
       throw new InternalServerErrorException('Failed to create user.');
     }
 
-    //cleanup sensitive info before sending to the client
-    const { passHash: _, ...userWithoutPassword } = newUser.toObject()
-      ? newUser.toObject()
-      : newUser;
-    //return a new user with a success message
     return {
-      message: 'User created successfully!',
-      user: userWithoutPassword,
-    };
+      message: "User created successfully!"
+    }
   }
 
   async login(loginDto: LoginDto): Promise<{
@@ -102,40 +94,46 @@ export class AuthService {
     //check if the user exists
     const existingUser = await this.usersService.findUserByUsername(username);
     if (!existingUser) {
-      throw new BadRequestException(`Invalid Username`);
+      throw new UnauthorizedException(`Invalid Username`);
     }
 
     const isPassValid = await bcrypt.compare(password, existingUser.passHash);
 
     if (!isPassValid) {
-      throw new BadRequestException('Invalid Password');
+      throw new UnauthorizedException('Invalid Password');
     }
 
-    // user exists and pass is valid too, we have to login the user...
     const tokens = await this.getTokens(
-      existingUser._id as string,
-      existingUser.username,
-    );
-    await this.updateRtHash(existingUser._id as string, tokens.refresh_token);
+      existingUser._id);
+    await this.storeRefreshToken(existingUser._id, tokens.refresh_token);
     return tokens;
   }
 
-  async refresh(userId: string, rt: string) {
-    const user = await this.usersService.findUserById(userId);
+  async refreshTokens(rt: string): Promise<{
+    access_token: string, 
+    refresh_token: string}>{
 
-    if (!user || !user.refreshToken) {
-      throw new ForbiddenException('Access Denied');
-    }
+      const token = await this.refreshTokenModel.findOne({
+        token: rt,
+        expiryDate: { $gte: new Date(Date.now())},
+      })
 
-    const rtMatches = await bcrypt.compare(rt, user.refreshToken);
-    if (!rtMatches) throw new ForbiddenException('Access Denied');
+      if(!token){
+        throw new UnauthorizedException('Invalid Refresh Token');
+      }
 
-    const tokens = await this.getTokens(user._id as string, user.username);
-    await this.updateRtHash(user._id as string, tokens.refresh_token);
-    return tokens;
+      const tokens = await this.getTokens(
+        token.userId);
+      await this.storeRefreshToken(token.userId, tokens.refresh_token);
+      await this.refreshTokenModel.findOneAndDelete({
+        _id: token._id
+      })
+      return tokens;
   }
 
-  async logout(userId: string): Promise<{
+  
+
+  async logout(userId): Promise<{
     message: string;
   }> {
     await this.usersService.removeRefreshToken(userId);
