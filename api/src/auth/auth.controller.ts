@@ -5,6 +5,7 @@ import { LoginDto } from './dtos/login.dto';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { Request, Response } from 'express';
 import { ObjectId } from 'mongoose';
+import { UserId } from 'src/types/types';
 
 @Controller('auth')
 export class AuthController {
@@ -41,7 +42,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(@GetUser('id') userId, @Res({passthrough: true}) res: Response) {
+  async logout(@GetUser('id') userId: UserId, @Res({passthrough: true}) res: Response) {
     await this.authService.logout(userId);
     res.clearCookie('access_token', {
       httpOnly: true,

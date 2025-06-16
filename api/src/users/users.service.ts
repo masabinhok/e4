@@ -1,24 +1,25 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './schema/user.schema';
+import { User} from './schema/user.schema';
 import { Model } from 'mongoose';
+import { UserId } from 'src/types/types';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async findUserById(userId): Promise<UserDocument | null> {
+  async findUserById(userId: UserId): Promise<User | null> {
     const user = await this.userModel.findById(userId);
     return user ? user : null;
   }
-  async findUserByUsername(username: string): Promise<UserDocument | null> {
+  async findUserByUsername(username: string): Promise<User | null> {
     const user = await this.userModel.findOne({
       username,
     });
     return user ? user : null;
   }
 
-  async createUser(username: string, hash: string): Promise<UserDocument> {
+  async createUser(username: string, hash: string): Promise<User> {
     const user = await this.userModel.create({
       username,
       passHash: hash,
@@ -31,7 +32,7 @@ export class UsersService {
     return user;
   }
 
-  async updateRtHash(userId, rtHash: string): Promise<UserDocument> {
+  async updateRtHash(userId: UserId, rtHash: string): Promise<User> {
     const user = await this.userModel.findByIdAndUpdate(userId, {
       refreshToken: rtHash,
     });
@@ -42,9 +43,9 @@ export class UsersService {
     return user;
   }
 
-  async removeRefreshToken(userId): Promise<{
+  async removeRefreshToken(userId: UserId): Promise<{
     message: string;
-    user: UserDocument | null;
+    user: User | null;
   }> {
     const loggedOutUser = await this.userModel.findByIdAndUpdate(userId, {
       refreshToken: null,

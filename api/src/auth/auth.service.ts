@@ -12,8 +12,9 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dtos/login.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { RefreshToken } from './schemas/refresh-token.schema';
-import { Model, ObjectId } from 'mongoose';
+import { Model } from 'mongoose';
 import {v4 as uuidv4} from 'uuid'
+import { UserId } from 'src/types/types';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +31,7 @@ export class AuthService {
   }
 
   async getTokens(
-    userId
+    userId: UserId
   ): Promise<{
     access_token: string;
     refresh_token: string;
@@ -42,7 +43,7 @@ export class AuthService {
     }
   }
 
-  async storeRefreshToken(userId, rt: string ){
+  async storeRefreshToken(userId: UserId, rt: string ){
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 7);
 
@@ -104,8 +105,8 @@ export class AuthService {
     }
 
     const tokens = await this.getTokens(
-      existingUser._id);
-    await this.storeRefreshToken(existingUser._id, tokens.refresh_token);
+      existingUser._id as UserId);
+    await this.storeRefreshToken(existingUser._id as UserId, tokens.refresh_token);
     return tokens;
   }
 
@@ -133,7 +134,7 @@ export class AuthService {
 
   
 
-  async logout(userId): Promise<{
+  async logout(userId: UserId): Promise<{
     message: string;
   }> {
     await this.usersService.removeRefreshToken(userId);

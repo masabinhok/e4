@@ -3,7 +3,7 @@ import mongoose, { Document } from 'mongoose';
 import { Variation } from 'src/variations/schema/variation.schema';
 
 @Schema()
-export class User {
+export class User extends Document {
   @Prop({ required: true, unique: true })
   username: string;
 
@@ -26,5 +26,4 @@ export class User {
   learnedLines?: Variation[];
 }
 
-export type UserDocument = User & Document;
 export const UserSchema = SchemaFactory.createForClass(User);
