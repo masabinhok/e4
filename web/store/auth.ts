@@ -95,7 +95,7 @@ export const useAuth = create<AuthState>()(
         set({isLoading: true});
 
         const response = await apiClient.get<{user: User}>('auth/me');
-
+        console.log(response);
         set({
           user: response.user,
           isAuthenticated: true, 
@@ -121,6 +121,7 @@ export const useAuth = create<AuthState>()(
 }), {
   name: 'auth-storage',
   partialize: (state) => ({
+    isLoading: state.isLoading,
     user: state.user,
     isAuthenticated: state.isAuthenticated,
   })

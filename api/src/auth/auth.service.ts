@@ -7,7 +7,6 @@ import {
 import { SignUpDto } from './dtos/sign-up.dto';
 import { UsersService } from 'src/users/users.service';
 import { Types } from 'mongoose';
-
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dtos/login.dto';
@@ -157,7 +156,9 @@ export class AuthService {
     };
   }
 
-  async getMe(userId: UserId): Promise<User | null>{
+  async getMe(userId: UserId): Promise<{
+    user: User
+  }>{
     return this.usersService.findUserById(userId);
   }
 }
