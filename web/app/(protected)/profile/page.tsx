@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '@/store/auth'
 import {
-  User as LucideUser,
   Trophy,
   Target,
   BookOpen,
@@ -102,14 +101,13 @@ const Profile = () => {
     icon: Icon
   }: ProgressItem) => (
     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all duration-300">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div className="flex items-center space-x-3">
           <div className={`w-10 h-10 ${color} rounded-lg flex items-center justify-center`}>
             <Icon className="w-5 h-5 text-white" />
           </div>
           <div>
             <div className="text-white font-medium">{category}</div>
-            <div className="text-gray-400 text-sm">{count} items</div>
           </div>
         </div>
         <div className="text-2xl font-bold text-white">{count}</div>

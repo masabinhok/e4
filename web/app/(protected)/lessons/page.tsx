@@ -65,7 +65,7 @@ const LessonsPage = () => {
           </Link>
         </div>
         {openings.map((lesson, index) => (
-          <div key={index} className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all">
+          <div key={index} className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all ">
             <h1 className="text-2xl lg:text-3xl font-bold mb-4">{lesson.name}</h1>
             <p className="text-gray-600 mb-6 line-clamp-2">{lesson.description}</p>
 
