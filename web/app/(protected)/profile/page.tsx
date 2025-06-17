@@ -9,12 +9,12 @@ import {
   Brain,
   Zap,
   Edit3,
-  Settings,
   Crown,
   Star,
   TrendingUp,
   Clock,
-  LucideIcon
+  LucideIcon,
+  LogOut
 } from 'lucide-react'
 
 // Define proper types
@@ -115,6 +115,12 @@ const Profile = () => {
     </div>
   )
 
+  const { logout } = useAuth();
+
+  const handleLogout = async() => {
+    await logout();
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
       <div className="max-w-6xl mx-auto">
@@ -153,9 +159,9 @@ const Profile = () => {
                     </div>
                   </div>
                 </div>
-                <button className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl px-6 py-3 text-white font-medium transition-all duration-300 flex items-center space-x-2">
-                  <Settings className="w-5 h-5" />
-                  <span>Settings</span>
+                <button onClick={() => handleLogout()} className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl px-6 py-3 text-white font-medium transition-all duration-300 flex items-center space-x-2">
+                  <LogOut className="w-5 h-5" />
+                  <span>Logout</span>
                 </button>
               </div>
             </div>
