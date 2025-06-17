@@ -5,9 +5,21 @@ import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://e4-learnchess.vercel.app',
+  ];
+  
   app.enableCors({
-    origin: 'http://localhost:3000', // allow your frontend origin
-    credentials: true, // allow sending cookies
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS policy violation: Not allowed by CORS'));
+      }
+    },
+    credentials: true,
   });
 
   app.use(cookieParser());
