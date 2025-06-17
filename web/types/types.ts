@@ -4,9 +4,17 @@ export type BoardFlip = 'white' | 'black'
 
 
 export type User = {
-  username: string;
   _id: string;
-}
+  username: string;
+  passHash?: string;
+  recordedLines?: string[];
+  customLines?: string[];
+  practicedLines?: string[];
+  quizzedLines?: string[];
+  learnedLines?: string[];
+  __v?: number;
+};
+
 
 export type OpeningVariation = {
   title: string;

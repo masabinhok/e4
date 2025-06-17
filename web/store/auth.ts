@@ -1,12 +1,7 @@
 import { apiClient } from "@/lib/api";
+import { User } from "@/types/types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-export interface User {
-  id: string;
-  username: string;
-  role?: string;
-}
 
 interface AuthState {
   user: User | null;
@@ -41,7 +36,7 @@ export const useAuth = create<AuthState>()(
       try{
         set({isLoading: true});
 
-        const response = await apiClient.post<{user: User}>('/auth/login', {
+        const response = await apiClient.post<{user: User}>('auth/login', {
           username, 
           password
         } );
