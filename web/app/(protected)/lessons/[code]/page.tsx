@@ -8,7 +8,7 @@ import Button from '@/components/Button';
 import Link from 'next/link'
 import Image from 'next/image';
 import flipBoard from '@/public/icons/flip.svg';
-import { BoardFlip, Opening } from '../../../types/types';
+import { BoardFlip, Opening } from '@/types/types'
 import { useSoundStore } from '@/store/useSoundStore';
 
 
