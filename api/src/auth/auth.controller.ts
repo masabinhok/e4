@@ -1,20 +1,41 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { LoginDto } from './dtos/login.dto';
-import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { Request, Response } from 'express';
-import { ObjectId } from 'mongoose';
-import { UserId } from 'src/types/types';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { GetUserId } from 'src/common/decorators/get-user.decorator';
+import { UserId } from 'src/types/types';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  async signUp(@Body() signUpDto: SignUpDto) {
-    return this.authService.signUp(signUpDto);
+  async signUp(@Body() signUpDto: SignUpDto,
+@Res({passthrough: true}) res: Response) {
+    const {user, tokens} = await this.authService.signUp(signUpDto);
+
+    res.cookie('access_token', tokens.access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 15*60*1000,
+      path: '/'
+    });
+
+    res.cookie('refresh_token', tokens.refresh_token, {
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    })
+
+    return {
+      user,
+      message: 'Signup Successful!'
+    }
   }
 
   @Post('login')
@@ -22,7 +43,7 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const tokens = await this.authService.login(loginDto);
+    const {user, tokens} = await this.authService.login(loginDto);
 
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
@@ -39,7 +60,9 @@ export class AuthController {
       path: '/',
     });
 
-    return { messsage: 'Login Successful' };
+    return { 
+      user, 
+      messsage: 'Login Successful' };
   }
 
   @UseGuards(AuthGuard)
@@ -89,5 +112,11 @@ export class AuthController {
     });
 
     return { messsage: 'Token Refreshed!' };
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('me')
+  async getMe(@GetUserId() userId: UserId){
+    return this.authService.getMe(userId);
   }
 }

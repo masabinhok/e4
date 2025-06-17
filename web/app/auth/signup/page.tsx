@@ -3,15 +3,16 @@
 import { useState } from 'react';
 import Button from '@/components/Button';
 import { Eye, EyeOff } from 'lucide-react';
-import { signUp } from '@/services/auth';
 import { useRouter } from 'next/navigation';
 import { parseError } from '@/utils/parseError';
+import { useAuth } from '@/store/auth';
 
 
 export default function Signup() {
   const [formData, setFormData] = useState({ username: '', password: '' });
-  const [error, setError] = useState<string | null>('');
+  const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const { signup, isLoading } = useAuth();
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,12 +21,13 @@ export default function Signup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setError('');
     try {
-      await signUp(formData.username, formData.password);
-      router.push('/auth/login');
+      console.log(formData);
+      await signup(formData.username, formData.password);
+      router.push('/');
     } catch (err: any) {
-      const message = parseError(err);
+      const message = parseError(err instanceof Error ? err.message : 'Signup failed');
       setError(message);
     };
   }
@@ -55,20 +57,6 @@ export default function Signup() {
             required
           />
         </div>
-        {/* <div className="mb-6">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email Address
-          </label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="you@example.com"
-            onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition duration-200 text-base"
-            required
-          />
-        </div> */}
 
         <div className="mb-8 relative">
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
@@ -93,7 +81,7 @@ export default function Signup() {
           </button>
         </div>
 
-        <Button type="submit" text="Sign Up" />
+        <Button type="submit" disabled={isLoading} text={isLoading ? 'Signing up...' : 'Sign Up'} />
 
         {error && <p className="text-red-600 mt-6 text-center text-sm">{error}</p>}
 

@@ -6,7 +6,7 @@ import Message from '@/components/Message';
 import Link from 'next/link';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useSearchParams } from 'next/navigation';
-import { BoardFlip } from '../../types/types';
+import { BoardFlip } from '../../../types/types';
 import Image from 'next/image';
 import flipBoard from '@/public/icons/flip.svg';
 import Button from '@/components/Button';
@@ -164,7 +164,7 @@ export default function RecordLine() {
     }
 
     const data = await res.json();
-  
+
 
     setPgnName('');
     setPgnDescription('');
