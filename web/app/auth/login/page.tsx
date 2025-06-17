@@ -1,17 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@/components/Button';
 import { Eye, EyeOff } from 'lucide-react';
-import { login } from '@/services/auth';
 import { useRouter } from 'next/navigation';
 import { parseError } from '@/utils/parseError';
+import { useAuth } from '@/store/auth';
+
 
 export default function Login() {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const { login, isLoading, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/')
+    }
+  }, [isAuthenticated, router,]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,11 +27,12 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     try {
       await login(formData.username, formData.password);
       router.push('/');
     } catch (err: any) {
-      setError(parseError(err));
+      setError(parseError(err instanceof Error ? err.message : 'Login Failed'));
     }
   };
 
@@ -75,7 +84,7 @@ export default function Login() {
           </button>
         </div>
 
-        <Button type="submit" text="Login" />
+        <Button type="submit" disabled={isLoading} text={isLoading ? 'Logging in' : 'Login'} />
 
         {error && <p className="text-red-600 mt-6 text-center text-sm">{error}</p>}
 

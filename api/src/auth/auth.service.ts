@@ -7,7 +7,6 @@ import {
 import { SignUpDto } from './dtos/sign-up.dto';
 import { UsersService } from 'src/users/users.service';
 import { Types } from 'mongoose';
-
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dtos/login.dto';
@@ -16,6 +15,7 @@ import { RefreshToken } from './schemas/refresh-token.schema';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { UserId } from 'src/types/types';
+import { User } from 'src/users/schema/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -55,38 +55,46 @@ export class AuthService {
     });
   }
 
-  async signUp(signUpDto: SignUpDto): Promise<{
-    message: string;
-  }> {
-    //get user info from client
-    const { username, password } = signUpDto;
+  async signUp(signUpDto: SignUpDto): Promise<{user: any, tokens: {
+    access_token: string, 
+    refresh_token: string
+  }
 
-    //check for existing user
+  }> {
+    const { username, password } = signUpDto;
     const existingUser = await this.usersService.findUserByUsername(username);
-    //if exists, throw exception
+
     if (existingUser) {
       throw new BadRequestException('Username already in use.');
     }
-    //if not hash the password
-    const hashedPassword = await this.generateHash(password);
 
-    //create a new user
+    const hashedPassword = await this.generateHash(password);
     const newUser = await this.usersService.createUser(
       username,
       hashedPassword,
     );
+
     if (!newUser) {
       throw new InternalServerErrorException('Failed to create user.');
     }
 
+    const tokens = await this.getTokens(newUser._id as UserId);
+    await this.storeRefreshToken(
+      newUser._id as UserId,
+      tokens.refresh_token,
+    );
+
     return {
-      message: 'User created successfully!',
+      user: newUser, tokens
     };
   }
 
   async login(loginDto: LoginDto): Promise<{
-    access_token: string;
-    refresh_token: string;
+    user: any,
+    tokens: {
+      access_token: string;
+      refresh_token: string;
+    }
   }> {
     //get credentials from the client
     const { username, password } = loginDto;
@@ -108,7 +116,11 @@ export class AuthService {
       existingUser._id as UserId,
       tokens.refresh_token,
     );
-    return tokens;
+
+  
+    return {
+      user: existingUser, tokens
+    }
   }
 
   async refreshTokens(rt: string): Promise<{
@@ -142,5 +154,11 @@ export class AuthService {
     return {
       message: 'Successfully logged out user.',
     };
+  }
+
+  async getMe(userId: UserId): Promise<{
+    user: User
+  }>{
+    return this.usersService.findUserById(userId);
   }
 }

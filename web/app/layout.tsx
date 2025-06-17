@@ -4,19 +4,20 @@ import { Poppins } from "next/font/google";
 import Navigation from "@/components/Navigation";
 
 
+
 //init poppins font
 const poppins = Poppins({
   subsets: ["latin"],
   weight: [
-    "100", 
-    "200", 
-    "300", 
-    "400", 
-    "500", 
-    "600", 
-    "700", 
-    "800", 
-    "900", 
+    "100",
+    "200",
+    "300",
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+    "900",
   ],
   variable: "--font-poppins",
 });

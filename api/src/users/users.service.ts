@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
@@ -8,9 +8,14 @@ import { UserId } from 'src/types/types';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async findUserById(userId: UserId): Promise<User | null> {
+  async findUserById(userId: UserId): Promise<{
+    user: User
+  }> {
     const user = await this.userModel.findById(userId);
-    return user ? user : null;
+    if(!user){
+      throw new InternalServerErrorException('User not found');
+    }
+    return {user};
   }
   async findUserByUsername(username: string): Promise<User | null> {
     const user = await this.userModel.findOne({

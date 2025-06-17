@@ -6,7 +6,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ArrayUnique } from 'class-validator';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 

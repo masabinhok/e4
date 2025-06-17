@@ -1,4 +1,10 @@
-export const sidebarContent = [{
+export const sidebarContent = [
+  
+  {
+title: "Profile",
+url: '/profile'
+  },
+  {
   title: "Lessons",
   url: "/lessons",
 }, {
