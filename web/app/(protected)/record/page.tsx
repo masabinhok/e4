@@ -163,9 +163,6 @@ export default function RecordLine() {
       throw new Error('Failed to contribute variation');
     }
 
-    const data = await res.json();
-
-
     setPgnName('');
     setPgnDescription('');
     setIsContributed(true);

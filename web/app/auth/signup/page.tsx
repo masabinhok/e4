@@ -32,7 +32,7 @@ export default function Signup() {
       console.log(formData);
       await signup(formData.username, formData.password);
       router.push('/');
-    } catch (err: any) {
+    } catch (err) {
       const message = parseError(err instanceof Error ? err.message : 'Signup failed');
       setError(message);
     };

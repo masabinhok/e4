@@ -35,7 +35,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
 
   useEffect(() => {
     const fetchCurrentOpening = async () => {
-      let fetchUrl = `${process.env.NEXT_PUBLIC_API_URL}${(code === 'recorded-lines' || code === 'custom-pgns') ? '/users' : '/openings'}/${code}`
+      const fetchUrl = `${process.env.NEXT_PUBLIC_API_URL}${(code === 'recorded-lines' || code === 'custom-pgns') ? '/users' : '/openings'}/${code}`
 
       await fetch(fetchUrl, {
         method: 'GET',
@@ -52,7 +52,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
       })
     }
     fetchCurrentOpening();
-  }, [])
+  }, [code])
 
 
   const movesContainerRef = useRef<HTMLDivElement>(null);

@@ -5,7 +5,7 @@ import { Chessboard } from 'react-chessboard';
 import Message from '@/components/Message';
 import Link from 'next/link';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { BoardFlip } from '../../types/types';
+import { BoardFlip } from '@/types/types';
 import flipBoard from '@/public/icons/flip.svg';
 import Image from 'next/image';
 import Button from '@/components/Button';
@@ -198,8 +198,6 @@ export default function CustomLine() {
     if (!res.ok) {
       throw new Error('Failed to save PGN');
     }
-
-    const data = await res.json();
     setPgnName('');
     setDescription('');
     setPgn('');

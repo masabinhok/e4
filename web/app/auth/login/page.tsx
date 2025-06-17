@@ -31,7 +31,7 @@ export default function Login() {
     try {
       await login(formData.username, formData.password);
       router.push('/');
-    } catch (err: any) {
+    } catch (err) {
       setError(parseError(err instanceof Error ? err.message : 'Login Failed'));
     }
   };

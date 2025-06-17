@@ -1,28 +1,32 @@
+// ./lib/api.ts
 class ApiClient {
-  private baseURL: string;
-  private isRefreshing = false;
+  private baseURL: string
+  private isRefreshing = false
+
+  // Queue item: when a 401 happens during a refresh,
+  // we enqueue promises to retry once the refresh completes.
   private failedQueue: Array<{
-    resolve: (value?: any) => void;
-    reject: (reason?: any) => void;
-  }> = [];
+    resolve: (value?: string | null) => void
+    reject: (reason?: unknown) => void
+  }> = []
 
   constructor(baseURL: string) {
-    this.baseURL = baseURL;
+    this.baseURL = baseURL
   }
 
-  private async processQueue(error: any, token: string | null = null) {
+  // Process the queue: if error is truthy, reject all; otherwise resolve with token
+  private async processQueue(error: unknown, token: string | null = null): Promise<void> {
     this.failedQueue.forEach(({ resolve, reject }) => {
       if (error) {
-        reject(error);
+        reject(error)
       } else {
-        resolve(token);
+        resolve(token)
       }
-    });
-    
-    this.failedQueue = [];
+    })
+    this.failedQueue = []
   }
 
-  private async refreshToken(): Promise<boolean> {
+  private async refreshToken(): Promise<string | null> {
     try {
       const response = await fetch(`${this.baseURL}/auth/refresh`, {
         method: 'POST',
@@ -30,29 +34,27 @@ class ApiClient {
         headers: {
           'Content-Type': 'application/json',
         },
-      });
-
-      if (response.ok) {
-        return true;
+      })
+      if (!response.ok) {
+        return null
       }
-      return false;
-    } catch (error) {
-      console.error('Token refresh failed:', error);
-      return false;
+      // If your refresh endpoint returns a new access token, parse it here:
+      // e.g. const data = await response.json() as { accessToken: string }
+      // return data.accessToken
+      return null // or return actual token if needed
+    } catch (err: unknown) {
+      console.error('Token refresh failed:', err)
+      return null
     }
   }
 
-  // endpoint linxa, jastai ki /auth/refresh ani options linxa jastai ki body, headers, method... 
-
+  // Main request method
   async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    //create a url with the endpoint and baseurl
-    const url = `${this.baseURL}/${endpoint}`;
-    console.log(url)
+    const url = `${this.baseURL}/${endpoint}`
 
-    //create config to send with the req.
     const config: RequestInit = {
       credentials: 'include',
       headers: {
@@ -60,84 +62,92 @@ class ApiClient {
         ...options.headers,
       },
       ...options,
-    };
+    }
 
     try {
-      const response = await fetch(url, config);
+      const response = await fetch(url, config)
 
-      // Handle 401 Unauthorized
+      // Handle 401 Unauthorized by trying to refresh
       if (response.status === 401) {
         if (this.isRefreshing) {
-          // Wait for the current refresh attempt
-          return new Promise((resolve, reject) => {
-            this.failedQueue.push({ resolve, reject });
+          // Already refreshing: enqueue and wait
+          return new Promise<string | null | undefined>((resolve, reject) => {
+            this.failedQueue.push({ resolve, reject })
           }).then(() => {
-            return this.request<T>(endpoint, options);
-          });
+            // After refresh, retry original request
+            return this.request<T>(endpoint, options)
+          }) as Promise<T>
         }
 
-        this.isRefreshing = true;
-        
-        try {
-          const refreshSuccess = await this.refreshToken();
-          
-          if (refreshSuccess) {
-            this.processQueue(null);
-            this.isRefreshing = false;
-            
-            // Retry original request
-            return this.request<T>(endpoint, options);
-          } else {
-            // Refresh failed, redirect to login
-            this.processQueue(new Error('Token refresh failed'));
-            window.location.href = '/auth/login';
-            throw new Error('Authentication failed');
-          }
-        } catch (refreshError) {
-          this.processQueue(refreshError);
-          this.isRefreshing = false;
-          window.location.href = '/auth/login';
-          throw refreshError;
+        this.isRefreshing = true
+
+        // Attempt refresh
+        const newToken = await this.refreshToken()
+        this.isRefreshing = false
+
+        if (newToken !== null) {
+          // If you need to store/use the new token (e.g., set header), do it here.
+          await this.processQueue(null, newToken)
+          // Retry original request
+          return this.request<T>(endpoint, options)
+        } else {
+          // Refresh failed: reject all queued, redirect to login
+          await this.processQueue(new Error('Token refresh failed'))
+          window.location.href = '/auth/login'
+          throw new Error('Authentication failed')
         }
       }
 
+      // If other error status
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}`);
+        // Try parse error message
+        let errorMessage = `HTTP ${response.status}`
+        try {
+          const errorData = await response.json()
+          if (errorData && typeof errorData.message === 'string') {
+            errorMessage = errorData.message
+          }
+        } catch {
+          // ignore JSON parse error
+        }
+        throw new Error(errorMessage)
       }
 
-      return response.json();
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('fetch')) {
-        throw new Error('Network error. Please check your connection.');
+      // Parse JSON as T
+      return (await response.json()) as T
+    } catch (err: unknown) {
+      // Network or other errors
+      if (err instanceof Error && err.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection.')
       }
-      throw error;
+      throw err
     }
   }
 
-  // Convenience methods
+  // Convenience methods with generic request/response types.
   get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+    return this.request<T>(endpoint, { method: 'GET' })
   }
 
-  post<T>(endpoint: string, data?: any): Promise<T> {
-    console.log(endpoint, data)
+  post<T, D = unknown>(endpoint: string, data?: D): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
-    });
+      body: data !== undefined ? JSON.stringify(data) : undefined,
+    })
   }
 
-  put<T>(endpoint: string, data?: any): Promise<T> {
+  put<T, D = unknown>(endpoint: string, data?: D): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
-    });
+      body: data !== undefined ? JSON.stringify(data) : undefined,
+    })
   }
 
   delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+    return this.request<T>(endpoint, { method: 'DELETE' })
   }
 }
 
-export const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000');
+export const apiClient = new ApiClient(
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+)
