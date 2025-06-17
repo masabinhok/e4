@@ -12,7 +12,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './guards/auth.guard';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,10 +22,10 @@ import { AuthGuard } from './guards/auth.guard';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (config) => ({
-        secret: config.get('jwt.secret')
+        secret: config.get('jwt.secret'),
       }),
       global: true,
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

@@ -25,8 +25,7 @@ const ContributeOpening = () => {
         throw new Error('Failed to submit opening');
       }
 
-      const data = await res.json();
-      console.log("Response from server:", data);
+     await res.json();
 
       // Reset form fields after successful submission
       setName('');

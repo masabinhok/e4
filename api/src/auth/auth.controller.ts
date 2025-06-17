@@ -44,9 +44,9 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Post('logout')
-  async logout(@Req() req: Request, @Res({passthrough: true}) res: Response) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = req['userId'];
-    console.log(userId);
+
     await this.authService.logout(userId);
     res.clearCookie('access_token', {
       httpOnly: true,
@@ -59,8 +59,8 @@ export class AuthController {
       secure: true,
     });
     return {
-      message: 'Logged Out Successfully.'
-    }
+      message: 'Logged Out Successfully.',
+    };
   }
 
   @UseGuards(AuthGuard)
@@ -70,9 +70,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const refreshToken = req.cookies['refresh_token'];
-    console.log(refreshToken);
+
     const tokens = await this.authService.refreshTokens(refreshToken);
-    console.log(tokens)
+
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
       secure: true,

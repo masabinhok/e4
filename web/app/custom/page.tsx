@@ -200,7 +200,6 @@ export default function CustomLine() {
     }
 
     const data = await res.json();
-    console.log('PGN saved:', data);
     setPgnName('');
     setDescription('');
     setPgn('');

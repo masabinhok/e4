@@ -164,7 +164,7 @@ export default function RecordLine() {
     }
 
     const data = await res.json();
-    console.log(data);
+  
 
     setPgnName('');
     setPgnDescription('');

@@ -1,15 +1,15 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { Document } from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose, { Document } from 'mongoose';
 
 @Schema()
-export class RefreshToken extends Document{
-  @Prop({required: true})
-  token: string
+export class RefreshToken extends Document {
+  @Prop({ required: true })
+  token: string;
 
-  @Prop({required: true, type: mongoose.Types.ObjectId})
+  @Prop({ required: true, type: mongoose.Types.ObjectId })
   userId: mongoose.Types.ObjectId;
 
-  @Prop({required: true})
+  @Prop({ required: true })
   expiryDate: Date;
 }
 
