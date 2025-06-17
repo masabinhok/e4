@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Button from '@/components/Button';
 import { Eye, EyeOff } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { parseError } from '@/utils/parseError';
 import { useAuth } from '@/store/auth';
 
@@ -14,14 +14,12 @@ export default function Login() {
   const { login, isLoading, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (isAuthenticated) {
-      const redirectTo = searchParams.get('redirect') || '/';
-      router.replace(redirectTo);
+      router.replace('/')
     }
-  }, [isAuthenticated, router, searchParams]);
+  }, [isAuthenticated, router,]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
