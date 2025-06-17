@@ -1,12 +1,11 @@
-import { fetchUser } from '@/services/auth'
-import React, { useEffect } from 'react'
+'use client'
+import { useAuth } from '@/store/auth'
+import React from 'react'
 
 const Profile = () => {
-  useEffect(() => {
-    fetchUser();
-  }, [])
+  const { user } = useAuth();
   return (
-    <div>Profile</div>
+    <div>{user?.username}</div>
   )
 }
 
