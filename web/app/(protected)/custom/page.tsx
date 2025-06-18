@@ -187,7 +187,8 @@ export default function CustomLine() {
       description: description
     };
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/contribute/custom-pgns`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/variations/custom`, {
+      credentials: 'include',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
