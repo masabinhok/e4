@@ -1,5 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { OpeningsService } from './openings.service';
+import { AddOpeningDto } from './dtos/add-opening.dto';
 
 @Controller('openings')
 export class OpeningsController {
@@ -8,6 +9,12 @@ export class OpeningsController {
   @Get('')
   async findAll() {
     return this.openingsService.findAll();
+  }
+
+  
+  @Post('add')
+  async addOpening(@Body() addOpeningDto: AddOpeningDto) {
+    return this.openingsService.addOpening(addOpeningDto);
   }
 
   @Get(':code')

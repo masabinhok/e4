@@ -13,7 +13,7 @@ export class Opening {
   @Prop({ required: true, unique: true })
   code: string;
 
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Variation' })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Variation', default: [] })
   variations: Variation[];
 }
 

@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Opening, OpeningDocument } from './schemas/opening.schema';
 import { Model } from 'mongoose';
 import { MongooseId } from 'src/types/types';
+import { AddOpeningDto } from './dtos/add-opening.dto';
 
 @Injectable()
 export class OpeningsService {
@@ -26,6 +27,14 @@ export class OpeningsService {
   async findAll() {
     const opening = await this.openingModel.find();
     return opening;
+  }
+
+  async addOpening(dto: AddOpeningDto){
+    const newOpening = await this.openingModel.create(dto);
+    if(!newOpening){
+      throw new InternalServerErrorException('Failed to create a new opening')
+    }
+    return newOpening;
   }
 
   async addContribution(code: string, variationId: MongooseId) : Promise<Opening>{

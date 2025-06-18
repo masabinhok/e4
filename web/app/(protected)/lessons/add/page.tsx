@@ -4,19 +4,20 @@ import React, { FormEvent, useState } from 'react'
 
 const ContributeOpening = () => {
   const [name, setName] = useState<string>('');
+  const [code, setCode] = useState<string>('');
   const [description, setDescription] = useState<string>('');
 
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:5000/openings`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name, description
+          name, description, code
         })
       });
 
@@ -25,7 +26,7 @@ const ContributeOpening = () => {
         throw new Error('Failed to submit opening');
       }
 
-     await res.json();
+      await res.json();
 
       // Reset form fields after successful submission
       setName('');
@@ -55,7 +56,19 @@ const ContributeOpening = () => {
             placeholder="e.g., Caro-Kann Defense"
           />
         </div>
-
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="code" className="text-sm font-semibold text-gray-700">Code</label>
+          <input
+            type="text"
+            id="code"
+            name="code"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            required
+            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="e.g., carokann"
+          />
+        </div>
         <div className="flex flex-col space-y-2">
           <label htmlFor="description" className="text-sm font-semibold text-gray-700">Description</label>
           <textarea
@@ -72,10 +85,6 @@ const ContributeOpening = () => {
 
         <Button type="submit" text="Submit Opening" />
       </form>
-
-      <div className='p-2 px-6 bg-green-100 text-green-500 rounded-xl text-center' >
-        Note: Once the opening is accepted, <br /> you can contribute lines from the lessons page where seen.
-      </div>
     </div>
   )
 }
