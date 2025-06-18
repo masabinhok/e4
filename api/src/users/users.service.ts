@@ -64,6 +64,22 @@ export class UsersService {
     }
     return updatedUser;
   }
+  async addCustomPgns(userId: MongooseId, variationId: MongooseId): Promise<User>{
+    console.log(userId);
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      {
+        $push: { customLines: variationId }
+      },
+      {
+        new: true, // return the updated document
+      }
+    );
+    if(!updatedUser){
+      throw new InternalServerErrorException('Failed to update the user')
+    }
+    return updatedUser;
+  }
   async addContributedLines(userId: MongooseId, variationId: MongooseId): Promise<User>{
     const updatedUser = await this.userModel.findByIdAndUpdate(userId, {
       $push : {

@@ -17,6 +17,12 @@ export class VariationsController {
         console.log('hi')
         return this.variationsService.recordVariation(userId, dto);
       } 
+      
+      @Post('custom')
+      async customVariation(@GetUserId() userId: MongooseId, @Body() dto: ContributeVariationDto ){
+        console.log('hi')
+        return this.variationsService.addCustomVariation(userId, dto);
+      } 
 
       @Post('contribute/:code')
       async contributeVariation(@GetUserId() userId: MongooseId,@Param('code') code: string, @Body() dto: ContributeVariationDto ){

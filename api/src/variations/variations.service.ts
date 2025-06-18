@@ -47,6 +47,25 @@ export class VariationsService {
       message: 'Successfully recorded a variation!'
     }
   }
+  async addCustomVariation(userId: MongooseId, dto: ContributeVariationDto){
+    const variation = {...dto, code: 'custom-pgns'}
+    console.log(variation)
+    const newVariation = await this.variationModel.create(
+     variation
+    );
+    if(!newVariation){
+      throw new InternalServerErrorException('Failed to create a new variation')
+    }
+    console.log(newVariation);
+
+    await this.usersService.addCustomPgns(userId, newVariation._id as MongooseId);
+ 
+    return {
+      message: 'Successfully saved a custom pgn!'
+    }
+  }
+
+
 
 
 
