@@ -95,7 +95,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
     setAutoPlay(false);
     setCurrentLine(moves);
     setBoardFlip(currentOpening.variations[lineKey].boardflip || 'white');
-    setCurrentLineIndex(currentOpening.variations[lineKey].index ?? 0);
+    setCurrentLineIndex(lineKey ?? 0);
     setLineName(currentOpening.variations[lineKey].title);
     setCurrentMoveIndex(0);
     setMoveHistory([]);
