@@ -19,7 +19,7 @@ export class AuthController {
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 15*60*1000,
       path: '/'
     });
@@ -27,7 +27,7 @@ export class AuthController {
     res.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true, 
       secure: true, 
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/',
     })
@@ -48,14 +48,14 @@ export class AuthController {
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 15 * 60 * 1000,
       path: '/',
     });
     res.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/',
     });
@@ -73,12 +73,12 @@ export class AuthController {
     await this.authService.logout(userId);
     res.clearCookie('access_token', {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       secure: true,
     });
     res.clearCookie('refresh_token', {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       secure: true,
     });
     return {
@@ -99,14 +99,14 @@ export class AuthController {
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 15 * 60 * 1000,
       path: '/',
     });
     res.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/',
     });
