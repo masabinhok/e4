@@ -102,13 +102,13 @@ export class AuthService {
     //check if the user exists
     const existingUser = await this.usersService.findUserByUsername(username);
     if (!existingUser) {
-      throw new UnauthorizedException(`Invalid Username`);
+      throw new BadRequestException(`Invalid Username`);
     }
 
     const isPassValid = await bcrypt.compare(password, existingUser.passHash);
 
     if (!isPassValid) {
-      throw new UnauthorizedException('Invalid Password');
+      throw new BadRequestException('Invalid Password');
     }
 
     const tokens = await this.getTokens(existingUser._id as UserId);
