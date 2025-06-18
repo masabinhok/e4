@@ -86,7 +86,6 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard)
   @Post('refresh')
   async refresh(
     @Req() req: Request,
