@@ -36,7 +36,7 @@ export class AuthService {
     access_token: string;
     refresh_token: string;
   }> {
-    const access_token = this.jwtService.sign({ userId }, { expiresIn: '1h' });
+    const access_token = this.jwtService.sign({ userId }, { expiresIn: '1m' });
     const refresh_token = uuidv4();
     return {
       access_token,
