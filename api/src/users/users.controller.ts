@@ -13,5 +13,10 @@ export class UsersController {
   async getRecordedPgns(@GetUserId() userId: MongooseId){
     return this.usersService.getRecordedPgns(userId)
   }
+
+  @Get(':custom-pgns')
+  async getCustomPgns(@GetUserId() userId: MongooseId){
+    return this.usersService.getCustomPgns(userId)
+  }
   
 }

@@ -88,4 +88,16 @@ export class UsersService {
     };
     return recordedLines;
   }
+  async getCustomPgns(userId: MongooseId){
+    const user = await this.userModel.findById(userId).populate('customLines');
+    console.log(user);
+    const customs = user?.customLines;
+    const customLines = {
+      name: 'Custom Pgns',
+      code: 'custom-pgns',
+      description: 'This is a set of custom pgns saved by you.',
+      variations: customs
+    };
+    return customLines;
+  }
 }
