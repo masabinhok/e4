@@ -1,4 +1,5 @@
 import { User } from "@/types/types";
+import { redirect } from "next/navigation";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -6,7 +7,7 @@ interface AuthState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  tokenRefreshInterval: NodeJS.Timeout | null;
+
 
   // Actions
   setUser: (user: User | null) => void;
@@ -17,15 +18,13 @@ interface AuthState {
   checkAuth: () => Promise<boolean>;
   clearAuth: () => void;
   refreshToken: () => Promise<boolean>;
-  startAutoRefresh: () => void;
-  stopAutoRefresh: () => void;
 }
 
 // Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-const REFRESH_INTERVAL = 14 * 60 * 1000; // 14 minutes (tokens usually expire in 15 mins)
 
-const apiCall = async (endpoint: string, options: RequestInit = {}, retry = true): Promise<any> => {
+
+const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     credentials: 'include',
     headers: {
@@ -35,20 +34,16 @@ const apiCall = async (endpoint: string, options: RequestInit = {}, retry = true
     ...options,
   });
 
-  if (response.status === 401 && retry) {
+  if (response.status === 401) {
     console.warn('401 detected. Attempting token refresh...');
     try {
       const success = await useAuth.getState().refreshToken();
-
       if (success) {
-        // Retry the original request once after successful refresh
-        return apiCall(endpoint, options, false);
+        return apiCall(endpoint, options);
       }
     } catch (refreshError) {
       console.error('Token refresh failed:', refreshError);
     }
-
-    // If refresh fails, let the original error fall through
     throw new Error('Unauthorized. Please login again.');
   }
 
@@ -67,7 +62,6 @@ export const useAuth = create<AuthState>()(
       user: null,
       isLoading: false,
       isAuthenticated: false,
-      tokenRefreshInterval: null,
 
       setUser: (user) =>
         set({
@@ -93,8 +87,7 @@ export const useAuth = create<AuthState>()(
             isLoading: false,
           });
 
-          // Start auto refresh after successful login
-          get().startAutoRefresh();
+
         } catch (error) {
           set({ isLoading: false });
           throw error;
@@ -115,9 +108,7 @@ export const useAuth = create<AuthState>()(
             isAuthenticated: true,
             isLoading: false,
           });
-
-          // Start auto refresh after successful signup
-          get().startAutoRefresh();
+        
         } catch (error) {
           set({ isLoading: false });
           throw error;
@@ -127,9 +118,6 @@ export const useAuth = create<AuthState>()(
       logout: async () => {
         try {
           set({ isLoading: true });
-          
-          // Stop auto refresh first
-          get().stopAutoRefresh();
 
           await apiCall('/auth/logout', {
             method: 'POST',
@@ -159,8 +147,6 @@ export const useAuth = create<AuthState>()(
             isLoading: false,
           });
 
-          // Start auto refresh if user is authenticated
-          get().startAutoRefresh();
           return true;
         } catch (error) {
           console.error('Auth check failed:', error);
@@ -169,13 +155,17 @@ export const useAuth = create<AuthState>()(
             isAuthenticated: false,
             isLoading: false,
           });
-          get().stopAutoRefresh();
           return false;
         }
       },
 
       refreshToken: async () => {
         try {
+          const hasRefreshToken = document.cookie.includes('refresh_token');
+
+          if(!hasRefreshToken){
+            redirect('/auth/login')
+          }
           await apiCall('/auth/refresh', {
             method: 'POST',
           });
@@ -191,7 +181,6 @@ export const useAuth = create<AuthState>()(
             isAuthenticated: false,
             isLoading: false,
           });
-          get().stopAutoRefresh();
           
           // Optionally redirect to login
           if (typeof window !== 'undefined') {
@@ -202,43 +191,7 @@ export const useAuth = create<AuthState>()(
         }
       },
 
-      startAutoRefresh: () => {
-        // Clear existing interval if any
-        get().stopAutoRefresh();
-
-        const interval = setInterval(async () => {
-          const { isAuthenticated, refreshToken } = get();
-          
-          if (isAuthenticated) {
-            console.log('Auto-refreshing token...');
-            const success = await refreshToken();
-            
-            if (!success) {
-              console.log('Auto-refresh failed, stopping interval');
-              get().stopAutoRefresh();
-            }
-          } else {
-            // User is not authenticated, stop the interval
-            get().stopAutoRefresh();
-          }
-        }, REFRESH_INTERVAL);
-
-        set({ tokenRefreshInterval: interval });
-        console.log('Auto token refresh started');
-      },
-
-      stopAutoRefresh: () => {
-        const { tokenRefreshInterval } = get();
-        
-        if (tokenRefreshInterval) {
-          clearInterval(tokenRefreshInterval);
-          set({ tokenRefreshInterval: null });
-          console.log('Auto token refresh stopped');
-        }
-      },
-
       clearAuth: () => {
-        get().stopAutoRefresh();
         set({
           user: null,
           isAuthenticated: false,
