@@ -14,7 +14,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { RefreshToken } from './schemas/refresh-token.schema';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import { UserId } from 'src/types/types';
+import { MongooseId } from 'src/types/types';
 import { User } from 'src/users/schema/user.schema';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class AuthService {
     return hash;
   }
 
-  async getTokens(userId: UserId): Promise<{
+  async getTokens(userId: MongooseId): Promise<{
     access_token: string;
     refresh_token: string;
   }> {
@@ -44,7 +44,7 @@ export class AuthService {
     };
   }
 
-  async storeRefreshToken(userId: UserId, rt: string) {
+  async storeRefreshToken(userId: MongooseId, rt: string) {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 7);
 
@@ -78,9 +78,9 @@ export class AuthService {
       throw new InternalServerErrorException('Failed to create user.');
     }
 
-    const tokens = await this.getTokens(newUser._id as UserId);
+    const tokens = await this.getTokens(newUser._id as MongooseId);
     await this.storeRefreshToken(
-      newUser._id as UserId,
+      newUser._id as MongooseId,
       tokens.refresh_token,
     );
 
@@ -111,9 +111,9 @@ export class AuthService {
       throw new BadRequestException('Invalid Password');
     }
 
-    const tokens = await this.getTokens(existingUser._id as UserId);
+    const tokens = await this.getTokens(existingUser._id as MongooseId);
     await this.storeRefreshToken(
-      existingUser._id as UserId,
+      existingUser._id as MongooseId,
       tokens.refresh_token,
     );
 
@@ -144,7 +144,7 @@ export class AuthService {
     return tokens;
   }
 
-  async logout(userId: UserId): Promise<{
+  async logout(userId: MongooseId): Promise<{
     message: string;
   }> {
     const deletedToken = await this.refreshTokenModel.findOneAndDelete({
@@ -156,7 +156,7 @@ export class AuthService {
     };
   }
 
-  async getMe(userId: UserId): Promise<{
+  async getMe(userId: MongooseId): Promise<{
     user: User
   }>{
     return this.usersService.findUserById(userId);

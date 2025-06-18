@@ -15,7 +15,7 @@ import { useSoundStore } from '@/store/useSoundStore';
 
 export default function RecordLine() {
   const searchParams = useSearchParams();
-  const code = searchParams.get('code') || 'recorded-pgns';
+  const code = searchParams.get('code');
   const [pgnName, setPgnName] = useState<string>('');
   const [pgnDescription, setPgnDescription] = useState<string>('');
   const [game, setGame] = useState(new Chess());
@@ -152,7 +152,9 @@ export default function RecordLine() {
       moves: moveHistory,
       boardflip: boardFlip,
     }
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/contribute/${code ? code : 'recorded-pgns'}`, {
+    console.log(newVariation)
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/variations/${code ? `contribute/${code}` : 'record'}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

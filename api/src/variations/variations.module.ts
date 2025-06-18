@@ -4,6 +4,7 @@ import { VariationsController } from './variations.controller';
 import { OpeningsModule } from 'src/openings/openings.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Variation, VariationSchema } from './schema/variation.schema';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { Variation, VariationSchema } from './schema/variation.schema';
         schema: VariationSchema,
       },
     ]),
+    UsersModule,
     forwardRef(() => OpeningsModule),
   ],
   controllers: [VariationsController],

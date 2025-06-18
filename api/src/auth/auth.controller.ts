@@ -5,7 +5,7 @@ import { LoginDto } from './dtos/login.dto';
 import { Request, Response } from 'express';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { GetUserId } from 'src/common/decorators/get-user.decorator';
-import { UserId } from 'src/types/types';
+import { MongooseId } from 'src/types/types';
 
 @Controller('auth')
 export class AuthController {
@@ -115,7 +115,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('me')
-  async getMe(@GetUserId() userId: UserId){
+  async getMe(@GetUserId() userId: MongooseId){
     return this.authService.getMe(userId);
   }
 }

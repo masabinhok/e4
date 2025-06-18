@@ -14,6 +14,9 @@ export class User extends Document {
   recordedLines?: Variation[];
 
   @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }])
+  contributedLines?: Variation[];
+
+  @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }])
   customLines?: Variation[];
 
   @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }])

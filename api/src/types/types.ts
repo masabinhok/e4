@@ -1,3 +1,6 @@
 import { Types } from 'mongoose';
 
-export type UserId = Types.ObjectId;
+export type MongooseId = Types.ObjectId;
+
+
+export type BoardFlip = 'white' | 'black';
