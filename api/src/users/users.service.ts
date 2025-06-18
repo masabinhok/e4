@@ -76,4 +76,16 @@ export class UsersService {
     }
     return updatedUser;
   }
+
+  async getRecordedPgns(userId: MongooseId){
+    const user = await this.userModel.findById(userId).populate('recordedLines');
+    const recordings = user?.recordedLines;
+    const recordedLines = {
+      name: 'Recorded Lines',
+      code: 'recorded-lines',
+      description: 'This is a set of recorded lines by you.',
+      variations: recordings
+    };
+    return recordedLines;
+  }
 }

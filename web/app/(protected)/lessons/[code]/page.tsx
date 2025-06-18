@@ -36,11 +36,12 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
   useEffect(() => {
     const fetchCurrentOpening = async () => {
       const fetchUrl = `${process.env.NEXT_PUBLIC_API_URL}${(code === 'recorded-lines' || code === 'custom-pgns') ? '/users' : '/openings'}/${code}`
-
+      console.log(fetchUrl);
       await fetch(fetchUrl, {
+        credentials: 'include',
         method: 'GET',
         headers: {
-          content: 'Application/json'
+          'Content-Type': 'application/json'
         },
       }).then(res => {
         if (!res.ok) {
@@ -48,6 +49,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
         }
         return res.json();
       }).then(data => {
+        console.log(data);
         setCurrentOpening(data);
       })
     }
@@ -58,30 +60,6 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
   const movesContainerRef = useRef<HTMLDivElement>(null);
 
   const getNewGame = useCallback(() => new Chess(), []);
-
-  useEffect(() => {
-    const fetchOpening = async (code: string) => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/${code}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error('Failed to fetch opening');
-        }
-
-        const data = await res.json();
-        setCurrentOpening(data);
-      }
-      catch (error) {
-        console.error('Error fetching opening:', error);
-      }
-    }
-    fetchOpening(code);
-  }, [code]);
 
   useEffect(() => {
     setIsBrowser(true);
