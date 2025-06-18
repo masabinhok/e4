@@ -302,11 +302,11 @@ export default function RecordLine() {
           <Button onClick={savePGN} text='Save PGN' icon="#" />
         </div>
         <div className='flex flex-col w-full gap-2'>
-          <Link href={`/lessons/recorded-pgns`} className='flex flex-col gap-4 w-full'>
+          <Link href={`/lessons/recorded-lines`} className='flex flex-col gap-4 w-full'>
             <Button text="Play Recorded Lines" icon="→" />
           </Link>
           {
-            isContributed && (<Link href={`/lessons/${code}`} >
+            isContributed && (<Link href={`/lessons/${code ? code : 'recorded-lines'}`} >
               <Button text="Visit Latest Contribution" icon="→" onClick={() => {
                 setIsContributed(false);
               }} />
