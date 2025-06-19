@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Opening, OpeningDocument } from './schemas/opening.schema';
 import { Model } from 'mongoose';
@@ -29,24 +33,30 @@ export class OpeningsService {
     return opening;
   }
 
-  async addOpening(dto: AddOpeningDto){
+  async addOpening(dto: AddOpeningDto) {
     const newOpening = await this.openingModel.create(dto);
-    if(!newOpening){
-      throw new InternalServerErrorException('Failed to create a new opening')
+    if (!newOpening) {
+      throw new InternalServerErrorException('Failed to create a new opening');
     }
     return newOpening;
   }
 
-  async addContribution(code: string, variationId: MongooseId) : Promise<Opening>{
-    const updatedOpening = await this.openingModel.findOneAndUpdate({
-      code
-    }, {
-      $push: {
-        variations: variationId
-      }
-    });
-    if(!updatedOpening){
-      throw new InternalServerErrorException('Failed to update the opening')
+  async addContribution(
+    code: string,
+    variationId: MongooseId,
+  ): Promise<Opening> {
+    const updatedOpening = await this.openingModel.findOneAndUpdate(
+      {
+        code,
+      },
+      {
+        $push: {
+          variations: variationId,
+        },
+      },
+    );
+    if (!updatedOpening) {
+      throw new InternalServerErrorException('Failed to update the opening');
     }
 
     return updatedOpening;

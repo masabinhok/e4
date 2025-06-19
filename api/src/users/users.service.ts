@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
@@ -9,13 +13,13 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async findUserById(userId: MongooseId): Promise<{
-    user: User
+    user: User;
   }> {
     const user = await this.userModel.findById(userId);
-    if(!user){
+    if (!user) {
       throw new InternalServerErrorException('User not found');
     }
-    return {user};
+    return { user };
   }
   async findUserByUsername(username: string): Promise<User | null> {
     const user = await this.userModel.findOne({
@@ -48,63 +52,74 @@ export class UsersService {
     return user;
   }
 
-  async addRecordedLines(userId: MongooseId, variationId: MongooseId): Promise<User>{
+  async addRecordedLines(
+    userId: MongooseId,
+    variationId: MongooseId,
+  ): Promise<User> {
     console.log(userId);
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {
-        $push: { recordedLines: variationId }
+        $push: { recordedLines: variationId },
       },
       {
         new: true, // return the updated document
-      }
+      },
     );
-    if(!updatedUser){
-      throw new InternalServerErrorException('Failed to update the user')
+    if (!updatedUser) {
+      throw new InternalServerErrorException('Failed to update the user');
     }
     return updatedUser;
   }
-  async addCustomPgns(userId: MongooseId, variationId: MongooseId): Promise<User>{
+  async addCustomPgns(
+    userId: MongooseId,
+    variationId: MongooseId,
+  ): Promise<User> {
     console.log(userId);
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {
-        $push: { customLines: variationId }
+        $push: { customLines: variationId },
       },
       {
         new: true, // return the updated document
-      }
+      },
     );
-    if(!updatedUser){
-      throw new InternalServerErrorException('Failed to update the user')
+    if (!updatedUser) {
+      throw new InternalServerErrorException('Failed to update the user');
     }
     return updatedUser;
   }
-  async addContributedLines(userId: MongooseId, variationId: MongooseId): Promise<User>{
+  async addContributedLines(
+    userId: MongooseId,
+    variationId: MongooseId,
+  ): Promise<User> {
     const updatedUser = await this.userModel.findByIdAndUpdate(userId, {
-      $push : {
-        contributedLines: variationId
-      }
+      $push: {
+        contributedLines: variationId,
+      },
     });
 
-    if(!updatedUser){
-      throw new InternalServerErrorException('Failed to update the user')
+    if (!updatedUser) {
+      throw new InternalServerErrorException('Failed to update the user');
     }
     return updatedUser;
   }
 
-  async getRecordedPgns(userId: MongooseId){
-    const user = await this.userModel.findById(userId).populate('recordedLines');
+  async getRecordedPgns(userId: MongooseId) {
+    const user = await this.userModel
+      .findById(userId)
+      .populate('recordedLines');
     const recordings = user?.recordedLines;
     const recordedLines = {
       name: 'Recorded Lines',
       code: 'recorded-lines',
       description: 'This is a set of recorded lines by you.',
-      variations: recordings
+      variations: recordings,
     };
     return recordedLines;
   }
-  async getCustomPgns(userId: MongooseId){
+  async getCustomPgns(userId: MongooseId) {
     const user = await this.userModel.findById(userId).populate('customLines');
     console.log(user);
     const customs = user?.customLines;
@@ -112,7 +127,7 @@ export class UsersService {
       name: 'Custom Pgns',
       code: 'custom-pgns',
       description: 'This is a set of custom pgns saved by you.',
-      variations: customs
+      variations: customs,
     };
     return customLines;
   }

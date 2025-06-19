@@ -55,11 +55,12 @@ export class AuthService {
     });
   }
 
-  async signUp(signUpDto: SignUpDto): Promise<{user: any, tokens: {
-    access_token: string, 
-    refresh_token: string
-  }
-
+  async signUp(signUpDto: SignUpDto): Promise<{
+    user: any;
+    tokens: {
+      access_token: string;
+      refresh_token: string;
+    };
   }> {
     const { username, password } = signUpDto;
     const existingUser = await this.usersService.findUserByUsername(username);
@@ -85,16 +86,17 @@ export class AuthService {
     );
 
     return {
-      user: newUser, tokens
+      user: newUser,
+      tokens,
     };
   }
 
   async login(loginDto: LoginDto): Promise<{
-    user: any,
+    user: any;
     tokens: {
       access_token: string;
       refresh_token: string;
-    }
+    };
   }> {
     //get credentials from the client
     const { username, password } = loginDto;
@@ -117,10 +119,10 @@ export class AuthService {
       tokens.refresh_token,
     );
 
-  
     return {
-      user: existingUser, tokens
-    }
+      user: existingUser,
+      tokens,
+    };
   }
 
   async refreshTokens(rt: string): Promise<{
@@ -157,8 +159,8 @@ export class AuthService {
   }
 
   async getMe(userId: MongooseId): Promise<{
-    user: User
-  }>{
+    user: User;
+  }> {
     return this.usersService.findUserById(userId);
   }
 }

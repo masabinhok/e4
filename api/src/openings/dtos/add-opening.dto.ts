@@ -1,8 +1,8 @@
-import { IsString } from "class-validator";
+import { IsString } from 'class-validator';
 
 export class AddOpeningDto {
   @IsString()
-  name: string; 
+  name: string;
 
   @IsString()
   code: string;

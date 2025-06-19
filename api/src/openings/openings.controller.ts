@@ -11,7 +11,6 @@ export class OpeningsController {
     return this.openingsService.findAll();
   }
 
-  
   @Post('add')
   async addOpening(@Body() addOpeningDto: AddOpeningDto) {
     return this.openingsService.addOpening(addOpeningDto);

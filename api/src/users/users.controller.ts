@@ -10,13 +10,12 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get(':recorded-lines')
-  async getRecordedPgns(@GetUserId() userId: MongooseId){
-    return this.usersService.getRecordedPgns(userId)
+  async getRecordedPgns(@GetUserId() userId: MongooseId) {
+    return this.usersService.getRecordedPgns(userId);
   }
 
   @Get(':custom-pgns')
-  async getCustomPgns(@GetUserId() userId: MongooseId){
-    return this.usersService.getCustomPgns(userId)
+  async getCustomPgns(@GetUserId() userId: MongooseId) {
+    return this.usersService.getCustomPgns(userId);
   }
-  
 }

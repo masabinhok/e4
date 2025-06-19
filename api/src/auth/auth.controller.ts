@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { LoginDto } from './dtos/login.dto';
@@ -12,30 +20,32 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  async signUp(@Body() signUpDto: SignUpDto,
-@Res({passthrough: true}) res: Response) {
-    const {user, tokens} = await this.authService.signUp(signUpDto);
+  async signUp(
+    @Body() signUpDto: SignUpDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { user, tokens } = await this.authService.signUp(signUpDto);
 
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
       maxAge: 60 * 60 * 1000,
-      path: '/'
+      path: '/',
     });
 
     res.cookie('refresh_token', tokens.refresh_token, {
-      httpOnly: true, 
-      secure: true, 
+      httpOnly: true,
+      secure: true,
       sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/',
-    })
+    });
 
     return {
       user,
-      message: 'Signup Successful!'
-    }
+      message: 'Signup Successful!',
+    };
   }
 
   @Post('login')
@@ -43,7 +53,7 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const {user, tokens} = await this.authService.login(loginDto);
+    const { user, tokens } = await this.authService.login(loginDto);
 
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
@@ -60,9 +70,10 @@ export class AuthController {
       path: '/',
     });
 
-    return { 
-      user, 
-      messsage: 'Login Successful' };
+    return {
+      user,
+      messsage: 'Login Successful',
+    };
   }
 
   @UseGuards(AuthGuard)
@@ -115,7 +126,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('me')
-  async getMe(@GetUserId() userId: MongooseId){
+  async getMe(@GetUserId() userId: MongooseId) {
     return this.authService.getMe(userId);
   }
 }

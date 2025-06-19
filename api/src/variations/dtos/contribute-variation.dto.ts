@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsString } from "class-validator";
+import { IsArray, IsEnum, IsString } from 'class-validator';
 
 enum BoardFlip {
   WHITE = 'white',
