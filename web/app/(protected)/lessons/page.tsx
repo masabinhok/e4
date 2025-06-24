@@ -8,6 +8,32 @@ import { Opening } from '@/types/types'
 
 const LessonsPage = () => {
   const [openings, setOpenings] = useState<Opening[] | []>([]);
+  const [pendingOpenings, setPendingOpenings] = useState<Opening[] | []>([]);
+
+  useEffect(() => {
+    const fetchPendingOpenings = async () => {
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/pending`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
+        }).then(res => {
+          if (!res.ok) {
+            throw new Error('network error');
+          }
+          return res.json();
+        }).then(data => {
+          setPendingOpenings(data);
+        });
+      }
+      catch (error) {
+        throw new Error(`Error: ${error}`);
+      }
+    }
+    fetchPendingOpenings();
+  }, [])
 
   useEffect(() => {
     const fetchOpenings = async () => {
@@ -31,6 +57,7 @@ const LessonsPage = () => {
         throw new Error(`Error: ${error}`);
       }
     }
+
     fetchOpenings();
   }, [])
 
@@ -72,6 +99,16 @@ const LessonsPage = () => {
 
             <Link href={`/lessons/${lesson.code}`} className="inline-block">
               <Button text='Practice Lines' />
+            </Link>
+          </div>
+        ))}
+        {pendingOpenings.map((lesson, index) => (
+          <div key={index} className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all ">
+            <h1 className="text-2xl lg:text-3xl font-bold mb-4">{lesson.name}</h1>
+            <p className="text-gray-600 mb-6 line-clamp-2">{lesson.description}</p>
+
+            <Link href={`/lessons/${lesson.code}`} className="inline-block">
+              <Button disabled={true} text='Pending Request' />
             </Link>
           </div>
         ))}

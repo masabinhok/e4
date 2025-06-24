@@ -18,6 +18,11 @@ export class OpeningsController {
     return this.openingsService.findAll();
   }
 
+  @Get('pending')
+  async findPending(@GetUser('sub') userId: MongooseId) {
+    return this.openingsService.findPending(userId);
+  }
+
   @Post('add')
   async addOpening(@Body() addOpeningDto: AddOpeningDto, @GetUser('sub') userId: MongooseId) {
     return this.openingsService.addOpening(addOpeningDto, userId);

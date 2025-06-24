@@ -29,10 +29,18 @@ export class OpeningsService {
   }
 
   async findAll() {
-    const opening = await this.openingModel.find({
+    const openings = await this.openingModel.find({
       status: Status.Accepted
     });
-    return opening;
+    return openings;
+  }
+
+  async findPending(userId) {
+    const openings = await this.openingModel.find({
+      status: Status.Pending,
+      contributor: userId
+    })
+    return openings;
   }
 
   async acceptOpening(openingId: MongooseId){
