@@ -35,7 +35,7 @@ export class OpeningsService {
     return openings;
   }
 
-  async findPending(userId) {
+  async findPending(userId: MongooseId) {
     const openings = await this.openingModel.find({
       status: Status.Pending,
       contributor: userId
