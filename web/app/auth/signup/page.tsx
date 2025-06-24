@@ -30,7 +30,7 @@ export default function Signup() {
     setError('');
     try {
 
-      await signup(formData.fullName, formData.email,  formData.password);
+      await signup(formData.fullName, formData.email, formData.password);
       router.push('/');
     } catch (err) {
       const message = parseError(err instanceof Error ? err.message : 'Signup failed');
@@ -108,7 +108,7 @@ export default function Signup() {
 
         <p className="text-center text-gray-600 text-sm mt-8">
           Already have an account?{' '}
-          <a href="/auth/login" className="text-blue-500 hover:underline">
+          <a href="/auth/login" className="text-blue-400 hover:underline">
             Log in
           </a>
         </p>

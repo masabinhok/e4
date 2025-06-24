@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { OpeningsService } from './openings.service';
 import { AddOpeningDto } from './dtos/add-opening.dto';
 import { MongooseId } from 'src/types/types';
@@ -21,6 +21,11 @@ export class OpeningsController {
   @Get('pending')
   async findPending(@GetUser('sub') userId: MongooseId) {
     return this.openingsService.findPending(userId);
+  }
+
+  @Delete('cancel/:id')
+  async cancelContribution(@Param('id') openingId: MongooseId){
+    return this.openingsService.cancelContribution(openingId);
   }
 
   @Post('add')

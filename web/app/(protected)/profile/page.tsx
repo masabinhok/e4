@@ -74,7 +74,7 @@ const Profile = () => {
     value,
     subtitle,
     icon: Icon,
-    color = "text-blue-500"
+    color = "text-blue-400"
   }: {
     title: string
     value: string | number
@@ -117,7 +117,7 @@ const Profile = () => {
 
   const { logout } = useAuth();
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     await logout();
   }
 

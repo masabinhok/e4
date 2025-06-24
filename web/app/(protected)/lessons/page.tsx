@@ -10,63 +10,79 @@ const LessonsPage = () => {
   const [openings, setOpenings] = useState<Opening[] | []>([]);
   const [pendingOpenings, setPendingOpenings] = useState<Opening[] | []>([]);
 
-  useEffect(() => {
-    const fetchPendingOpenings = async () => {
-      try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/pending`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include'
-        }).then(res => {
-          if (!res.ok) {
-            throw new Error('network error');
-          }
-          return res.json();
-        }).then(data => {
-          setPendingOpenings(data);
-        });
-      }
-      catch (error) {
-        throw new Error(`Error: ${error}`);
-      }
+  const fetchPendingOpenings = async () => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/pending`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      }).then(res => {
+        if (!res.ok) {
+          throw new Error('network error');
+        }
+        return res.json();
+      }).then(data => {
+        setPendingOpenings(data);
+      });
     }
+    catch (error) {
+      throw new Error(`Error: ${error}`);
+    }
+  }
+
+  const fetchOpenings = async () => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      }).then(res => {
+        if (!res.ok) {
+          throw new Error('network error');
+        }
+        return res.json();
+      }).then(data => {
+        setOpenings(data);
+      });
+    }
+    catch (error) {
+      throw new Error(`Error: ${error}`);
+    }
+  }
+
+  const handleCancel = async (openingId: string) => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/cancel/${openingId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then(res => {
+        if (!res.ok) {
+          throw new Error('network error');
+        }
+        fetchPendingOpenings();
+      })
+    } catch (error) {
+      throw new Error(`Error: ${error}`);
+    }
+  }
+
+  useEffect(() => {
     fetchPendingOpenings();
-  }, [])
-
-  useEffect(() => {
-    const fetchOpenings = async () => {
-      try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include'
-        }).then(res => {
-          if (!res.ok) {
-            throw new Error('network error');
-          }
-          return res.json();
-        }).then(data => {
-          setOpenings(data);
-        });
-      }
-      catch (error) {
-        throw new Error(`Error: ${error}`);
-      }
-    }
-
     fetchOpenings();
   }, [])
-
 
   return (
     <main className="p-4 lg:p-10 lg:ml-10">
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-[1100px] max-lg:p-5">
         <div className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all">
-          <h1 className="text-2xl lg:text-3xl text-blue-500 font-bold mb-4">Add New Opening</h1>
+          <h1 className="text-2xl lg:text-3xl text-blue-400 font-bold mb-4">Add New Opening</h1>
           <p className="text-gray-600 mb-6 line-clamp-2">
             You can add a new opening by clicking the button below. This will allow you to contribute a new opening for everyone to use.
           </p>
@@ -75,7 +91,7 @@ const LessonsPage = () => {
           </Link>
         </div>
         <div className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all">
-          <h1 className="text-2xl lg:text-3xl text-blue-500 font-bold mb-4">Recorded Lines</h1>
+          <h1 className="text-2xl lg:text-3xl text-blue-400 font-bold mb-4">Recorded Lines</h1>
           <p className="text-gray-600 mb-6 line-clamp-2">
             Here are the list of recorded lines, you can record lines by playing it and save it to practice, learn or quiz.
           </p>
@@ -84,7 +100,7 @@ const LessonsPage = () => {
           </Link>
         </div>
         <div className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all">
-          <h1 className="text-2xl lg:text-3xl text-blue-500 font-bold mb-4">Custom PGNs</h1>
+          <h1 className="text-2xl lg:text-3xl text-blue-400 font-bold mb-4">Custom PGNs</h1>
           <p className="text-gray-600 mb-6 line-clamp-2">
             Here are the list of custom PGNs, you can add custom lines directly by pasting a valid pgn and save it to practice, learn or quiz.
           </p>
@@ -107,9 +123,12 @@ const LessonsPage = () => {
             <h1 className="text-2xl lg:text-3xl font-bold mb-4">{lesson.name}</h1>
             <p className="text-gray-600 mb-6 line-clamp-2">{lesson.description}</p>
 
-            <Link href={`/lessons/${lesson.code}`} className="inline-block">
-              <Button disabled={true} text='Pending Request' />
-            </Link>
+            <div className='flex items-center justify-between gap-5'>
+              <Link href={`/lessons/${lesson.code}`} className='w-full'>
+                <Button disabled={true} text='Pending...' />
+              </Link>
+              <Button onClick={() => handleCancel(lesson._id)} color="red" text='Cancel Request' />
+            </div>
           </div>
         ))}
       </section>

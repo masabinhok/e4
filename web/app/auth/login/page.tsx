@@ -46,7 +46,7 @@ export default function Login() {
           ♟️ Login to e4
         </h2>
 
-  
+
 
         <div className="mb-6">
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -92,7 +92,7 @@ export default function Login() {
 
         <p className="text-center text-gray-600 text-sm mt-8">
           New to e4?    {' '}
-          <a href="/auth/signup" className="text-blue-500 hover:underline">
+          <a href="/auth/signup" className="text-blue-400 hover:underline">
             Sign Up
           </a>
         </p>

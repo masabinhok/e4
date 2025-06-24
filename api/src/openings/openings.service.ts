@@ -57,6 +57,13 @@ export class OpeningsService {
       }
   }
 
+  async cancelContribution(openingId: MongooseId){
+     await this.openingModel.findByIdAndDelete(openingId);
+     return {
+      message: 'Cancelled Opening Contribution'
+     }
+  }
+
   async addOpening(dto: AddOpeningDto, userId: MongooseId) {
     const newOpening = await this.openingModel.create({
       ...dto, 

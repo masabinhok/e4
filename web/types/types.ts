@@ -25,6 +25,7 @@ export type OpeningVariation = {
 };
 
 export type Opening = {
+  _id: string;
   name: string;
   description: string;
   code: string;
