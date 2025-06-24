@@ -2,11 +2,17 @@ export type Mode = 'practice' | 'quiz' | 'learn'
 
 export type BoardFlip = 'white' | 'black'
 
+export enum Role {
+  Admin = 'ADMIN',
+  User = 'USER'
+}
+
 
 export type User = {
   _id: string;
   fullName: string;
   email: string;
+  role: Role
   recordedLines?: string[];
   customLines?: string[];
   practicedLines?: string[];
