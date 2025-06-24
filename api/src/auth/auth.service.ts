@@ -90,7 +90,7 @@ export class AuthService {
       newUser._id as MongooseId,
       tokens.refreshToken,
     );
-    console.log('returning tokens')
+
     return tokens;
   }
 
@@ -128,7 +128,6 @@ export class AuthService {
   }> {
     
     const user = await this.usersService.findUserById(userId);
-    console.log(user);
     if(!user || !user.refreshToken){
       throw new ForbiddenException('Invalid refresh token');
     }

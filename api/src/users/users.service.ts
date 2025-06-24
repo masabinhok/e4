@@ -63,7 +63,7 @@ export class UsersService {
     userId: MongooseId,
     variationId: MongooseId,
   ): Promise<User> {
-    console.log(userId);
+
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {
@@ -82,7 +82,7 @@ export class UsersService {
     userId: MongooseId,
     variationId: MongooseId,
   ): Promise<User> {
-    console.log(userId);
+
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {
@@ -128,7 +128,7 @@ export class UsersService {
   }
   async getCustomPgns(userId: MongooseId) {
     const user = await this.userModel.findById(userId).populate('customLines');
-    console.log(user);
+
     const customs = user?.customLines;
     const customLines = {
       name: 'Custom Pgns',

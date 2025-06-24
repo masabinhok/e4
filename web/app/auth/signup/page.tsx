@@ -29,7 +29,7 @@ export default function Signup() {
     e.preventDefault();
     setError('');
     try {
-      console.log(formData);
+
       await signup(formData.fullName, formData.email,  formData.password);
       router.push('/');
     } catch (err) {

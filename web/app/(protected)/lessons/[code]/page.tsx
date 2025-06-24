@@ -36,7 +36,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
   useEffect(() => {
     const fetchCurrentOpening = async () => {
       const fetchUrl = `${process.env.NEXT_PUBLIC_API_URL}${(code === 'recorded-lines' || code === 'custom-pgns') ? '/users' : '/openings'}/${code}`
-      console.log(fetchUrl);
+
       await fetch(fetchUrl, {
         credentials: 'include',
         method: 'GET',
@@ -49,7 +49,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
         }
         return res.json();
       }).then(data => {
-        console.log(data);
+
         setCurrentOpening(data);
       })
     }

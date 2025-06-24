@@ -38,7 +38,6 @@ export class AuthController {
       maxAge: 7* 24* 60 * 60* 1000
     });
 
-    console.log(accessToken,'jfdkslaf', refreshToken);
     return {
       message: 'Signed Up Successfully'
     }

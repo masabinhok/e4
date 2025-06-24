@@ -152,7 +152,7 @@ export default function RecordLine() {
       moves: moveHistory,
       boardflip: boardFlip,
     }
-    console.log(newVariation)
+
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/variations/${code ? `contribute/${code}` : 'record'}`, {
       credentials: 'include',

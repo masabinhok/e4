@@ -63,7 +63,7 @@ export class VariationsService {
         'Failed to create a new variation',
       );
     }
-    console.log(newVariation);
+
 
     //this should be done after accepted by the admin.
     
@@ -71,14 +71,14 @@ export class VariationsService {
 
   async recordVariation(userId: MongooseId, dto: ContributeVariationDto) {
     const variation = { ...dto, code: 'recorded-pgns' };
-    console.log(variation);
+
     const newVariation = await this.variationModel.create(variation);
     if (!newVariation) {
       throw new InternalServerErrorException(
         'Failed to create a new variation',
       );
     }
-    console.log(newVariation);
+
 
     await this.usersService.addRecordedLines(
       userId,
@@ -92,14 +92,13 @@ export class VariationsService {
 
   async addCustomVariation(userId: MongooseId, dto: ContributeVariationDto) {
     const variation = { ...dto, code: 'custom-pgns' };
-    console.log(variation);
+
     const newVariation = await this.variationModel.create(variation);
     if (!newVariation) {
       throw new InternalServerErrorException(
         'Failed to create a new variation',
       );
     }
-    console.log(newVariation);
 
     await this.usersService.addCustomPgns(
       userId,

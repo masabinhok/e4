@@ -133,7 +133,7 @@ export const useAuth = create<AuthState>()(
             method: 'GET',
           });
 
-          console.log(data);
+
           set({
             user: data,
             isAuthenticated: true,
@@ -157,8 +157,6 @@ export const useAuth = create<AuthState>()(
           await apiCall('/auth/refresh', {
             method: 'POST',
           });
-
-          console.log('Token refreshed successfully');
           return true;
         } catch (error) {
           console.error('Token refresh failed:', error);
