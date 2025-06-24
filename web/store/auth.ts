@@ -1,5 +1,4 @@
 import { User } from "@/types/types";
-import { redirect } from "next/navigation";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
