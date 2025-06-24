@@ -5,8 +5,8 @@ export type BoardFlip = 'white' | 'black'
 
 export type User = {
   _id: string;
-  username: string;
-  passHash?: string;
+  fullName: string;
+  email: string;
   recordedLines?: string[];
   customLines?: string[];
   practicedLines?: string[];

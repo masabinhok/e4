@@ -12,8 +12,8 @@ interface AuthState {
   // Actions
   setUser: (user: User | null) => void;
   setLoading: (isLoading: boolean) => void;
-  login: (username: string, password: string) => Promise<void>;
-  signup: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (fullName: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<boolean>;
   clearAuth: () => void;
@@ -72,13 +72,13 @@ export const useAuth = create<AuthState>()(
 
       setLoading: (isLoading) => set({ isLoading }),
 
-      login: async (username, password) => {
+      login: async (email, password) => {
         try {
           set({ isLoading: true });
 
           const data = await apiCall('/auth/login', {
             method: 'POST',
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({ email, password }),
           });
 
           set({
@@ -94,13 +94,13 @@ export const useAuth = create<AuthState>()(
         }
       },
 
-      signup: async (username, password) => {
+      signup: async (fullName, email, password) => {
         try {
           set({ isLoading: true });
 
           const data = await apiCall('/auth/signup', {
             method: 'POST',
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({ fullName, email,  password }),
           });
 
           set({

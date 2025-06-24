@@ -9,7 +9,7 @@ import { useAuth } from '@/store/auth';
 
 
 export default function Signup() {
-  const [formData, setFormData] = useState({ username: '', password: '' });
+  const [formData, setFormData] = useState({ fullName: '', email: '', password: '' });
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const { signup, isAuthenticated, isLoading } = useAuth();
@@ -30,7 +30,7 @@ export default function Signup() {
     setError('');
     try {
       console.log(formData);
-      await signup(formData.username, formData.password);
+      await signup(formData.fullName, formData.email,  formData.password);
       router.push('/');
     } catch (err) {
       const message = parseError(err instanceof Error ? err.message : 'Signup failed');
@@ -50,14 +50,29 @@ export default function Signup() {
         </h2>
 
         <div className="mb-6">
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-            Username
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+            Full Name
           </label>
           <input
-            type="username"
-            name="username"
-            id="username"
-            placeholder="yourname"
+            type="text"
+            name="fullName"
+            id="fullName"
+            placeholder="Sabin Shrestha"
+            onChange={handleChange}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition duration-200 text-base"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            placeholder="sabinshrestha@example.com"
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition duration-200 text-base"
             required

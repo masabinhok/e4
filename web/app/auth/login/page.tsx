@@ -9,7 +9,7 @@ import { useAuth } from '@/store/auth';
 
 
 export default function Login() {
-  const [formData, setFormData] = useState({ username: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const { login, isLoading, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -29,7 +29,7 @@ export default function Login() {
     e.preventDefault();
     setError('');
     try {
-      await login(formData.username, formData.password);
+      await login(formData.email, formData.password);
       router.push('/');
     } catch (err) {
       setError(parseError(err instanceof Error ? err.message : 'Login Failed'));
@@ -46,15 +46,17 @@ export default function Login() {
           ♟️ Login to e4
         </h2>
 
+  
+
         <div className="mb-6">
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-            Username
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email
           </label>
           <input
-            type="text"
-            name="username"
-            id="username"
-            placeholder="masabinhok"
+            type="email"
+            name="email"
+            id="email"
+            placeholder="sabinshrestha@example.com"
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition duration-200 text-base"
             required
