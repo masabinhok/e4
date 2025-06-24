@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import { Status } from 'src/openings/schemas/opening.schema';
+import { User } from 'src/users/schema/user.schema';
 
 export type BoardFlip = 'white' | 'black';
 
@@ -11,6 +12,9 @@ export class Variation {
 
   @Prop({required: true, type: String, default:Status.Pending, enum: Status })
   status: Status;
+  
+  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User'})
+  contributor?: User;
 
   @Prop({ required: true })
   moves: string[];

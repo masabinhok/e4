@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
+import { User } from 'src/users/schema/user.schema';
 import { Variation } from 'src/variations/schema/variation.schema';
 
 export enum Status {
@@ -21,6 +22,9 @@ export class Opening {
 
   @Prop({required: true, type: String, default:Status.Pending, enum: Status })
   status: Status;
+
+  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User', default: 'DEFAULT'})
+    contributor?: User | 'DEFAULT'
 
   @Prop({
     type: [mongoose.Schema.Types.ObjectId],

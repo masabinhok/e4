@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Opening, OpeningDocument } from './schemas/opening.schema';
+import { Opening, OpeningDocument, Status } from './schemas/opening.schema';
 import { Model } from 'mongoose';
 import { MongooseId } from 'src/types/types';
 import { AddOpeningDto } from './dtos/add-opening.dto';
@@ -29,8 +29,20 @@ export class OpeningsService {
   }
 
   async findAll() {
-    const opening = await this.openingModel.find();
+    const opening = await this.openingModel.find({
+      status: Status.Accepted
+    });
     return opening;
+  }
+
+  async acceptOpening(openingId: MongooseId){
+      await this.openingModel.findByIdAndUpdate(openingId, {
+        $set: {
+          status: Status.Accepted
+        }
+      }, {
+        new: true
+      });
   }
 
   async addOpening(dto: AddOpeningDto) {
