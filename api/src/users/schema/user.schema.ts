@@ -20,7 +20,7 @@ export class User extends Document {
   passHash: string;
 
   @Prop({type: String, enum: Role, default: Role.User})
-  role : string;
+  role : Role;
 
   @Prop()
   refreshToken?: string;
