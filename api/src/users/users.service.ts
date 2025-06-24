@@ -12,26 +12,26 @@ import { MongooseId } from 'src/types/types';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async findUserById(userId: MongooseId): Promise<{
-    user: User;
-  }> {
+  async findUserById(userId: MongooseId): Promise<User> {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new InternalServerErrorException('User not found');
     }
-    return { user };
+    return user;
   }
-  async findUserByUsername(username: string): Promise<User | null> {
+  
+  async findUserByEmail(email: string): Promise<User | null> {
     const user = await this.userModel.findOne({
-      username,
+      email,
     });
     return user ? user : null;
   }
 
-  async createUser(username: string, hash: string): Promise<User> {
+  async createUser(fullName: string, email: string,  passHash: string): Promise<User> {
     const user = await this.userModel.create({
-      username,
-      passHash: hash,
+      fullName,
+      email,
+      passHash
     });
 
     if (!user) {
@@ -41,7 +41,7 @@ export class UsersService {
     return user;
   }
 
-  async updateRtHash(userId: MongooseId, rtHash: string): Promise<User> {
+  async updateRtHash(userId: MongooseId, rtHash: string | null): Promise<User> {
     const user = await this.userModel.findByIdAndUpdate(userId, {
       refreshToken: rtHash,
     });
@@ -50,6 +50,11 @@ export class UsersService {
       throw new BadRequestException('User not found!');
     }
     return user;
+  }
+
+  async getSafeUser(user: User): Promise<Partial<User>> {
+    const { passHash, refreshToken, ...safeUser } = user;
+    return safeUser;
   }
 
   async addRecordedLines(

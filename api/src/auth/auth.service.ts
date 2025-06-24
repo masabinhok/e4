@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -10,68 +11,72 @@ import { Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dtos/login.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { RefreshToken } from './schemas/refresh-token.schema';
-import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { MongooseId } from 'src/types/types';
-import { User } from 'src/users/schema/user.schema';
+import { Role, User } from 'src/users/schema/user.schema';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(RefreshToken.name)
-    private refreshTokenModel: Model<RefreshToken>,
     private usersService: UsersService,
     private jwtService: JwtService,
+    private config: ConfigService
   ) {}
 
+  //generateHash
   async generateHash(val: string): Promise<string> {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(val, salt);
     return hash;
   }
 
-  async getTokens(userId: MongooseId): Promise<{
-    access_token: string;
-    refresh_token: string;
+
+  //getTokens
+  async getTokens(userId: MongooseId, role: string, email: string ): Promise<{
+    accessToken: string;
+    refreshToken: string;
   }> {
-    const access_token = this.jwtService.sign({ userId }, { expiresIn: '60m' });
-    const refresh_token = uuidv4();
-    return {
-      access_token,
-      refresh_token,
+    const payload = {
+      sub: userId, 
+      email,
+      role
     };
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.config.get<string>('jwt.accessSecret'),
+        expiresIn: this.config.get<string>('jwt.accessExpire'),
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.config.get<string>('jwt.refreshSecret'),
+        expiresIn: this.config.get<string>('jwt.refreshExpire'),
+      }),
+    ]);
+    return {
+      accessToken, refreshToken
+    }
   }
 
   async storeRefreshToken(userId: MongooseId, rt: string) {
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 7);
-
-    await this.refreshTokenModel.create({
-      userId,
-      token: rt,
-      expiryDate,
-    });
+    const hashedRt = await this.generateHash(rt);
+    return this.usersService.updateRtHash(userId, hashedRt);
   }
 
   async signUp(signUpDto: SignUpDto): Promise<{
-    user: any;
-    tokens: {
-      access_token: string;
-      refresh_token: string;
-    };
-  }> {
-    const { username, password } = signUpDto;
-    const existingUser = await this.usersService.findUserByUsername(username);
+    accessToken: string, 
+    refreshToken: string
+  }>{
+    const { fullName, email, password } = signUpDto;
+    const existingUser = await this.usersService.findUserByEmail(email);
 
     if (existingUser) {
-      throw new BadRequestException('Username already in use.');
+      throw new BadRequestException('Email already in use.');
     }
 
     const hashedPassword = await this.generateHash(password);
     const newUser = await this.usersService.createUser(
-      username,
+      fullName,
+      email,
       hashedPassword,
     );
 
@@ -79,32 +84,26 @@ export class AuthService {
       throw new InternalServerErrorException('Failed to create user.');
     }
 
-    const tokens = await this.getTokens(newUser._id as MongooseId);
+    const tokens = await this.getTokens(newUser._id as MongooseId, newUser.role, newUser.email);
     await this.storeRefreshToken(
       newUser._id as MongooseId,
-      tokens.refresh_token,
+      tokens.refreshToken,
     );
-
-    return {
-      user: newUser,
-      tokens,
-    };
+    console.log('returning tokens')
+    return tokens;
   }
 
   async login(loginDto: LoginDto): Promise<{
-    user: any;
-    tokens: {
-      access_token: string;
-      refresh_token: string;
-    };
+      accessToken: string;
+      refreshToken: string;
   }> {
     //get credentials from the client
-    const { username, password } = loginDto;
+    const { email, password } = loginDto;
 
     //check if the user exists
-    const existingUser = await this.usersService.findUserByUsername(username);
+    const existingUser = await this.usersService.findUserByEmail(email);
     if (!existingUser) {
-      throw new BadRequestException(`Invalid Username`);
+      throw new BadRequestException(`Invalid email`);
     }
 
     const isPassValid = await bcrypt.compare(password, existingUser.passHash);
@@ -113,54 +112,54 @@ export class AuthService {
       throw new BadRequestException('Invalid Password');
     }
 
-    const tokens = await this.getTokens(existingUser._id as MongooseId);
+    const tokens = await this.getTokens(existingUser._id as MongooseId, existingUser.role, existingUser.email);
     await this.storeRefreshToken(
       existingUser._id as MongooseId,
-      tokens.refresh_token,
+      tokens.refreshToken,
     );
 
-    return {
-      user: existingUser,
-      tokens,
-    };
+    return tokens;
   }
 
-  async refreshTokens(rt: string): Promise<{
-    access_token: string;
-    refresh_token: string;
+  async refresh(userId: MongooseId, rt: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
   }> {
-    const token = await this.refreshTokenModel.findOne({
-      token: rt,
-      expiryDate: { $gte: new Date(Date.now()) },
-    });
-
-    if (!token) {
-      throw new UnauthorizedException('Invalid Refresh Token');
+    
+    const user = await this.usersService.findUserById(userId);
+    console.log(user);
+    if(!user || !user.refreshToken){
+      throw new ForbiddenException('Invalid refresh token');
     }
 
-    const tokens = await this.getTokens(token.userId);
-    await this.storeRefreshToken(token.userId, tokens.refresh_token);
-    await this.refreshTokenModel.findOneAndDelete({
-      _id: token._id,
-    });
+    const matches = await bcrypt.compare(rt , user.refreshToken);
+
+    if(!matches){
+      throw new UnauthorizedException('Invalid token');
+    }
+
+
+    const tokens = await this.getTokens(user._id as MongooseId, user.role, user.email );
+    await this.storeRefreshToken(user._id as MongooseId, tokens.refreshToken);
     return tokens;
   }
 
   async logout(userId: MongooseId): Promise<{
     message: string;
   }> {
-    const deletedToken = await this.refreshTokenModel.findOneAndDelete({
-      userId: new Types.ObjectId(userId),
-    });
+    const user = await this.usersService.updateRtHash(userId, null);
+    if(!user){
+      throw new BadRequestException('No user to logout!');
+    }
 
     return {
       message: 'Successfully logged out user.',
     };
   }
 
-  async getMe(userId: MongooseId): Promise<{
-    user: User;
-  }> {
-    return this.usersService.findUserById(userId);
+  async getMe(userId: MongooseId): Promise<Partial<User> | null> {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) return null;
+    return this.usersService.getSafeUser(user);
   }
 }

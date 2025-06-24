@@ -161,7 +161,7 @@ export const useAuth = create<AuthState>()(
 
       refreshToken: async () => {
         try {
-          const hasRefreshToken = document.cookie.includes('refresh_token');
+          const hasRefreshToken = document.cookie.includes('refreshToken');
 
           if(!hasRefreshToken){
             redirect('/auth/login')

@@ -11,41 +11,37 @@ import { AuthService } from './auth.service';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { LoginDto } from './dtos/login.dto';
 import { Request, Response } from 'express';
-import { AuthGuard } from 'src/guards/auth.guard';
-import { GetUserId } from 'src/common/decorators/get-user.decorator';
+import { RefreshTokenGuard } from 'src/common/guards/refresh-token.guard';
+import { GetUser } from 'src/common/decorators/get-user.decorator';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 import { MongooseId } from 'src/types/types';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   @Post('signup')
-  async signUp(
-    @Body() signUpDto: SignUpDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const { user, tokens } = await this.authService.signUp(signUpDto);
+  async signUp(@Body() signUpDto: SignUpDto, @Res({passthrough: true}) res: Response) {
+    const {accessToken, refreshToken} = await this.authService.signUp(signUpDto);
 
-    res.cookie('access_token', tokens.access_token, {
-      httpOnly: true,
-      secure: true,
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true, 
       sameSite: 'none',
-      maxAge: 60 * 60 * 1000,
-      path: '/',
+      secure: true, 
+      maxAge: 15 * 60 * 1000,
     });
 
-    res.cookie('refresh_token', tokens.refresh_token, {
-      httpOnly: true,
-      secure: true,
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true, 
+      secure: true, 
       sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/',
+      maxAge: 7* 24* 60 * 60* 1000
     });
 
+    console.log(accessToken,'jfdkslaf', refreshToken);
     return {
-      user,
-      message: 'Signup Successful!',
-    };
+      message: 'Signed Up Successfully'
+    }
   }
 
   @Post('login')
@@ -53,80 +49,86 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { user, tokens } = await this.authService.login(loginDto);
+    const { accessToken, refreshToken } =
+      await this.authService.login(loginDto);
 
-    res.cookie('access_token', tokens.access_token, {
+    res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: 60 * 60 * 1000,
-      path: '/',
+      maxAge: 15 * 60 * 1000, // 15 minutes
     });
-    res.cookie('refresh_token', tokens.refresh_token, {
+
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     return {
-      user,
-      messsage: 'Login Successful',
+      message: 'Logged In Successfully',
     };
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(RefreshTokenGuard)
   @Post('logout')
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const userId = req['userId'];
-
+  async logout(
+    @GetUser('sub') userId: MongooseId,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     await this.authService.logout(userId);
-    res.clearCookie('access_token', {
+    res.clearCookie('accessToken', {
       httpOnly: true,
       sameSite: 'none',
       secure: true,
     });
-    res.clearCookie('refresh_token', {
+
+    res.clearCookie('refreshToken', {
       httpOnly: true,
       sameSite: 'none',
       secure: true,
     });
+
     return {
-      message: 'Logged Out Successfully.',
+      message: 'Logged Out Successfully',
     };
   }
 
+  @UseGuards(RefreshTokenGuard)
   @Post('refresh')
   async refresh(
+    @GetUser('sub') userId: MongooseId,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies['refresh_token'];
-
-    const tokens = await this.authService.refreshTokens(refreshToken);
-
-    res.cookie('access_token', tokens.access_token, {
+    const rt = req.cookies['refreshToken'];
+    const { accessToken, refreshToken } = await this.authService.refresh(
+      userId,
+      rt,
+    );
+    res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: 60 * 60 * 1000,
-      path: '/',
+      maxAge: 15 * 60 * 1000, 
     });
-    res.cookie('refresh_token', tokens.refresh_token, {
+
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
-    return { messsage: 'Token Refreshed!' };
+    return {
+      message: 'Token Refreshed Successfully',
+    };
   }
 
   @UseGuards(AuthGuard)
   @Get('me')
-  async getMe(@GetUserId() userId: MongooseId) {
+  async getUserProfile(@GetUser('sub') userId: MongooseId) {
     return this.authService.getMe(userId);
   }
 }

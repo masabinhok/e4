@@ -2,27 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'https://e4-learnchess.vercel.app',
-  ];
+  app.use(cookieParser());
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('port') ?? 5000; 
 
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('CORS policy violation: Not allowed by CORS'));
-      }
-    },
-    credentials: true,
+    origin: configService.get<string>('cors.origin'),
   });
-
-  app.use(cookieParser());
 
   app.setGlobalPrefix('api');
 
@@ -32,6 +23,6 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  await app.listen(process.env.PORT ?? 5000);
+  await app.listen(port);
 }
 bootstrap();
