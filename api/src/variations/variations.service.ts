@@ -42,6 +42,10 @@ export class VariationsService {
           variation.contributor?._id as MongooseId,
           variationId
         );
+
+        return {
+          message: 'Variation Accepted.'
+        }
   }
 
   async contributeVariation(
@@ -52,6 +56,7 @@ export class VariationsService {
     const newVariation = await this.variationModel.create({
       code,
       ...dto,
+      contributor: userId
     });
     if (!newVariation) {
       throw new InternalServerErrorException(

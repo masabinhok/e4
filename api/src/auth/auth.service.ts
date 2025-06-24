@@ -13,8 +13,9 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dtos/login.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { MongooseId } from 'src/types/types';
-import { Role, User } from 'src/users/schema/user.schema';
+import { User } from 'src/users/schema/user.schema';
 import { ConfigService } from '@nestjs/config';
+import { Role } from 'src/roles/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,7 @@ export class AuthService {
 
 
   //getTokens
-  async getTokens(userId: MongooseId, role: string, email: string ): Promise<{
+  async getTokens(userId: MongooseId, role: Role, email: string ): Promise<{
     accessToken: string;
     refreshToken: string;
   }> {

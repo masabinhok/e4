@@ -4,6 +4,10 @@ import { ContributeVariationDto } from './dtos/contribute-variation.dto';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { MongooseId } from 'src/types/types';
 import { AuthGuard } from 'src/common/guards/auth.guard';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { Roles } from 'src/roles/roles.decorator';
+import { Role } from 'src/roles/roles.enum';
+
 
 
 @UseGuards(AuthGuard)
@@ -34,5 +38,12 @@ export class VariationsController {
     @Body() dto: ContributeVariationDto,
   ) {
     return this.variationsService.contributeVariation(userId, code, dto);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  @Post('accept/:id')
+  async acceptVariation(@Param('id') variationId: MongooseId){
+    return this.variationsService.acceptVariation(variationId);
   }
 }

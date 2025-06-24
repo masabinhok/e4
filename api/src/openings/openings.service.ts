@@ -43,10 +43,17 @@ export class OpeningsService {
       }, {
         new: true
       });
+
+      return {
+        message: 'Opening Accepted'
+      }
   }
 
-  async addOpening(dto: AddOpeningDto) {
-    const newOpening = await this.openingModel.create(dto);
+  async addOpening(dto: AddOpeningDto, userId: MongooseId) {
+    const newOpening = await this.openingModel.create({
+      ...dto, 
+      contributor: userId
+    });
     if (!newOpening) {
       throw new InternalServerErrorException('Failed to create a new opening');
     }

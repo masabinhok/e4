@@ -23,8 +23,8 @@ export class Opening {
   @Prop({required: true, type: String, default:Status.Pending, enum: Status })
   status: Status;
 
-  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User', default: 'DEFAULT'})
-    contributor?: User | 'DEFAULT'
+  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User'})
+  contributor?: User
 
   @Prop({
     type: [mongoose.Schema.Types.ObjectId],
