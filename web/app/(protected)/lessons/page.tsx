@@ -17,6 +17,7 @@ const LessonsPage = () => {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include'
         }).then(res => {
           if (!res.ok) {
             throw new Error('network error');
