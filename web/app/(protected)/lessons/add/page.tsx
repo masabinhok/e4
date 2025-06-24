@@ -31,6 +31,7 @@ const ContributeOpening = () => {
 
       // Reset form fields after successful submission
       setName('');
+      setCode('');
       setDescription('');
     }
     catch (error) {
