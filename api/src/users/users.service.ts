@@ -19,7 +19,7 @@ export class UsersService {
     }
     return user;
   }
-  
+
   async findUserByEmail(email: string): Promise<User | null> {
     const user = await this.userModel.findOne({
       email,
@@ -53,9 +53,11 @@ export class UsersService {
   }
 
   async getSafeUser(user: User): Promise<Partial<User>> {
-    const { passHash, refreshToken, ...safeUser } = user;
+    const plainUser = user.toObject(); 
+    const { passHash, refreshToken, ...safeUser } = plainUser;
     return safeUser;
   }
+  
 
   async addRecordedLines(
     userId: MongooseId,
