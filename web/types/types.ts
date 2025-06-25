@@ -28,6 +28,7 @@ export type User = {
 
 
 export type OpeningVariation = {
+  _id: string;
   title: string;
   index: number;
   moves: string[];
