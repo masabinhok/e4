@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OpeningsService } from 'src/openings/openings.service';
+import { MongooseId } from 'src/types/types';
 import { UsersService } from 'src/users/users.service';
 import { VariationsService } from 'src/variations/variations.service';
 
@@ -15,5 +16,13 @@ export class AdminService {
     return {
       users, openings, variations
     }
+  }
+
+  async toggleVariationStatus(variationId: MongooseId){
+    return this.variationsService.acceptVariation(variationId);
+  }
+
+  async toggleOpeningStatus(openingId: MongooseId){
+    return this.openingsService.acceptOpening(openingId);
   }
 }
