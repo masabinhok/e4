@@ -7,6 +7,11 @@ export enum Role {
   User = 'USER'
 }
 
+export enum Status {
+  Pending = "PENDING",
+  Accepted = 'ACCEPTED',
+  Rejected = 'REJECTED'
+}
 
 export type User = {
   _id: string;
@@ -28,6 +33,7 @@ export type OpeningVariation = {
   moves: string[];
   boardflip: BoardFlip
   description: string;
+  status: Status
 };
 
 export type Opening = {
@@ -36,4 +42,5 @@ export type Opening = {
   description: string;
   code: string;
   variations: OpeningVariation[];
+  status: Status
 };
