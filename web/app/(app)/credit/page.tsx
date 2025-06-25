@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import Image from 'next/image';
-import sabinOg from "../../public/images/sabin-og.png";
+import sabinOg from "@/public/images/sabin-og.png";
 import Link from 'next/link';
 
 const CreditPage = () => {
@@ -68,9 +68,9 @@ const CreditPage = () => {
                   tabIndex={0}
                   onClick={() => {
                     navigator.clipboard.writeText("sabin.shrestha.er@gmail.com")
-                  }} 
-                  onKeyDown={(e)=> {
-                    if(e.key === "Enter" || e.key === ' '){
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === ' ') {
                       navigator.clipboard.writeText('sabin.shrestha.er@gmail.com');
                     }
                   }}
