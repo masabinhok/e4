@@ -22,6 +22,11 @@ export class VariationsService {
     private usersService: UsersService,
   ) {}
 
+  async findAll(){
+    const variations = await this.variationModel.find();
+    return variations;
+  }
+
   async acceptVariation(variationId: MongooseId){
     const variation = await this.variationModel.findByIdAndUpdate(variationId, {
       $set: {

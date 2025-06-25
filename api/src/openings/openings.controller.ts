@@ -14,8 +14,8 @@ export class OpeningsController {
   constructor(private readonly openingsService: OpeningsService) {}
 
   @Get('')
-  async findAll() {
-    return this.openingsService.findAll();
+  async findAccepted() {
+    return this.openingsService.findAccepted();
   }
 
   @Get('pending')

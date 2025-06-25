@@ -12,6 +12,11 @@ import { MongooseId } from 'src/types/types';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
+  async findUsers(){
+    const users = await this.userModel.find();
+    return await Promise.all(users.map((user)=> this.getSafeUser(user)));
+  }
+
   async findUserById(userId: MongooseId): Promise<User> {
     const user = await this.userModel.findById(userId);
     if (!user) {

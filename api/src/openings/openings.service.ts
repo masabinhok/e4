@@ -29,6 +29,11 @@ export class OpeningsService {
   }
 
   async findAll() {
+    const openings = await this.openingModel.find();
+    return openings;
+  }
+
+  async findAccepted() {
     const openings = await this.openingModel.find({
       status: Status.Accepted
     });
