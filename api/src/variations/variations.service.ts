@@ -75,7 +75,7 @@ export class VariationsService {
   }
 
   async recordVariation(userId: MongooseId, dto: ContributeVariationDto) {
-    const variation = { ...dto, code: 'recorded-pgns' };
+    const variation = { ...dto, code: 'recorded-pgns', status: Status.Accepted };
 
     const newVariation = await this.variationModel.create(variation);
     if (!newVariation) {
@@ -96,7 +96,7 @@ export class VariationsService {
   }
 
   async addCustomVariation(userId: MongooseId, dto: ContributeVariationDto) {
-    const variation = { ...dto, code: 'custom-pgns' };
+    const variation = { ...dto, code: 'custom-pgns', status: Status.Accepted };
 
     const newVariation = await this.variationModel.create(variation);
     if (!newVariation) {
