@@ -30,11 +30,11 @@ export type User = {
 export type OpeningVariation = {
   _id: string;
   title: string;
-  index: number;
   moves: string[];
   boardflip: BoardFlip
   description: string;
   status: Status
+  code: string;
 };
 
 export type Opening = {
