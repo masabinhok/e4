@@ -28,6 +28,16 @@ export class OpeningsService {
     return opening;
   }
 
+  async deleteOne(openingId: MongooseId){
+    const deletedOpening = await this.openingModel.findByIdAndDelete(openingId);
+    if(!deletedOpening){
+      throw new BadRequestException('No opening with such id exist')
+    }
+    return {
+      message: 'Deletion Successful'
+    }
+  }
+
   async findAll() {
     const openings = await this.openingModel.find();
     return openings;

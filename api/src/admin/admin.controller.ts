@@ -32,5 +32,14 @@ export class AdminController {
     return this.adminService.deleteVariation(variationId);
   }
 
-  
+  @Delete('user/:id')
+  async deleteuser(@Param('id') userId: MongooseId){
+    return this.adminService.deleteUser(userId);
+  }
+
+  @Delete('opening/:id')
+  async deleteOpening(@Param('id') openingId: MongooseId){
+    return this.adminService.deleteOpening(openingId);
+  }
+
 }

@@ -54,9 +54,9 @@ const AdminPage = () => {
     })
   }
 
-  const deleteVariation = async (variationId: string) => {
+  const handleDelete = async (type: string, id: string) => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/variation/${variationId}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/${type}/${id}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
@@ -64,12 +64,11 @@ const AdminPage = () => {
         }
       }).then(res => res.json()).then(data => {
         console.log(data);
-        fetchAdminData(); 
+        fetchAdminData();
       })
     } catch (error) {
       throw new Error('network error')
     }
-
   }
 
   const renderContent = () => {
@@ -77,9 +76,9 @@ const AdminPage = () => {
       case 'dashboard':
         return <Dashboard variations={variations} users={users} openings={openings} />;
       case 'users':
-        return <UserManagement users={users} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />;
+        return <UserManagement handleDelete={handleDelete} users={users} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />;
       case 'lessons':
-        return <LessonManagement deleteVariation={deleteVariation} openings={openings} variations={variations} toggleStatus={toggleStatus} />;
+        return <LessonManagement handleDelete={handleDelete} openings={openings} variations={variations} toggleStatus={toggleStatus} />;
       default:
         return <Dashboard variations={variations} users={users} openings={openings} />;
     }

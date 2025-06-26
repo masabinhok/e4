@@ -28,7 +28,10 @@ export class VariationsService {
   }
 
   async deleteOne(variationId: MongooseId){
-    await this.variationModel.findByIdAndDelete(variationId);
+    const deletedVariation = await this.variationModel.findByIdAndDelete(variationId);
+    if(!deletedVariation){
+      throw new BadRequestException('No variation with such id exist')
+    }
     return {
       message: 'Deletion Successful'
     }

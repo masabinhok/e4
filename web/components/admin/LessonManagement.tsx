@@ -6,10 +6,10 @@ interface LessonManagementProps {
   openings: Opening[];
   variations: OpeningVariation[];
   toggleStatus: (type: string, id: string) => void;
-  deleteVariation: (id: string) => void;
+  handleDelete: (type: string, id: string) => void;
 }
 
-const LessonManagement = ({ openings, variations, toggleStatus, deleteVariation }: LessonManagementProps) => {
+const LessonManagement = ({ openings, variations, toggleStatus, handleDelete }: LessonManagementProps) => {
 
 
   return (
@@ -71,7 +71,7 @@ const LessonManagement = ({ openings, variations, toggleStatus, deleteVariation 
                       <button className="p-2 text-green-600 hover:bg-green-100 rounded-lg">
                         <Edit size={16} />
                       </button>
-                      <button className="p-2 text-red-600 hover:bg-red-100 rounded-lg">
+                      <button onClick={() => handleDelete('opening', lesson._id)} className="p-2 text-red-600 hover:bg-red-100 rounded-lg">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -126,7 +126,7 @@ const LessonManagement = ({ openings, variations, toggleStatus, deleteVariation 
                       <button className="p-2 text-green-600 hover:bg-green-100 rounded-lg">
                         <Edit size={16} />
                       </button>
-                      <button onClick={() => deleteVariation(variation._id)} className="p-2 text-red-600 hover:bg-red-100 rounded-lg">
+                      <button onClick={() => handleDelete('variation', variation._id)} className="p-2 text-red-600 hover:bg-red-100 rounded-lg">
                         <Trash2 size={16} />
                       </button>
                     </div>

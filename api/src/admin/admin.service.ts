@@ -29,4 +29,10 @@ export class AdminService {
   async deleteVariation(variationId: MongooseId){
     return this.variationsService.deleteOne(variationId);
   }
+  async deleteUser(userId: MongooseId){
+    return this.usersService.deleteOne(userId);
+  }
+  async deleteOpening(openingId: MongooseId){
+    return this.openingsService.deleteOne(openingId);
+  }
 }

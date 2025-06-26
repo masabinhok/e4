@@ -7,9 +7,10 @@ interface UserManagementProps {
   users: User[];
   searchTerm: string;
   setSearchTerm: (term: string) => void;
+  handleDelete: (type: string, id: string) => void;
 }
 
-const UserManagement = ({ users, searchTerm, setSearchTerm }: UserManagementProps) => {
+const UserManagement = ({ users, searchTerm, setSearchTerm, handleDelete }: UserManagementProps) => {
   ;
   return (
     <div className="space-y-6">
@@ -71,7 +72,7 @@ const UserManagement = ({ users, searchTerm, setSearchTerm }: UserManagementProp
                       <button className="p-2 text-green-600 hover:bg-green-100 rounded-lg">
                         <Edit size={16} />
                       </button>
-                      <button className="p-2 text-red-600 hover:bg-red-100 rounded-lg">
+                      <button onClick={() => handleDelete('user', user._id)} className="p-2 text-red-600 hover:bg-red-100 rounded-lg">
                         <Trash2 size={16} />
                       </button>
                     </div>
