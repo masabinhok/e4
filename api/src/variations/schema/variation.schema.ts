@@ -5,7 +5,7 @@ import { User } from 'src/users/schema/user.schema';
 
 export type BoardFlip = 'white' | 'black';
 
-@Schema()
+@Schema({timestamps: true})
 export class Variation {
   @Prop({ required: true })
   title: string;

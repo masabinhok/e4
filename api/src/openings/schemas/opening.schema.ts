@@ -9,7 +9,7 @@ export enum Status {
   Rejected = 'REJECTED'
 }
 
-@Schema()
+@Schema({timestamps : true})
 export class Opening {
   @Prop({ required: true })
   name: string;
