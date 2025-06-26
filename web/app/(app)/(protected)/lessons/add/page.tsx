@@ -1,11 +1,17 @@
 'use client'
 import Button from '@/components/Button';
+import Message from '@/components/Message';
+import { useMessageStore } from '@/store/messageStore';
+import { useSoundStore } from '@/store/useSoundStore';
 import React, { FormEvent, useState } from 'react'
 
 const ContributeOpening = () => {
   const [name, setName] = useState<string>('');
   const [code, setCode] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+
+  const { messages, removeMessage, addMessage } = useMessageStore();
+  const { playSound } = useSoundStore();
 
 
   const handleSubmit = async (e: FormEvent) => {
@@ -27,8 +33,9 @@ const ContributeOpening = () => {
         throw new Error('Failed to submit opening');
       }
 
-      await res.json();
-
+      const data = await res.json();
+      addMessage({ content: data.message, type: 'success' })
+      setTimeout(() => playSound('achievement'), 1);
       // Reset form fields after successful submission
       setName('');
       setCode('');
@@ -36,12 +43,16 @@ const ContributeOpening = () => {
     }
     catch (error) {
       console.error("Error submitting form:", error);
-
     }
   }
 
   return (
     <div className="flex justify-center items-center min-h-screen p-6 flex-col">
+      <div className="fixed top-6 right-6 z-50 space-y-2">
+        {messages.map((msg, idx) => (
+          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(idx)} />
+        ))}
+      </div>
       <form onSubmit={(e: FormEvent) => { handleSubmit(e) }} className="shadow-lg rounded-xl p-8 w-full max-w-md space-y-6">
         <h1 className="text-2xl font-bold text-center text-blue-600">♟️ Contribute New Opening</h1>
 

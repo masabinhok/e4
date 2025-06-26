@@ -87,7 +87,9 @@ export class OpeningsService {
     if (!newOpening) {
       throw new InternalServerErrorException('Failed to create a new opening');
     }
-    return newOpening;
+    return {
+      message: 'Successfully Contributed!'
+    }
   }
 
   async addContribution(
