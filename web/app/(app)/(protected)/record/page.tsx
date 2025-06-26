@@ -6,11 +6,12 @@ import Message from '@/components/Message';
 import Link from 'next/link';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useSearchParams } from 'next/navigation';
-import { BoardFlip } from '../../../types/types';
+import { BoardFlip } from '@/types/types';
 import Image from 'next/image';
 import flipBoard from '@/public/icons/flip.svg';
 import Button from '@/components/Button';
 import { useSoundStore } from '@/store/useSoundStore';
+import { useMessageStore } from '@/store/messageStore';
 
 
 export default function RecordLine() {
@@ -23,7 +24,7 @@ export default function RecordLine() {
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
-  const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
+  const { messages, setMessages, addMessage, removeMessage } = useMessageStore();
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const playSound = useSoundStore((s) => s.playSound)
   const [isContributed, setIsContributed] = useLocalStorage<boolean>('isContributed', false);
@@ -37,19 +38,6 @@ export default function RecordLine() {
   useEffect(() => {
     setIsBrowser(true);
   }, []);
-
-
-  const addMessage = (newMessage: { content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }) => {
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-  };
-
-  const removeMessage = (index: number) => {
-    const messageToRemove = messages[index];
-    if (messageToRemove.onClose) {
-      messageToRemove.onClose();
-    }
-    setMessages((prevMessages) => prevMessages.filter((_, i) => i !== index));
-  };
 
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {

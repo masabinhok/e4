@@ -10,6 +10,7 @@ import flipBoard from '@/public/icons/flip.svg';
 import Image from 'next/image';
 import Button from '@/components/Button';
 import { useSoundStore } from '@/store/useSoundStore';
+import { useMessageStore } from '@/store/messageStore';
 
 export default function CustomLine() {
   const [pgnName, setPgnName] = useState<string>('');
@@ -18,7 +19,7 @@ export default function CustomLine() {
   const [currentLine, setCurrentLine] = useState<string[]>([]);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
-  const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
+  const { messages, setMessages, addMessage, removeMessage } = useMessageStore();
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const [description, setDescription] = useState<string>('');
   const playSound = useSoundStore((s) => s.playSound);
@@ -89,17 +90,9 @@ export default function CustomLine() {
 
 
 
-  const addMessage = (newMessage: { content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }) => {
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-  };
+  
 
-  const removeMessage = (index: number) => {
-    const messageToRemove = messages[index];
-    if (messageToRemove.onClose) {
-      messageToRemove.onClose();
-    }
-    setMessages((prevMessages) => prevMessages.filter((_, i) => i !== index));
-  };
+  
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
     try {

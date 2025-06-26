@@ -10,6 +10,7 @@ import Image from 'next/image';
 import flipBoard from '@/public/icons/flip.svg';
 import { BoardFlip, Opening } from '@/types/types'
 import { useSoundStore } from '@/store/useSoundStore';
+import { useMessageStore } from '@/store/messageStore';
 
 
 
@@ -27,7 +28,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
   const [mode, setMode] = useLocalStorage<'learn' | 'practice' | 'quiz'>('currentMode', 'learn');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);
-  const [messages, setMessages] = useState<{ content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }[]>([]);
+  const { messages, setMessages, addMessage, removeMessage } = useMessageStore();
   const [mistakes, setMistakes] = useState<number>(0);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const playSound = useSoundStore((s) => s.playSound);
@@ -73,17 +74,6 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
     }
   }, [currentOpening, currentLineIndex, setBoardFlip]);
 
-  const addMessage = (newMessage: { content: string; type: 'success' | 'error' | 'info'; onClose?: () => void }) => {
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-  };
-
-  const removeMessage = (index: number) => {
-    const messageToRemove = messages[index];
-    if (messageToRemove.onClose) {
-      messageToRemove.onClose();
-    }
-    setMessages((prevMessages) => prevMessages.filter((_, i) => i !== index));
-  };
 
   const toggleBoardFlip = () => {
     setBoardFlip(boardFlip === 'white' ? 'black' : 'white');
