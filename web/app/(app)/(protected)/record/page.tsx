@@ -24,7 +24,7 @@ export default function RecordLine() {
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
-  const { messages, setMessages, addMessage, removeMessage } = useMessageStore();
+  const { messages, addMessage, removeMessage } = useMessageStore();
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const playSound = useSoundStore((s) => s.playSound)
   const [isContributed, setIsContributed] = useLocalStorage<boolean>('isContributed', false);

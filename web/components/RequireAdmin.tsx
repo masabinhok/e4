@@ -11,7 +11,7 @@ export default function RequireAdmin({ children }: { children: ReactNode }) {
     if (!isLoading && (!user || user.role !== 'ADMIN')) {
       router.push('/unauthorized');
     }
-  }, [user, isLoading])
+  }, [user, isLoading, router])
 
   if (isLoading || !user) return <div> Loading... </div>;
 

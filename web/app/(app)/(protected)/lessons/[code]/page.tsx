@@ -37,7 +37,6 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
   useEffect(() => {
     const fetchCurrentOpening = async () => {
       const fetchUrl = `${process.env.NEXT_PUBLIC_API_URL}${(code === 'recorded-lines' || code === 'custom-pgns') ? '/users' : '/openings'}/${code}`
-
       await fetch(fetchUrl, {
         credentials: 'include',
         method: 'GET',
@@ -50,7 +49,6 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
         }
         return res.json();
       }).then(data => {
-
         setCurrentOpening(data);
       })
     }
@@ -92,7 +90,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
     setMoveValidation(null);
     setMistakes(0);
     setGame(getNewGame());
-  }, [currentOpening?.variations, getNewGame, setBoardFlip, setCurrentLineIndex]);
+  }, [currentOpening?.variations, getNewGame, setBoardFlip, setCurrentLineIndex, ]);
 
 
   useEffect(() => {
@@ -147,7 +145,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
         },
       });
     }
-  }, [lineCompleted, mode, playSound, mistakes, currentOpening?.variations, loadRandomLine, setCurrentLineIndex]);
+  }, [lineCompleted, mode, playSound, mistakes, currentOpening?.variations, loadRandomLine, setCurrentLineIndex, setMessages, addMessage]);
 
   const handleModeChange = (newMode: 'learn' | 'practice' | 'quiz') => {
     setMode(newMode);
@@ -232,7 +230,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
         setAutoPlay(false);
       }
     }
-  }, [autoPlay, currentMoveIndex, currentLine, nextMove]);
+  }, [autoPlay, currentMoveIndex, currentLine, nextMove, setMessages]);
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
     if (autoPlay) return false;

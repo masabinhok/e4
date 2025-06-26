@@ -1,13 +1,11 @@
 import React from 'react';
-import { BarChart3, Users, BookOpen } from 'lucide-react';
+import { BarChart3, Users, BookOpen, LucideIcon } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
-import logo from "@/public/icons/e4.svg";
 
 interface TabButtonProps {
   id: string;
   label: string;
-  icon: any;
+  icon: LucideIcon
   isActive: boolean;
   onClick: (id: string) => void;
 }
@@ -20,7 +18,7 @@ const TabButton = ({ id, label, icon: Icon, isActive, onClick }: TabButtonProps)
       : 'text-gray-300 hover:bg-gray-700 hover:text-white'
       }`}
   >
-    <Icon size={20} />
+    {Icon && <Icon size={20} />} {/* Safety check */}
     <span className="font-medium">{label}</span>
   </button>
 );
@@ -34,9 +32,11 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   return (
     <div className="w-64 bg-gray-800 shadow-lg border-r border-gray-700 min-h-screen">
       <div className="p-6 border-b flex items-center flex-col border-gray-700">
-        <span className='text-xs font-bold text-gray-300'>ADMIN PANEL</span>
-        <Link href={"/"} className="flex items-center group">
-          <h1 className="text-2xl font-bold hidden lg:block ml-2 text-white">e4.<span className="text-blue-400">learnchess</span></h1>
+        <span className="text-xs font-bold text-gray-300">ADMIN PANEL</span>
+        <Link href="/" className="flex items-center group">
+          <h1 className="text-2xl font-bold hidden lg:block ml-2 text-white">
+            e4.<span className="text-blue-400">learnchess</span>
+          </h1>
         </Link>
       </div>
 

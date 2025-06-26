@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Opening, OpeningVariation, User } from '@/types/types';
 import Sidebar from '@/components/admin/Sidebar';
 import Dashboard from '@/components/admin/Dashboard';
@@ -19,7 +19,7 @@ const AdminPage = () => {
   const { messages, removeMessage, addMessage } = useMessageStore();
   const { playSound } = useSoundStore();
 
-  const fetchAdminData = async () => {
+  const fetchAdminData = useCallback(async () => {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin`, {
       method: "GET",
       credentials: 'include',
@@ -37,30 +37,35 @@ const AdminPage = () => {
       setUsers(data.users);
       setVariations(data.variations);
     })
-  }
+  }, []);
 
   useEffect(() => {
     fetchAdminData();
-  }, [])
+  }, [fetchAdminData])
 
   const toggleStatus = async (type: string, id: string) => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/${type}/toggle-status/${id}`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(res => {
-      if (!res.ok) {
-        addMessage({ content: 'Network Error', type: 'error' });
-        throw new Error('Network error');
-      }
-      return res.json();
-    }).then((data) => {
-      addMessage({ content: data.message, type: 'success' })
-      setTimeout(() => playSound('achievement'), 1);
-      fetchAdminData();
-    })
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/${type}/toggle-status/${id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => {
+        if (!res.ok) {
+          addMessage({ content: 'Network Error', type: 'error' });
+          throw new Error('Network error');
+        }
+        return res.json();
+      }).then((data) => {
+        addMessage({ content: data.message, type: 'success' })
+        setTimeout(() => playSound('achievement'), 1);
+        fetchAdminData();
+      })
+    } catch {
+      addMessage({ content: 'Something went wrong', type: 'error' });
+    }
+
   }
 
   const handleDelete = async (type: string, id: string) => {
@@ -76,8 +81,8 @@ const AdminPage = () => {
         setTimeout(() => playSound('achievement'), 1);
         fetchAdminData();
       })
-    } catch (error) {
-      throw new Error('network error')
+    } catch {
+      addMessage({ content: 'Something went wrong', type: 'error' });
     }
   }
 
