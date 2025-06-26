@@ -1,9 +1,9 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { MongooseId } from 'src/types/types';
 
-export const GetUserId = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): MongooseId => {
+export const GetUser = createParamDecorator(
+  (data: string | undefined, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
-    return request.userId;
+    const user = request.user;
+    return data ? user?.[data] : user;
   },
 );

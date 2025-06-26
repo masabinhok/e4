@@ -17,6 +17,7 @@ import { UsersModule } from 'src/users/users.module';
     UsersModule,
     forwardRef(() => OpeningsModule),
   ],
+  exports: [VariationsService],
   controllers: [VariationsController],
   providers: [VariationsService],
 })

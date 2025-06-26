@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
-import Navigation from "@/components/Navigation";
-
 
 
 //init poppins font
@@ -47,10 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.variable} font-poppins antialiased bg-gray-900 text-gray-100`}>
-        <Navigation />
-        <div className="mt-[100px] lg:mt-0 lg:ml-[320px] p-4">
           {children}
-        </div>
       </body>
     </html>
   );

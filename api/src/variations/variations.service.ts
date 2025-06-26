@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   UseGuards,
@@ -10,6 +11,7 @@ import { OpeningsService } from 'src/openings/openings.service';
 import { ContributeVariationDto } from './dtos/contribute-variation.dto';
 import { UsersService } from 'src/users/users.service';
 import { MongooseId } from 'src/types/types';
+import { Status } from 'src/openings/schemas/opening.schema';
 
 @Injectable()
 export class VariationsService {
@@ -20,6 +22,47 @@ export class VariationsService {
     private usersService: UsersService,
   ) {}
 
+  async findAll(){
+    const variations = await this.variationModel.find();
+    return variations;
+  }
+
+  async deleteOne(variationId: MongooseId){
+    const deletedVariation = await this.variationModel.findByIdAndDelete(variationId);
+    if(!deletedVariation){
+      throw new BadRequestException('No variation with such id exist')
+    }
+    return {
+      message: 'Successfully Deleted!'
+    }
+  }
+
+  async acceptVariation(variationId: MongooseId){
+    const variation = await this.variationModel.findByIdAndUpdate(variationId, {
+      $set: {
+        status: Status.Accepted
+      }, 
+    }, {
+      new: true,
+    }).populate('contributor')
+    if(!variation){
+      throw new BadRequestException('No such variation exists.');
+    }
+
+    await this.openingsService.addContribution(
+          variation.code,
+          variationId
+        );
+    await this.usersService.addContributedLines(
+          variation.contributor?._id as MongooseId,
+          variationId
+        );
+
+        return {
+          message: 'Variation Accepted!'
+        }
+  }
+
   async contributeVariation(
     userId: MongooseId,
     code: string,
@@ -28,33 +71,29 @@ export class VariationsService {
     const newVariation = await this.variationModel.create({
       code,
       ...dto,
+      contributor: userId
     });
     if (!newVariation) {
       throw new InternalServerErrorException(
         'Failed to create a new variation',
       );
     }
-    console.log(newVariation);
-    await this.openingsService.addContribution(
-      code,
-      newVariation._id as MongooseId,
-    );
-    await this.usersService.addContributedLines(
-      userId,
-      newVariation._id as MongooseId,
-    );
+
+
+    //this should be done after accepted by the admin.
+    
   }
 
   async recordVariation(userId: MongooseId, dto: ContributeVariationDto) {
-    const variation = { ...dto, code: 'recorded-pgns' };
-    console.log(variation);
+    const variation = { ...dto, code: 'recorded-pgns', status: Status.Accepted };
+
     const newVariation = await this.variationModel.create(variation);
     if (!newVariation) {
       throw new InternalServerErrorException(
         'Failed to create a new variation',
       );
     }
-    console.log(newVariation);
+
 
     await this.usersService.addRecordedLines(
       userId,
@@ -65,16 +104,16 @@ export class VariationsService {
       message: 'Successfully recorded a variation!',
     };
   }
+
   async addCustomVariation(userId: MongooseId, dto: ContributeVariationDto) {
-    const variation = { ...dto, code: 'custom-pgns' };
-    console.log(variation);
+    const variation = { ...dto, code: 'custom-pgns', status: Status.Accepted };
+
     const newVariation = await this.variationModel.create(variation);
     if (!newVariation) {
       throw new InternalServerErrorException(
         'Failed to create a new variation',
       );
     }
-    console.log(newVariation);
 
     await this.usersService.addCustomPgns(
       userId,

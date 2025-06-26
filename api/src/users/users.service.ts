@@ -12,26 +12,31 @@ import { MongooseId } from 'src/types/types';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async findUserById(userId: MongooseId): Promise<{
-    user: User;
-  }> {
+  async findUsers(){
+    const users = await this.userModel.find();
+    return await Promise.all(users.map((user)=> this.getSafeUser(user)));
+  }
+
+  async findUserById(userId: MongooseId): Promise<User> {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new InternalServerErrorException('User not found');
     }
-    return { user };
+    return user;
   }
-  async findUserByUsername(username: string): Promise<User | null> {
+
+  async findUserByEmail(email: string): Promise<User | null> {
     const user = await this.userModel.findOne({
-      username,
+      email,
     });
     return user ? user : null;
   }
 
-  async createUser(username: string, hash: string): Promise<User> {
+  async createUser(fullName: string, email: string,  passHash: string): Promise<User> {
     const user = await this.userModel.create({
-      username,
-      passHash: hash,
+      fullName,
+      email,
+      passHash
     });
 
     if (!user) {
@@ -41,7 +46,7 @@ export class UsersService {
     return user;
   }
 
-  async updateRtHash(userId: MongooseId, rtHash: string): Promise<User> {
+  async updateRtHash(userId: MongooseId, rtHash: string | null): Promise<User> {
     const user = await this.userModel.findByIdAndUpdate(userId, {
       refreshToken: rtHash,
     });
@@ -52,11 +57,28 @@ export class UsersService {
     return user;
   }
 
+  async getSafeUser(user: User): Promise<Partial<User>> {
+    const plainUser = user.toObject(); 
+    const { passHash, refreshToken, ...safeUser } = plainUser;
+    return safeUser;
+  }
+
+  async deleteOne(userId: MongooseId){
+    const deletedUser = await this.userModel.findByIdAndDelete(userId);
+    if(!deletedUser){
+      throw new BadRequestException('No user with such id exist')
+    }
+    return {
+      message: 'Successfully Deleted!'
+    }
+  }
+  
+
   async addRecordedLines(
     userId: MongooseId,
     variationId: MongooseId,
   ): Promise<User> {
-    console.log(userId);
+
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {
@@ -75,7 +97,7 @@ export class UsersService {
     userId: MongooseId,
     variationId: MongooseId,
   ): Promise<User> {
-    console.log(userId);
+
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {
@@ -121,7 +143,7 @@ export class UsersService {
   }
   async getCustomPgns(userId: MongooseId) {
     const user = await this.userModel.findById(userId).populate('customLines');
-    console.log(user);
+
     const customs = user?.customLines;
     const customLines = {
       name: 'Custom Pgns',
