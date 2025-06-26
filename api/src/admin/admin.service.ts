@@ -25,4 +25,8 @@ export class AdminService {
   async toggleOpeningStatus(openingId: MongooseId){
     return this.openingsService.acceptOpening(openingId);
   }
+
+  async deleteVariation(variationId: MongooseId){
+    return this.variationsService.deleteOne(variationId);
+  }
 }

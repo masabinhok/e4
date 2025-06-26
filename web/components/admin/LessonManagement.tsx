@@ -6,9 +6,12 @@ interface LessonManagementProps {
   openings: Opening[];
   variations: OpeningVariation[];
   toggleStatus: (type: string, id: string) => void;
+  deleteVariation: (id: string) => void;
 }
 
-const LessonManagement = ({ openings, variations, toggleStatus }: LessonManagementProps) => {
+const LessonManagement = ({ openings, variations, toggleStatus, deleteVariation }: LessonManagementProps) => {
+
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
@@ -53,9 +56,9 @@ const LessonManagement = ({ openings, variations, toggleStatus }: LessonManageme
                       disabled={lesson.status === Status.Accepted}
                       onClick={() => toggleStatus('opening', lesson._id)}
                       className={`inline-block px-3 py-1 rounded-full text-sm ${lesson.status === Status.Accepted
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                        }`}
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                        } `}
                     >
                       {lesson.status}
                     </button>
@@ -108,9 +111,9 @@ const LessonManagement = ({ openings, variations, toggleStatus }: LessonManageme
                       disabled={variation.status === Status.Accepted}
                       onClick={() => toggleStatus('variation', variation._id)}
                       className={`inline-block px-3 py-1 rounded-full text-sm ${variation.status === Status.Accepted
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                        }`}
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                        } `}
                     >
                       {variation.status}
                     </button>
@@ -123,7 +126,7 @@ const LessonManagement = ({ openings, variations, toggleStatus }: LessonManageme
                       <button className="p-2 text-green-600 hover:bg-green-100 rounded-lg">
                         <Edit size={16} />
                       </button>
-                      <button className="p-2 text-red-600 hover:bg-red-100 rounded-lg">
+                      <button onClick={() => deleteVariation(variation._id)} className="p-2 text-red-600 hover:bg-red-100 rounded-lg">
                         <Trash2 size={16} />
                       </button>
                     </div>

@@ -27,6 +27,13 @@ export class VariationsService {
     return variations;
   }
 
+  async deleteOne(variationId: MongooseId){
+    await this.variationModel.findByIdAndDelete(variationId);
+    return {
+      message: 'Deletion Successful'
+    }
+  }
+
   async acceptVariation(variationId: MongooseId){
     const variation = await this.variationModel.findByIdAndUpdate(variationId, {
       $set: {

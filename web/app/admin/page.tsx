@@ -54,6 +54,24 @@ const AdminPage = () => {
     })
   }
 
+  const deleteVariation = async (variationId: string) => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/variation/${variationId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json()).then(data => {
+        console.log(data);
+        fetchAdminData(); 
+      })
+    } catch (error) {
+      throw new Error('network error')
+    }
+
+  }
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -61,7 +79,7 @@ const AdminPage = () => {
       case 'users':
         return <UserManagement users={users} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />;
       case 'lessons':
-        return <LessonManagement openings={openings} variations={variations} toggleStatus={toggleStatus} />;
+        return <LessonManagement deleteVariation={deleteVariation} openings={openings} variations={variations} toggleStatus={toggleStatus} />;
       default:
         return <Dashboard variations={variations} users={users} openings={openings} />;
     }

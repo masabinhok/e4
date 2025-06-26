@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -25,6 +25,11 @@ export class AdminController {
   @Post('opening/toggle-status/:id')
   async toggleOpeningStatus(@Param('id') openingId: MongooseId){
     return this.adminService.toggleOpeningStatus(openingId);
+  }
+
+  @Delete('variation/:id')
+  async deleteVariation(@Param('id') variationId: MongooseId){
+    return this.adminService.deleteVariation(variationId);
   }
 
   
