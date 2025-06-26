@@ -57,30 +57,30 @@ const Dashboard = ({ users, openings, variations }: DashboardProps) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold mb-4">Recent Users</h3>
+        <div className="bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-700">
+          <h3 className="text-lg font-semibold mb-4 text-white">Recent Users</h3>
           <div className="space-y-3">
             {users.slice(0, 4).map(user => (
-              <div key={user._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={user._id} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
                 <div>
-                  <p className="font-medium">{user.fullName}</p>
-                  <p className="text-sm text-gray-500">{user.email}</p>
+                  <p className="font-medium text-white">{user.fullName}</p>
+                  <p className="text-sm text-gray-400">{user.email}</p>
                 </div>
                 <div className="text-right">
-                  <p className={`font-medium ${user.role === Role.Admin ? 'text-green-500' : 'text-blue-500'}`}>{user.role}</p>
+                  <p className={`font-medium ${user.role === Role.Admin ? 'text-green-400' : 'text-blue-400'}`}>{user.role}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold mb-4">Top Performing Lessons</h3>
+        <div className="bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-700">
+          <h3 className="text-lg font-semibold mb-4 text-white">Top Performing Lessons</h3>
           <div className="space-y-3">
             {openings.slice(0, 4).map(lesson => (
-              <div key={lesson._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={lesson._id} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
                 <div>
-                  <p className="font-medium">{lesson.name}</p>
+                  <p className="font-medium text-white">{lesson.name}</p>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center gap-1">

@@ -17,7 +17,7 @@ const TabButton = ({ id, label, icon: Icon, isActive, onClick }: TabButtonProps)
     onClick={() => onClick(id)}
     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
       ? 'bg-blue-600 text-white shadow-lg'
-      : 'text-black hover:bg-gray-100 hover:text-gray-900'
+      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
       }`}
   >
     <Icon size={20} />
@@ -32,11 +32,11 @@ interface SidebarProps {
 
 const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   return (
-    <div className="w-64 bg-white shadow-lg border-r border-gray-200 min-h-screen">
-      <div className="p-6 border-b flex items-center flex-col border-gray-200">
-        <span className='text-xs font-bold'>ADMIN PANEL</span>
+    <div className="w-64 bg-gray-800 shadow-lg border-r border-gray-700 min-h-screen">
+      <div className="p-6 border-b flex items-center flex-col border-gray-700">
+        <span className='text-xs font-bold text-gray-300'>ADMIN PANEL</span>
         <Link href={"/"} className="flex items-center group">
-          <h1 className="text-2xl font-bold hidden lg:block ml-2">e4.<span className="text-blue-400">learnchess</span></h1>
+          <h1 className="text-2xl font-bold hidden lg:block ml-2 text-white">e4.<span className="text-blue-400">learnchess</span></h1>
         </Link>
       </div>
 

@@ -95,7 +95,7 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 w-full text-black">
+    <div className="min-h-screen bg-gray-900 w-full text-white">
       <div className="fixed top-6 right-6 z-50 space-y-2">
         {messages.map((msg, idx) => (
           <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(idx)} />
