@@ -1,14 +1,19 @@
 import React from 'react';
 import { Users, BookOpen, Trophy, Star } from 'lucide-react';
 import StatCard from './StatCard';
-import { Opening, Role, User } from '@/types/types';
+import { Opening, OpeningVariation, Role, User } from '@/types/types';
 
 interface DashboardProps {
   users: User[];
   openings: Opening[];
+  variations: OpeningVariation[];
 }
 
-const Dashboard = ({ users, openings   }: DashboardProps) => {
+const Dashboard = ({ users, openings, variations }: DashboardProps) => {
+
+  const recordingsCount = variations.filter((variation) => variation.code === 'recorded-pgns').length
+  const customsCount = variations.filter((variation) => variation.code === 'custom-pgns').length
+  const contributionsCount = variations.filter((variation) => variation.contributor).length
 
   return (
     <div className="space-y-6">
@@ -26,26 +31,26 @@ const Dashboard = ({ users, openings   }: DashboardProps) => {
           icon={BookOpen}
         />
         <StatCard
-          title="Completions"
-          value={1}
+          title="Total Variations"
+          value={variations.length}
           color="blue"
           icon={Trophy}
         />
         <StatCard
-          title="Contributions"
-          value={1}
+          title="Total Contributions"
+          value={contributionsCount}
           color="blue"
           icon={Star}
         />
         <StatCard
-          title="Recordings"
-          value={1}
+          title="Total Recordings"
+          value={recordingsCount}
           color="red"
           icon={Star}
         />
         <StatCard
-          title="Custom Lines"
-          value={1}
+          title="Total Custom Lines"
+          value={customsCount}
           icon={Star}
           color="green"
         />

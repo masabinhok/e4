@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { Opening, OpeningVariation, Status, User } from '@/types/types';
+import { Opening, OpeningVariation, User } from '@/types/types';
 import Sidebar from '@/components/admin/Sidebar';
 import Dashboard from '@/components/admin/Dashboard';
 import UserManagement from '@/components/admin/UserManagement';
@@ -57,13 +57,13 @@ const AdminPage = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard users={users} openings={openings} />;
+        return <Dashboard variations={variations} users={users} openings={openings} />;
       case 'users':
         return <UserManagement users={users} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />;
       case 'lessons':
         return <LessonManagement openings={openings} variations={variations} toggleStatus={toggleStatus} />;
       default:
-        return <Dashboard users={users} openings={openings} />;
+        return <Dashboard variations={variations} users={users} openings={openings} />;
     }
   };
 

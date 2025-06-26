@@ -36,6 +36,7 @@ export type OpeningVariation = {
   description: string;
   status: Status
   code: string;
+  contributor: string;
 };
 
 export type Opening = {
