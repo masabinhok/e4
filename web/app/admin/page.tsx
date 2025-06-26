@@ -5,6 +5,9 @@ import Sidebar from '@/components/admin/Sidebar';
 import Dashboard from '@/components/admin/Dashboard';
 import UserManagement from '@/components/admin/UserManagement';
 import LessonManagement from '@/components/admin/LessonManagement';
+import { useMessageStore } from '@/store/messageStore';
+import Message from '@/components/Message';
+import { useSoundStore } from '@/store/useSoundStore';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -12,6 +15,9 @@ const AdminPage = () => {
   const [openings, setOpenings] = useState<Opening[] | []>([]);
   const [users, setUsers] = useState<User[] | []>([]);
   const [variations, setVariations] = useState<OpeningVariation[] | []>([]);
+
+  const { messages, removeMessage, addMessage } = useMessageStore();
+  const { playSound } = useSoundStore();
 
   const fetchAdminData = async () => {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin`, {
@@ -22,11 +28,11 @@ const AdminPage = () => {
       }
     }).then(res => {
       if (!res.ok) {
-        throw new Error('network error');
+        addMessage({ content: 'Network Error', type: 'error' });
+        throw new Error('Network error');
       }
       return res.json();
     }).then(data => {
-      console.log(data);
       setOpenings(data.openings);
       setUsers(data.users);
       setVariations(data.variations);
@@ -46,10 +52,13 @@ const AdminPage = () => {
       }
     }).then(res => {
       if (!res.ok) {
+        addMessage({ content: 'Network Error', type: 'error' });
         throw new Error('Network error');
       }
       return res.json();
-    }).then(() => {
+    }).then((data) => {
+      addMessage({ content: data.message, type: 'success' })
+      setTimeout(() => playSound('achievement'), 1);
       fetchAdminData();
     })
   }
@@ -63,7 +72,8 @@ const AdminPage = () => {
           'Content-Type': 'application/json'
         }
       }).then(res => res.json()).then(data => {
-        console.log(data);
+        addMessage({ content: data.message, type: 'success' })
+        setTimeout(() => playSound('achievement'), 1);
         fetchAdminData();
       })
     } catch (error) {
@@ -86,6 +96,11 @@ const AdminPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 w-full text-black">
+      <div className="fixed top-6 right-6 z-50 space-y-2">
+        {messages.map((msg, idx) => (
+          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(idx)} />
+        ))}
+      </div>
       <div className="flex">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="flex-1 p-8">

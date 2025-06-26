@@ -34,7 +34,7 @@ export class OpeningsService {
       throw new BadRequestException('No opening with such id exist')
     }
     return {
-      message: 'Deletion Successful'
+      message: 'Successfully Deleted'
     }
   }
 
@@ -68,14 +68,14 @@ export class OpeningsService {
       });
 
       return {
-        message: 'Opening Accepted'
+        message: 'Opening Accepted!'
       }
   }
 
   async cancelContribution(openingId: MongooseId){
      await this.openingModel.findByIdAndDelete(openingId);
      return {
-      message: 'Cancelled Opening Contribution'
+      message: 'Cancelled Contribution!'
      }
   }
 
@@ -88,7 +88,7 @@ export class OpeningsService {
       throw new InternalServerErrorException('Failed to create a new opening');
     }
     return {
-      message: 'Successfully Contributed!'
+        message: 'Successfully Deleted!'
     }
   }
 

@@ -33,7 +33,7 @@ export class VariationsService {
       throw new BadRequestException('No variation with such id exist')
     }
     return {
-      message: 'Deletion Successful'
+      message: 'Successfully Deleted!'
     }
   }
 
@@ -59,7 +59,7 @@ export class VariationsService {
         );
 
         return {
-          message: 'Variation Accepted.'
+          message: 'Variation Accepted!'
         }
   }
 

@@ -69,7 +69,7 @@ export class UsersService {
       throw new BadRequestException('No user with such id exist')
     }
     return {
-      message: 'Deletion Successful'
+      message: 'Successfully Deleted!'
     }
   }
   
