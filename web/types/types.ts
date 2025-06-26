@@ -24,6 +24,7 @@ export type User = {
   quizzedLines?: string[];
   learnedLines?: string[];
   __v?: number;
+  createdAt: string
 };
 
 

@@ -57,13 +57,13 @@ const AdminPage = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard openings={openings} />;
+        return <Dashboard users={users} openings={openings} />;
       case 'users':
-        return <UserManagement searchTerm={searchTerm} setSearchTerm={setSearchTerm} />;
+        return <UserManagement users={users} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />;
       case 'lessons':
         return <LessonManagement openings={openings} variations={variations} toggleStatus={toggleStatus} />;
       default:
-        return <Dashboard openings={openings} />;
+        return <Dashboard users={users} openings={openings} />;
     }
   };
 
