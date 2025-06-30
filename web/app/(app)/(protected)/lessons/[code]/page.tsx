@@ -32,6 +32,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
   const [mistakes, setMistakes] = useState<number>(0);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const playSound = useSoundStore((s) => s.playSound);
+  const [isProcessingCompletion, setIsProcessingCompletion] = useState(false)
 
 
   useEffect(() => {
@@ -110,6 +111,9 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
   }, [loadLine, currentOpening?.variations]);
 
   const handleLineCompletion = useCallback(() => {
+    if (isProcessingCompletion || !lineCompleted) return;
+
+    setIsProcessingCompletion(true);
     clearMessages();
     if (lineCompleted && mode === 'practice') {
       setTimeout(() => {
@@ -122,10 +126,12 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
 
       });
 
+
       setTimeout(() => {
         setLineCompleted(false);
         loadRandomLine();
         playSound('scatter');
+        setIsProcessingCompletion(false); // Reset guard
       }, 3000)
     }
     if (lineCompleted && mode === 'quiz') {
@@ -138,6 +144,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
         type: 'success',
       });
 
+
       setTimeout(() => {
         setLineCompleted(false);
         setCurrentLineIndex(() => {
@@ -146,10 +153,12 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
         });
         loadRandomLine();
         playSound('scatter');
+        setIsProcessingCompletion(true);
       }, 3000)
 
+
     }
-  }, [lineCompleted, mode, playSound, mistakes, currentOpening?.variations, loadRandomLine, setCurrentLineIndex, clearMessages, addMessage]);
+  }, [lineCompleted, mode, playSound, mistakes, currentOpening?.variations, loadRandomLine, setCurrentLineIndex, clearMessages, addMessage, setLineCompleted]);
 
   const handleModeChange = (newMode: 'learn' | 'practice' | 'quiz') => {
     setMode(newMode);
