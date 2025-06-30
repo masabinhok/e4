@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'motion/react'
 interface MessageProps {
   message: string
   type?: 'success' | 'error' | 'info' | 'warning'
+  id?: number
   duration?: number
   onClose?: () => void
 }
@@ -12,7 +13,7 @@ interface MessageProps {
 const Message: React.FC<MessageProps> = ({
   message,
   type = 'info',
-  duration = 2000,
+  duration = 1000,
   onClose
 }) => {
   const timerRef = useRef<NodeJS.Timeout | null>(null)

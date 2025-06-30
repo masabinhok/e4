@@ -90,7 +90,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
     setMoveValidation(null);
     setMistakes(0);
     setGame(getNewGame());
-  }, [currentOpening?.variations, getNewGame, setBoardFlip, setCurrentLineIndex, ]);
+  }, [currentOpening?.variations, getNewGame, setBoardFlip, setCurrentLineIndex,]);
 
 
   useEffect(() => {
@@ -325,7 +325,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
       {/* Toasts */}
       <div className="fixed top-6 right-6 z-50 space-y-2">
         {messages.map((msg, idx) => (
-          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(idx)} />
+          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(msg.id!)} />
         ))}
       </div>
 

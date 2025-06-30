@@ -103,7 +103,7 @@ const AdminPage = () => {
     <div className="min-h-screen bg-gray-900 w-full text-white">
       <div className="fixed top-6 right-6 z-50 space-y-2">
         {messages.map((msg, idx) => (
-          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(idx)} />
+          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(msg.id!)} />
         ))}
       </div>
       <div className="flex">

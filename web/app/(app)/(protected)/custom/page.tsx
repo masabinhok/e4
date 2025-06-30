@@ -90,9 +90,9 @@ export default function CustomLine() {
 
 
 
-  
 
-  
+
+
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
     try {
@@ -204,7 +204,7 @@ export default function CustomLine() {
     <div className="flex flex-col lg:flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 relative">
       <div className="fixed top-6 right-6 z-50 space-y-2">
         {messages.map((msg, idx) => (
-          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(idx)} />
+          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(msg.id!)} />
         ))}
       </div>
 
