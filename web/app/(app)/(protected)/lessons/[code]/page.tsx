@@ -139,7 +139,13 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
       });
 
       setTimeout(() => {
-
+        setLineCompleted(false);
+        setCurrentLineIndex(() => {
+          const randomLineIndex = Math.floor(Math.random() * (currentOpening?.variations.length ?? 1));
+          return randomLineIndex;
+        });
+        loadRandomLine();
+        playSound('scatter');
       }, 3000)
 
     }
