@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 
 interface MessageProps {

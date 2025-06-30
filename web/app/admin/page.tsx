@@ -37,7 +37,7 @@ const AdminPage = () => {
       setUsers(data.users);
       setVariations(data.variations);
     })
-  }, []);
+  }, [addMessage]);
 
   useEffect(() => {
     fetchAdminData();

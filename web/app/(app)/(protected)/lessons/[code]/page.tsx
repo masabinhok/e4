@@ -158,7 +158,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
 
 
     }
-  }, [lineCompleted, mode, playSound, mistakes, currentOpening?.variations, loadRandomLine, setCurrentLineIndex, clearMessages, addMessage, setLineCompleted]);
+  }, [lineCompleted, mode, playSound, mistakes, currentOpening?.variations, loadRandomLine, setCurrentLineIndex, clearMessages, addMessage, setLineCompleted, isProcessingCompletion]);
 
   const handleModeChange = (newMode: 'learn' | 'practice' | 'quiz') => {
     setMode(newMode);
