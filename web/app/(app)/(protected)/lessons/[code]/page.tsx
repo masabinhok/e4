@@ -200,7 +200,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
 
 
   useEffect(() => {
-    if (mode === 'practice' || mode === 'quiz') {
+    if (!autoPlay && mode === 'practice' || mode === 'quiz') {
       if (currentOpening?.variations[currentLineIndex]?.boardflip === 'black' && currentMoveIndex % 2 === 0) {
         setTimeout(() => nextMove(), 500);
       }
@@ -213,7 +213,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
         handleLineCompletion();
       }
     }
-  }, [currentLineIndex, currentMoveIndex, mode, currentOpening, currentLine, nextMove, handleLineCompletion]);
+  }, [currentLineIndex, currentMoveIndex, mode, currentOpening, currentLine, nextMove, handleLineCompletion, autoPlay]);
 
   const previousMove = () => {
     if (currentMoveIndex > 0) {
