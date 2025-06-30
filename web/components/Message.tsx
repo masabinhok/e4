@@ -5,31 +5,15 @@ import { AnimatePresence, motion } from 'motion/react'
 interface MessageProps {
   message: string
   type?: 'success' | 'error' | 'info' | 'warning'
-  id?: number
-  duration?: number
-  onClose?: () => void
+  onClose?: () => void;
 }
 
 const Message: React.FC<MessageProps> = ({
   message,
   type = 'info',
-  duration = 1000,
   onClose
 }) => {
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
-  useEffect(() => {
-    if (duration && onClose) {
-      timerRef.current = setTimeout(onClose, duration)
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-        timerRef.current = null
-      }
-    }
-  }, [duration, onClose])
 
   const getStyles = () => {
     const base = "p-4 rounded-lg shadow-lg max-w-xs z-50 border font-medium flex items-start backdrop-blur-sm"
@@ -108,6 +92,7 @@ const Message: React.FC<MessageProps> = ({
         <div className="flex-1">
           <p className="text-sm">{message}</p>
         </div>
+
         {onClose && (
           <button
             onClick={onClose}
@@ -119,6 +104,7 @@ const Message: React.FC<MessageProps> = ({
             </svg>
           </button>
         )}
+
       </motion.div>
     </AnimatePresence>
   )

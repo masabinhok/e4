@@ -49,8 +49,8 @@ const ContributeOpening = () => {
   return (
     <div className="flex justify-center items-center min-h-screen p-6 flex-col">
       <div className="fixed top-6 right-6 z-50 space-y-2">
-        {messages.map((msg, idx) => (
-          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(msg.id!)} />
+        {messages.map((msg) => (
+          <Message key={msg.id} message={msg.content} type={msg.type} onClose={() => removeMessage(msg.id!)} />
         ))}
       </div>
       <form onSubmit={(e: FormEvent) => { handleSubmit(e) }} className="shadow-lg rounded-xl p-8 w-full max-w-md space-y-6">

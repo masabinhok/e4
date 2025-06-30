@@ -19,7 +19,7 @@ export default function CustomLine() {
   const [currentLine, setCurrentLine] = useState<string[]>([]);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>('boardFlip', 'white');
-  const { messages, setMessages, addMessage, removeMessage } = useMessageStore();
+  const { messages, clearMessages, addMessage, removeMessage } = useMessageStore();
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const [description, setDescription] = useState<string>('');
   const playSound = useSoundStore((s) => s.playSound);
@@ -49,7 +49,7 @@ export default function CustomLine() {
         if (!validationGame.move(move)) throw new Error(`Invalid move: ${move}`);
       });
 
-      setMessages([]);
+      clearMessages();
       setGame(new Chess());
       setCurrentLine(moves);
       setCurrentMoveIndex(0);
@@ -203,8 +203,8 @@ export default function CustomLine() {
   return (
     <div className="flex flex-col lg:flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 relative">
       <div className="fixed top-6 right-6 z-50 space-y-2">
-        {messages.map((msg, idx) => (
-          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(msg.id!)} />
+        {messages.map((msg) => (
+          <Message key={msg.id} message={msg.content} type={msg.type} onClose={() => removeMessage(msg.id!)} />
         ))}
       </div>
 

@@ -28,7 +28,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
   const [mode, setMode] = useLocalStorage<'learn' | 'practice' | 'quiz'>('currentMode', 'learn');
   const [moveValidation, setMoveValidation] = useState<{ source: string; target: string; valid: boolean } | null>(null);
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);
-  const { messages, setMessages, addMessage, removeMessage } = useMessageStore();
+  const { messages, clearMessages, addMessage, removeMessage } = useMessageStore();
   const [mistakes, setMistakes] = useState<number>(0);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const playSound = useSoundStore((s) => s.playSound);
@@ -110,7 +110,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
   }, [loadLine, currentOpening?.variations]);
 
   const handleLineCompletion = useCallback(() => {
-    setMessages([]);
+    clearMessages();
     if (lineCompleted && mode === 'practice') {
       setTimeout(() => {
         playSound('achievement');
@@ -119,12 +119,14 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
       addMessage({
         content: "Congratulations! You've completed the line.",
         type: 'success',
-        onClose: () => {
-          setLineCompleted(false);
-          loadRandomLine();
-          playSound('scatter');
-        },
+
       });
+
+      setTimeout(() => {
+        setLineCompleted(false);
+        loadRandomLine();
+        playSound('scatter');
+      }, 3000)
     }
     if (lineCompleted && mode === 'quiz') {
       setTimeout(() => {
@@ -134,18 +136,14 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
       addMessage({
         content: `Congratulations! You've completed the line. You made ${mistakes} mistakes.`,
         type: 'success',
-        onClose: () => {
-          setLineCompleted(false);
-          setCurrentLineIndex(() => {
-            const randomLineIndex = Math.floor(Math.random() * (currentOpening?.variations.length ?? 1));
-            return randomLineIndex;
-          });
-          loadRandomLine();
-          playSound('scatter');
-        },
       });
+
+      setTimeout(() => {
+
+      }, 3000)
+
     }
-  }, [lineCompleted, mode, playSound, mistakes, currentOpening?.variations, loadRandomLine, setCurrentLineIndex, setMessages, addMessage]);
+  }, [lineCompleted, mode, playSound, mistakes, currentOpening?.variations, loadRandomLine, setCurrentLineIndex, clearMessages, addMessage]);
 
   const handleModeChange = (newMode: 'learn' | 'practice' | 'quiz') => {
     setMode(newMode);
@@ -221,7 +219,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
     if (autoPlay) {
       const lineLength = currentLine?.length ?? 0;
       if (currentMoveIndex < lineLength) {
-        setMessages([]);
+        clearMessages()
         const timer = setTimeout(() => {
           nextMove();
         }, 1000);
@@ -230,7 +228,7 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
         setAutoPlay(false);
       }
     }
-  }, [autoPlay, currentMoveIndex, currentLine, nextMove, setMessages]);
+  }, [autoPlay, currentMoveIndex, currentLine, nextMove, clearMessages]);
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
     if (autoPlay) return false;
@@ -324,8 +322,8 @@ export default function ChessGame({ params }: { params: Promise<{ code: string }
     <div className=" flex flex-col lg:flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 relative">
       {/* Toasts */}
       <div className="fixed top-6 right-6 z-50 space-y-2">
-        {messages.map((msg, idx) => (
-          <Message key={idx} message={msg.content} type={msg.type} onClose={() => removeMessage(msg.id!)} />
+        {messages.map((msg) => (
+          <Message key={msg.id} message={msg.content} type={msg.type} onClose={() => removeMessage(msg.id!)} />
         ))}
       </div>
 
