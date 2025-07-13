@@ -6,6 +6,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { parseError } from "@/utils/parseError";
 import { useAuth } from "@/store/auth";
+import ServerStatus from "@/components/ServerStatus";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -103,6 +104,7 @@ export default function Login() {
           </a>
         </p>
       </form>
+      <ServerStatus />
     </div>
   );
 }
