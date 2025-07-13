@@ -7,14 +7,14 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.use(cookieParser());
+  app.use(cookieParser() as any);
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('port') ?? 5000; 
+  const port = configService.get<number>('port') ?? 5000;
 
   app.enableCors({
     origin: configService.get<string>('cors.origin'),
-    credentials: true
-  },);
+    credentials: true,
+  });
 
   app.setGlobalPrefix('api');
 
@@ -26,4 +26,5 @@ async function bootstrap() {
   );
   await app.listen(port);
 }
-bootstrap();
+
+void bootstrap();

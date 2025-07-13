@@ -1,8 +1,8 @@
-import { useState, useEffect, Dispatch, SetStateAction, useRef } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction, useRef } from "react";
 
 function useLocalStorage<T>(
   key: string,
-  initialValue: T
+  initialValue: T,
 ): [T, Dispatch<SetStateAction<T>>] {
   const isMounted = useRef(false);
   // State to store our value
@@ -10,7 +10,7 @@ function useLocalStorage<T>(
 
   // Load from localStorage once the component mounts
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     try {
       const item = window.localStorage.getItem(key);
@@ -33,7 +33,7 @@ function useLocalStorage<T>(
       // Save state
       setStoredValue(valueToStore);
       // Save to local storage only if component is mounted
-      if (typeof window !== 'undefined' && isMounted.current) {
+      if (typeof window !== "undefined" && isMounted.current) {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       }
     } catch (error) {
@@ -43,22 +43,20 @@ function useLocalStorage<T>(
 
   // Sync between tabs/windows
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === key) {
         try {
-          setStoredValue(
-            e.newValue ? JSON.parse(e.newValue) : initialValue
-          );
+          setStoredValue(e.newValue ? JSON.parse(e.newValue) : initialValue);
         } catch (error) {
           console.error(error);
         }
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, [key, initialValue]);
 
   return [storedValue, setValue];

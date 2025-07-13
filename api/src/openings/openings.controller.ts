@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { OpeningsService } from './openings.service';
 import { AddOpeningDto } from './dtos/add-opening.dto';
 import { MongooseId } from 'src/types/types';
@@ -24,12 +32,15 @@ export class OpeningsController {
   }
 
   @Delete('cancel/:id')
-  async cancelContribution(@Param('id') openingId: MongooseId){
+  async cancelContribution(@Param('id') openingId: MongooseId) {
     return this.openingsService.cancelContribution(openingId);
   }
 
   @Post('add')
-  async addOpening(@Body() addOpeningDto: AddOpeningDto, @GetUser('sub') userId: MongooseId) {
+  async addOpening(
+    @Body() addOpeningDto: AddOpeningDto,
+    @GetUser('sub') userId: MongooseId,
+  ) {
     return this.openingsService.addOpening(addOpeningDto, userId);
   }
 
@@ -41,8 +52,7 @@ export class OpeningsController {
   @UseGuards(RolesGuard)
   @Roles(Role.Admin)
   @Post('accept/:id')
-  async acceptOpening(@Param('id') openingId: MongooseId){
+  async acceptOpening(@Param('id') openingId: MongooseId) {
     return this.openingsService.acceptOpening(openingId);
   }
-
 }

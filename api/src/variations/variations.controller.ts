@@ -8,8 +8,6 @@ import { RolesGuard } from 'src/roles/roles.guard';
 import { Roles } from 'src/roles/roles.decorator';
 import { Role } from 'src/roles/roles.enum';
 
-
-
 @UseGuards(AuthGuard)
 @Controller('variations')
 export class VariationsController {
@@ -43,7 +41,7 @@ export class VariationsController {
   @UseGuards(RolesGuard)
   @Roles(Role.Admin)
   @Post('accept/:id')
-  async acceptVariation(@Param('id') variationId: MongooseId){
+  async acceptVariation(@Param('id') variationId: MongooseId) {
     return this.variationsService.acceptVariation(variationId);
   }
 }

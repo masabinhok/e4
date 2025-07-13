@@ -1,63 +1,79 @@
-'use client'
-import Button from '@/components/Button';
-import Message from '@/components/Message';
-import { useMessageStore } from '@/store/messageStore';
-import { useSoundStore } from '@/store/useSoundStore';
-import React, { FormEvent, useState } from 'react'
+"use client";
+import Button from "@/components/Button";
+import Message from "@/components/Message";
+import { useMessageStore } from "@/store/messageStore";
+import { useSoundStore } from "@/store/useSoundStore";
+import React, { FormEvent, useState } from "react";
 
 const ContributeOpening = () => {
-  const [name, setName] = useState<string>('');
-  const [code, setCode] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
+  const [name, setName] = useState<string>("");
+  const [code, setCode] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
 
   const { messages, removeMessage, addMessage } = useMessageStore();
   const { playSound } = useSoundStore();
 
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/add`, {
-        credentials: 'include',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/openings/add`,
+        {
+          credentials: "include",
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            description,
+            code,
+          }),
         },
-        body: JSON.stringify({
-          name, description, code
-        })
-      });
-
+      );
 
       if (!res.ok) {
-        throw new Error('Failed to submit opening');
+        throw new Error("Failed to submit opening");
       }
 
       const data = await res.json();
-      addMessage({ content: data.message, type: 'success' })
-      setTimeout(() => playSound('achievement'), 1);
+      addMessage({ content: data.message, type: "success" });
+      setTimeout(() => playSound("achievement"), 1);
       // Reset form fields after successful submission
-      setName('');
-      setCode('');
-      setDescription('');
-    }
-    catch (error) {
+      setName("");
+      setCode("");
+      setDescription("");
+    } catch (error) {
       console.error("Error submitting form:", error);
     }
-  }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen p-6 flex-col">
       <div className="fixed top-6 right-6 z-50 space-y-2">
         {messages.map((msg) => (
-          <Message key={msg.id} message={msg.content} type={msg.type} onClose={() => removeMessage(msg.id!)} />
+          <Message
+            key={msg.id}
+            message={msg.content}
+            type={msg.type}
+            onClose={() => removeMessage(msg.id!)}
+          />
         ))}
       </div>
-      <form onSubmit={(e: FormEvent) => { handleSubmit(e) }} className="shadow-lg rounded-xl p-8 w-full max-w-md space-y-6">
-        <h1 className="text-2xl font-bold text-center text-blue-600">♟️ Contribute New Opening</h1>
+      <form
+        onSubmit={(e: FormEvent) => {
+          handleSubmit(e);
+        }}
+        className="shadow-lg rounded-xl p-8 w-full max-w-md space-y-6"
+      >
+        <h1 className="text-2xl font-bold text-center text-blue-600">
+          ♟️ Contribute New Opening
+        </h1>
 
         <div className="flex flex-col space-y-2">
-          <label htmlFor="name" className="text-sm font-semibold text-gray-700">Opening Name</label>
+          <label htmlFor="name" className="text-sm font-semibold text-gray-700">
+            Opening Name
+          </label>
           <input
             type="text"
             id="name"
@@ -70,7 +86,9 @@ const ContributeOpening = () => {
           />
         </div>
         <div className="flex flex-col space-y-2">
-          <label htmlFor="code" className="text-sm font-semibold text-gray-700">Code</label>
+          <label htmlFor="code" className="text-sm font-semibold text-gray-700">
+            Code
+          </label>
           <input
             type="text"
             id="code"
@@ -83,7 +101,12 @@ const ContributeOpening = () => {
           />
         </div>
         <div className="flex flex-col space-y-2">
-          <label htmlFor="description" className="text-sm font-semibold text-gray-700">Description</label>
+          <label
+            htmlFor="description"
+            className="text-sm font-semibold text-gray-700"
+          >
+            Description
+          </label>
           <textarea
             id="description"
             name="description"
@@ -99,7 +122,7 @@ const ContributeOpening = () => {
         <Button type="submit" text="Submit Opening" />
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default ContributeOpening
+export default ContributeOpening;

@@ -2,15 +2,14 @@ import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
-import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
-
 
 @Module({
   imports: [
-    UsersModule, JwtModule.register({
+    UsersModule,
+    JwtModule.register({
       global: true,
-    })
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService],

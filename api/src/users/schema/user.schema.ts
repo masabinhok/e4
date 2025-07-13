@@ -20,22 +20,40 @@ export class User extends Document {
   @Prop()
   refreshToken?: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }], default: [] })
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }],
+    default: [],
+  })
   recordedLines?: Variation[];
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }], default: [] })
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }],
+    default: [],
+  })
   contributedLines?: Variation[];
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }], default: [] })
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }],
+    default: [],
+  })
   customLines?: Variation[];
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }], default: [] })
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }],
+    default: [],
+  })
   practicedLines?: Variation[];
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }], default: [] })
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }],
+    default: [],
+  })
   quizzedLines?: Variation[];
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }], default: [] })
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }],
+    default: [],
+  })
   learnedLines?: Variation[];
 }
 

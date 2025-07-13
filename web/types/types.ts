@@ -1,40 +1,39 @@
-export type Mode = 'practice' | 'quiz' | 'learn'
+export type Mode = "practice" | "quiz" | "learn";
 
-export type BoardFlip = 'white' | 'black'
+export type BoardFlip = "white" | "black";
 
 export enum Role {
-  Admin = 'ADMIN',
-  User = 'USER'
+  Admin = "ADMIN",
+  User = "USER",
 }
 
 export enum Status {
   Pending = "PENDING",
-  Accepted = 'ACCEPTED',
-  Rejected = 'REJECTED'
+  Accepted = "ACCEPTED",
+  Rejected = "REJECTED",
 }
 
 export type User = {
   _id: string;
   fullName: string;
   email: string;
-  role: Role
+  role: Role;
   recordedLines?: string[];
   customLines?: string[];
   practicedLines?: string[];
   quizzedLines?: string[];
   learnedLines?: string[];
   __v?: number;
-  createdAt: string
+  createdAt: string;
 };
-
 
 export type OpeningVariation = {
   _id: string;
   title: string;
   moves: string[];
-  boardflip: BoardFlip
+  boardflip: BoardFlip;
   description: string;
-  status: Status
+  status: Status;
   code: string;
   contributor: string;
 };
@@ -45,5 +44,5 @@ export type Opening = {
   description: string;
   code: string;
   variations: OpeningVariation[];
-  status: Status
+  status: Status;
 };

@@ -1,15 +1,13 @@
-
-'use client'
+"use client";
 
 import { useAuth } from "@/store/auth";
-
 
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 
 interface ProtectedRouteProps {
-  children: ReactNode,
-  fallback?: ReactNode
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
@@ -24,7 +22,7 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/auth/login');
+      router.push("/auth/login");
     }
   }, [isAuthenticated, isLoading, user, router]);
 

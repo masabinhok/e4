@@ -1,5 +1,5 @@
-import { LucideIcon } from 'lucide-react';
-import React from 'react';
+import { LucideIcon } from "lucide-react";
+import React from "react";
 
 interface StatCardProps {
   title: string;
@@ -8,7 +8,12 @@ interface StatCardProps {
   color: string;
 }
 
-const StatCard = ({ title, value, icon: Icon, color = 'blue' }: StatCardProps) => (
+const StatCard = ({
+  title,
+  value,
+  icon: Icon,
+  color = "blue",
+}: StatCardProps) => (
   <div className="bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-700 hover:shadow-md transition-shadow">
     <div className="flex items-center justify-between">
       <div>

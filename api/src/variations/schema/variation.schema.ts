@@ -5,15 +5,15 @@ import { User } from 'src/users/schema/user.schema';
 
 export type BoardFlip = 'white' | 'black';
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class Variation {
   @Prop({ required: true })
   title: string;
 
-  @Prop({required: true, type: String, default:Status.Pending, enum: Status })
+  @Prop({ required: true, type: String, default: Status.Pending, enum: Status })
   status: Status;
-  
-  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User'})
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   contributor?: User;
 
   @Prop({ required: true })

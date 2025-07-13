@@ -1,7 +1,7 @@
-import React from 'react';
-import { Search, Filter, Download, Eye, Edit, Trash2 } from 'lucide-react';
-import { User } from '@/types/types';
-import { dateConverter } from '@/lib/utils';
+import React from "react";
+import { Search, Filter, Download, Eye, Edit, Trash2 } from "lucide-react";
+import { User } from "@/types/types";
+import { dateConverter } from "@/lib/utils";
 
 interface UserManagementProps {
   users: User[];
@@ -10,15 +10,22 @@ interface UserManagementProps {
   handleDelete: (type: string, id: string) => void;
 }
 
-const UserManagement = ({ users, searchTerm, setSearchTerm, handleDelete }: UserManagementProps) => {
-  ;
+const UserManagement = ({
+  users,
+  searchTerm,
+  setSearchTerm,
+  handleDelete,
+}: UserManagementProps) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <h2 className="text-2xl font-bold text-white">User Management</h2>
         <div className="flex gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={20}
+            />
             <input
               type="text"
               placeholder="Search users..."
@@ -46,12 +53,16 @@ const UserManagement = ({ users, searchTerm, setSearchTerm, handleDelete }: User
                 <th className="text-left p-4 font-semibold text-white">User</th>
                 <th className="text-left p-4 font-semibold text-white">Role</th>
                 <th className="text-left p-4 font-semibold text-white">_id</th>
-                <th className="text-left p-4 font-semibold text-white">Joined</th>
-                <th className="text-left p-4 font-semibold text-white">Actions</th>
+                <th className="text-left p-4 font-semibold text-white">
+                  Joined
+                </th>
+                <th className="text-left p-4 font-semibold text-white">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-600">
-              {users.map(user => (
+              {users.map((user) => (
                 <tr key={user._id} className="hover:bg-gray-700">
                   <td className="p-4">
                     <div>
@@ -63,7 +74,9 @@ const UserManagement = ({ users, searchTerm, setSearchTerm, handleDelete }: User
                     <span className="font-medium text-white">{user.role}</span>
                   </td>
                   <td className="p-4 text-white">{user._id}</td>
-                  <td className="p-4 text-white">{dateConverter(user.createdAt)}</td>
+                  <td className="p-4 text-white">
+                    {dateConverter(user.createdAt)}
+                  </td>
                   <td className="p-4">
                     <div className="flex gap-2">
                       <button className="p-2 text-blue-400 hover:bg-blue-900 rounded-lg">
@@ -72,7 +85,10 @@ const UserManagement = ({ users, searchTerm, setSearchTerm, handleDelete }: User
                       <button className="p-2 text-green-400 hover:bg-green-900 rounded-lg">
                         <Edit size={16} />
                       </button>
-                      <button onClick={() => handleDelete('user', user._id)} className="p-2 text-red-400 hover:bg-red-900 rounded-lg">
+                      <button
+                        onClick={() => handleDelete("user", user._id)}
+                        className="p-2 text-red-400 hover:bg-red-900 rounded-lg"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>

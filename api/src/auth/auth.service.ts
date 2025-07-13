@@ -7,11 +7,9 @@ import {
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { UsersService } from 'src/users/users.service';
-import { Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dtos/login.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { MongooseId } from 'src/types/types';
 import { User } from 'src/users/schema/user.schema';
 import { ConfigService } from '@nestjs/config';
@@ -22,7 +20,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private config: ConfigService
+    private config: ConfigService,
   ) {}
 
   //generateHash
@@ -32,16 +30,19 @@ export class AuthService {
     return hash;
   }
 
-
   //getTokens
-  async getTokens(userId: MongooseId, role: Role, email: string ): Promise<{
+  async getTokens(
+    userId: MongooseId,
+    role: Role,
+    email: string,
+  ): Promise<{
     accessToken: string;
     refreshToken: string;
   }> {
     const payload = {
-      sub: userId, 
+      sub: userId,
       email,
-      role
+      role,
     };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -54,8 +55,9 @@ export class AuthService {
       }),
     ]);
     return {
-      accessToken, refreshToken
-    }
+      accessToken,
+      refreshToken,
+    };
   }
 
   async storeRefreshToken(userId: MongooseId, rt: string) {
@@ -64,9 +66,9 @@ export class AuthService {
   }
 
   async signUp(signUpDto: SignUpDto): Promise<{
-    accessToken: string, 
-    refreshToken: string
-  }>{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const { fullName, email, password } = signUpDto;
     const existingUser = await this.usersService.findUserByEmail(email);
 
@@ -85,7 +87,11 @@ export class AuthService {
       throw new InternalServerErrorException('Failed to create user.');
     }
 
-    const tokens = await this.getTokens(newUser._id as MongooseId, newUser.role, newUser.email);
+    const tokens = await this.getTokens(
+      newUser._id as MongooseId,
+      newUser.role,
+      newUser.email,
+    );
     await this.storeRefreshToken(
       newUser._id as MongooseId,
       tokens.refreshToken,
@@ -95,8 +101,8 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<{
-      accessToken: string;
-      refreshToken: string;
+    accessToken: string;
+    refreshToken: string;
   }> {
     //get credentials from the client
     const { email, password } = loginDto;
@@ -113,7 +119,11 @@ export class AuthService {
       throw new BadRequestException('Invalid Password');
     }
 
-    const tokens = await this.getTokens(existingUser._id as MongooseId, existingUser.role, existingUser.email);
+    const tokens = await this.getTokens(
+      existingUser._id as MongooseId,
+      existingUser.role,
+      existingUser.email,
+    );
     await this.storeRefreshToken(
       existingUser._id as MongooseId,
       tokens.refreshToken,
@@ -122,24 +132,29 @@ export class AuthService {
     return tokens;
   }
 
-  async refresh(userId: MongooseId, rt: string): Promise<{
+  async refresh(
+    userId: MongooseId,
+    rt: string,
+  ): Promise<{
     accessToken: string;
     refreshToken: string;
   }> {
-    
     const user = await this.usersService.findUserById(userId);
-    if(!user || !user.refreshToken){
+    if (!user || !user.refreshToken) {
       throw new ForbiddenException('Invalid refresh token');
     }
 
-    const matches = await bcrypt.compare(rt , user.refreshToken);
+    const matches = await bcrypt.compare(rt, user.refreshToken);
 
-    if(!matches){
+    if (!matches) {
       throw new UnauthorizedException('Invalid token');
     }
 
-
-    const tokens = await this.getTokens(user._id as MongooseId, user.role, user.email );
+    const tokens = await this.getTokens(
+      user._id as MongooseId,
+      user.role,
+      user.email,
+    );
     await this.storeRefreshToken(user._id as MongooseId, tokens.refreshToken);
     return tokens;
   }
@@ -148,7 +163,7 @@ export class AuthService {
     message: string;
   }> {
     const user = await this.usersService.updateRtHash(userId, null);
-    if(!user){
+    if (!user) {
       throw new BadRequestException('No user to logout!');
     }
 

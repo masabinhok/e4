@@ -8,9 +8,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { VariationsModule } from './variations/variations.module';
 import config from './config/config';
-import { JwtModule } from '@nestjs/jwt';
 import { AdminModule } from './admin/admin.module';
-
 
 @Module({
   imports: [
@@ -21,7 +19,7 @@ import { AdminModule } from './admin/admin.module';
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (config) => ({
+      useFactory: (config: ConfigService) => ({
         uri: config.get('database.databaseUrl'),
       }),
       inject: [ConfigService],

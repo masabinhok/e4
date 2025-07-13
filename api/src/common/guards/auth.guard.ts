@@ -15,7 +15,7 @@ export class AuthGuard implements CanActivate {
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = request.cookies['accessToken'];
+    const token: string = request.cookies['accessToken'];
 
     if (!token || typeof token !== 'string') {
       throw new UnauthorizedException('Access Token Missing or malformed');
@@ -28,7 +28,7 @@ export class AuthGuard implements CanActivate {
 
       request.user = payload;
       return true;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired access token');
     }
   }

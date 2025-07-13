@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
-  UseGuards,
 } from '@nestjs/common';
 import { Variation, VariationDocument } from './schema/variation.schema';
 import { Model } from 'mongoose';
@@ -22,45 +21,49 @@ export class VariationsService {
     private usersService: UsersService,
   ) {}
 
-  async findAll(){
+  async findAll() {
     const variations = await this.variationModel.find();
     return variations;
   }
 
-  async deleteOne(variationId: MongooseId){
-    const deletedVariation = await this.variationModel.findByIdAndDelete(variationId);
-    if(!deletedVariation){
-      throw new BadRequestException('No variation with such id exist')
+  async deleteOne(variationId: MongooseId) {
+    const deletedVariation =
+      await this.variationModel.findByIdAndDelete(variationId);
+    if (!deletedVariation) {
+      throw new BadRequestException('No variation with such id exist');
     }
     return {
-      message: 'Successfully Deleted!'
-    }
+      message: 'Successfully Deleted!',
+    };
   }
 
-  async acceptVariation(variationId: MongooseId){
-    const variation = await this.variationModel.findByIdAndUpdate(variationId, {
-      $set: {
-        status: Status.Accepted
-      }, 
-    }, {
-      new: true,
-    }).populate('contributor')
-    if(!variation){
+  async acceptVariation(variationId: MongooseId) {
+    const variation = await this.variationModel
+      .findByIdAndUpdate(
+        variationId,
+        {
+          $set: {
+            status: Status.Accepted,
+          },
+        },
+        {
+          new: true,
+        },
+      )
+      .populate('contributor');
+    if (!variation) {
       throw new BadRequestException('No such variation exists.');
     }
 
-    await this.openingsService.addContribution(
-          variation.code,
-          variationId
-        );
+    await this.openingsService.addContribution(variation.code, variationId);
     await this.usersService.addContributedLines(
-          variation.contributor?._id as MongooseId,
-          variationId
-        );
+      variation.contributor?._id as MongooseId,
+      variationId,
+    );
 
-        return {
-          message: 'Variation Accepted!'
-        }
+    return {
+      message: 'Variation Accepted!',
+    };
   }
 
   async contributeVariation(
@@ -71,7 +74,7 @@ export class VariationsService {
     const newVariation = await this.variationModel.create({
       code,
       ...dto,
-      contributor: userId
+      contributor: userId,
     });
     if (!newVariation) {
       throw new InternalServerErrorException(
@@ -79,13 +82,15 @@ export class VariationsService {
       );
     }
 
-
     //this should be done after accepted by the admin.
-    
   }
 
   async recordVariation(userId: MongooseId, dto: ContributeVariationDto) {
-    const variation = { ...dto, code: 'recorded-pgns', status: Status.Accepted };
+    const variation = {
+      ...dto,
+      code: 'recorded-pgns',
+      status: Status.Accepted,
+    };
 
     const newVariation = await this.variationModel.create(variation);
     if (!newVariation) {
@@ -93,7 +98,6 @@ export class VariationsService {
         'Failed to create a new variation',
       );
     }
-
 
     await this.usersService.addRecordedLines(
       userId,

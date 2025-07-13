@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,8 +12,16 @@ export default function Navigation() {
     <div className="fixed top-0 left-0 w-full lg:w-auto bg-gray-900 lg:bg-transparent p-4 lg:p-0 shadow-lg lg:shadow-none z-50 border-b border-gray-800">
       <div className="flex justify-between items-center lg:flex-col lg:gap-5 max-lg:py-0 p-5">
         <Link href={"/"} className="flex items-center group">
-          <Image src={logo} height={40} width={40} alt="logo" className="size-24 max-lg:size-16 transition-transform group-hover:scale-105"></Image>
-          <h1 className="text-2xl font-bold hidden lg:block ml-2">e4.<span className="text-blue-400">learnchess</span></h1>
+          <Image
+            src={logo}
+            height={40}
+            width={40}
+            alt="logo"
+            className="size-24 max-lg:size-16 transition-transform group-hover:scale-105"
+          ></Image>
+          <h1 className="text-2xl font-bold hidden lg:block ml-2">
+            e4.<span className="text-blue-400">learnchess</span>
+          </h1>
         </Link>
         <button
           className="lg:hidden text-2xl text-gray-300 hover:text-white transition-colors"
@@ -38,4 +46,4 @@ export default function Navigation() {
       </div>
     </div>
   );
-} 
+}

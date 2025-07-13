@@ -18,16 +18,20 @@ interface AuthState {
   refreshToken: () => Promise<boolean>;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 let retried = false;
 
-const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
+const apiCall = async (
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<any> => {
   const tryRequest = async () => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      credentials: 'include',
+      credentials: "include",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -35,14 +39,16 @@ const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any
 
     if (response.status === 401 && !retried) {
       retried = true;
-      console.warn('401 detected. Attempting token refresh...');
+      console.warn("401 detected. Attempting token refresh...");
       const success = await useAuth.getState().refreshToken();
       if (success) return tryRequest(); // Retry once after refresh
     }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(
+        errorData.message || `HTTP ${response.status}: ${response.statusText}`,
+      );
     }
 
     return response.json();
@@ -53,7 +59,7 @@ const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any
 
 export const useAuth = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       isLoading: false,
       isAuthenticated: false,
@@ -71,8 +77,8 @@ export const useAuth = create<AuthState>()(
         try {
           set({ isLoading: true });
 
-          const data = await apiCall('/auth/login', {
-            method: 'POST',
+          const data = await apiCall("/auth/login", {
+            method: "POST",
             body: JSON.stringify({ email, password }),
           });
 
@@ -91,8 +97,8 @@ export const useAuth = create<AuthState>()(
         try {
           set({ isLoading: true });
 
-          const data = await apiCall('/auth/signup', {
-            method: 'POST',
+          const data = await apiCall("/auth/signup", {
+            method: "POST",
             body: JSON.stringify({ fullName, email, password }),
           });
 
@@ -111,11 +117,11 @@ export const useAuth = create<AuthState>()(
         try {
           set({ isLoading: true });
 
-          await apiCall('/auth/logout', {
-            method: 'POST',
+          await apiCall("/auth/logout", {
+            method: "POST",
           });
         } catch (error) {
-          console.error('Logout error:', error);
+          console.error("Logout error:", error);
         } finally {
           set({
             user: null,
@@ -129,10 +135,9 @@ export const useAuth = create<AuthState>()(
         try {
           set({ isLoading: true });
 
-          const data = await apiCall('/auth/me', {
-            method: 'GET',
+          const data = await apiCall("/auth/me", {
+            method: "GET",
           });
-
 
           set({
             user: data,
@@ -142,7 +147,7 @@ export const useAuth = create<AuthState>()(
 
           return true;
         } catch (error) {
-          console.error('Auth check failed:', error);
+          console.error("Auth check failed:", error);
           set({
             user: null,
             isAuthenticated: false,
@@ -154,12 +159,12 @@ export const useAuth = create<AuthState>()(
 
       refreshToken: async () => {
         try {
-          await apiCall('/auth/refresh', {
-            method: 'POST',
+          await apiCall("/auth/refresh", {
+            method: "POST",
           });
           return true;
         } catch (error) {
-          console.error('Token refresh failed:', error);
+          console.error("Token refresh failed:", error);
 
           set({
             user: null,
@@ -167,8 +172,8 @@ export const useAuth = create<AuthState>()(
             isLoading: false,
           });
 
-          if (typeof window !== 'undefined') {
-            window.location.href = '/auth/login';
+          if (typeof window !== "undefined") {
+            window.location.href = "/auth/login";
           }
 
           return false;
@@ -184,7 +189,7 @@ export const useAuth = create<AuthState>()(
       },
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage",
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
@@ -194,6 +199,6 @@ export const useAuth = create<AuthState>()(
           state.checkAuth();
         }
       },
-    }
-  )
+    },
+  ),
 );

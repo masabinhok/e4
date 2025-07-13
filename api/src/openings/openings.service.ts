@@ -28,14 +28,14 @@ export class OpeningsService {
     return opening;
   }
 
-  async deleteOne(openingId: MongooseId){
+  async deleteOne(openingId: MongooseId) {
     const deletedOpening = await this.openingModel.findByIdAndDelete(openingId);
-    if(!deletedOpening){
-      throw new BadRequestException('No opening with such id exist')
+    if (!deletedOpening) {
+      throw new BadRequestException('No opening with such id exist');
     }
     return {
-      message: 'Successfully Deleted'
-    }
+      message: 'Successfully Deleted',
+    };
   }
 
   async findAll() {
@@ -45,7 +45,7 @@ export class OpeningsService {
 
   async findAccepted() {
     const openings = await this.openingModel.find({
-      status: Status.Accepted
+      status: Status.Accepted,
     });
     return openings;
   }
@@ -53,43 +53,47 @@ export class OpeningsService {
   async findPending(userId: MongooseId) {
     const openings = await this.openingModel.find({
       status: Status.Pending,
-      contributor: userId
-    })
+      contributor: userId,
+    });
     return openings;
   }
 
-  async acceptOpening(openingId: MongooseId){
-      await this.openingModel.findByIdAndUpdate(openingId, {
+  async acceptOpening(openingId: MongooseId) {
+    await this.openingModel.findByIdAndUpdate(
+      openingId,
+      {
         $set: {
-          status: Status.Accepted
-        }
-      }, {
-        new: true
-      });
+          status: Status.Accepted,
+        },
+      },
+      {
+        new: true,
+      },
+    );
 
-      return {
-        message: 'Opening Accepted!'
-      }
+    return {
+      message: 'Opening Accepted!',
+    };
   }
 
-  async cancelContribution(openingId: MongooseId){
-     await this.openingModel.findByIdAndDelete(openingId);
-     return {
-      message: 'Cancelled Contribution!'
-     }
+  async cancelContribution(openingId: MongooseId) {
+    await this.openingModel.findByIdAndDelete(openingId);
+    return {
+      message: 'Cancelled Contribution!',
+    };
   }
 
   async addOpening(dto: AddOpeningDto, userId: MongooseId) {
     const newOpening = await this.openingModel.create({
-      ...dto, 
-      contributor: userId
+      ...dto,
+      contributor: userId,
     });
     if (!newOpening) {
       throw new InternalServerErrorException('Failed to create a new opening');
     }
     return {
-        message: 'Successfully Deleted!'
-    }
+      message: 'Successfully Deleted!',
+    };
   }
 
   async addContribution(

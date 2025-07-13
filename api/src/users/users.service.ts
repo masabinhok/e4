@@ -12,9 +12,9 @@ import { MongooseId } from 'src/types/types';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async findUsers(){
+  async findUsers() {
     const users = await this.userModel.find();
-    return await Promise.all(users.map((user)=> this.getSafeUser(user)));
+    return await Promise.all(users.map((user) => this.getSafeUser(user)));
   }
 
   async findUserById(userId: MongooseId): Promise<User> {
@@ -32,11 +32,15 @@ export class UsersService {
     return user ? user : null;
   }
 
-  async createUser(fullName: string, email: string,  passHash: string): Promise<User> {
+  async createUser(
+    fullName: string,
+    email: string,
+    passHash: string,
+  ): Promise<User> {
     const user = await this.userModel.create({
       fullName,
       email,
-      passHash
+      passHash,
     });
 
     if (!user) {
@@ -57,28 +61,29 @@ export class UsersService {
     return user;
   }
 
-  async getSafeUser(user: User): Promise<Partial<User>> {
-    const plainUser = user.toObject(); 
+  getSafeUser(user: User): Partial<User> {
+    const plainUser = user.toObject();
     const { passHash, refreshToken, ...safeUser } = plainUser;
-    return safeUser;
+    // passHash and refreshToken are intentionally extracted and not used
+    void passHash;
+    void refreshToken;
+    return safeUser as Partial<User>;
   }
 
-  async deleteOne(userId: MongooseId){
+  async deleteOne(userId: MongooseId) {
     const deletedUser = await this.userModel.findByIdAndDelete(userId);
-    if(!deletedUser){
-      throw new BadRequestException('No user with such id exist')
+    if (!deletedUser) {
+      throw new BadRequestException('No user with such id exist');
     }
     return {
-      message: 'Successfully Deleted!'
-    }
+      message: 'Successfully Deleted!',
+    };
   }
-  
 
   async addRecordedLines(
     userId: MongooseId,
     variationId: MongooseId,
   ): Promise<User> {
-
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {
@@ -97,7 +102,6 @@ export class UsersService {
     userId: MongooseId,
     variationId: MongooseId,
   ): Promise<User> {
-
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
       {

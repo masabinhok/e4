@@ -21,26 +21,30 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('signup')
-  async signUp(@Body() signUpDto: SignUpDto, @Res({passthrough: true}) res: Response) {
-    const {accessToken, refreshToken} = await this.authService.signUp(signUpDto);
+  async signUp(
+    @Body() signUpDto: SignUpDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken } =
+      await this.authService.signUp(signUpDto);
 
     res.cookie('accessToken', accessToken, {
-      httpOnly: true, 
+      httpOnly: true,
       sameSite: 'none',
-      secure: true, 
+      secure: true,
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie('refreshToken', refreshToken, {
-      httpOnly: true, 
-      secure: true, 
+      httpOnly: true,
+      secure: true,
       sameSite: 'none',
-      maxAge: 7* 24* 60 * 60* 1000
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return {
-      message: 'Signed Up Successfully'
-    }
+      message: 'Signed Up Successfully',
+    };
   }
 
   @Post('login')
@@ -101,7 +105,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const rt = req.cookies['refreshToken'];
+    const rt = req.cookies['refreshToken'] as string;
     const { accessToken, refreshToken } = await this.authService.refresh(
       userId,
       rt,
@@ -110,14 +114,14 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: 15 * 60 * 1000, 
+      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return {

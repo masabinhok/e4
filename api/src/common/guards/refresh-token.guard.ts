@@ -15,7 +15,7 @@ export class RefreshTokenGuard implements CanActivate {
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = request.cookies['refreshToken'];
+    const token: string = request.cookies['refreshToken'];
 
     if (!token) {
       throw new UnauthorizedException('Refresh Token missing');
@@ -28,7 +28,7 @@ export class RefreshTokenGuard implements CanActivate {
 
       request.user = payload;
       return true;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
   }
