@@ -1,356 +1,178 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useAuth } from "@/store/auth";
 import {
   Trophy,
   Target,
   BookOpen,
   Brain,
-  Zap,
   Edit3,
-  Crown,
-  Star,
-  TrendingUp,
-  Clock,
-  LucideIcon,
+  User,
+  Mail,
+  Calendar,
   LogOut,
 } from "lucide-react";
 
-// Define proper types
-type Achievement = {
-  name: string;
-  description: string;
-  icon: LucideIcon;
-};
-
-type Stat = {
-  totalGames: number;
-  winRate: number;
-  currentRating: number;
-  bestRating: number;
-  studyStreak: number;
-  totalStudyTime: number;
-  favoriteOpening: string;
-  recentAchievements: Achievement[];
-};
-
-type ProgressItem = {
-  category: string;
-  count: number;
-  color: string;
-  icon: LucideIcon;
-};
-
 const Profile = () => {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "progress" | "achievements"
-  >("overview");
-
-  const stats: Stat = {
-    totalGames: 247,
-    winRate: 68,
-    currentRating: 1432,
-    bestRating: 1587,
-    studyStreak: 12,
-    totalStudyTime: 156,
-    favoriteOpening: "Sicilian Defense",
-    recentAchievements: [
-      {
-        name: "Opening Master",
-        description: "Learned 50 opening lines",
-        icon: BookOpen,
-      },
-      {
-        name: "Streak Champion",
-        description: "15-day study streak",
-        icon: Zap,
-      },
-      { name: "Tactician", description: "Solved 100 puzzles", icon: Target },
-    ],
-  };
-
-  const learningProgress: ProgressItem[] = [
-    {
-      category: "Recorded Lines",
-      count: user?.recordedLines?.length || 0,
-      color: "bg-blue-500",
-      icon: BookOpen,
-    },
-    {
-      category: "Custom Lines",
-      count: user?.customLines?.length || 0,
-      color: "bg-purple-500",
-      icon: Edit3,
-    },
-    {
-      category: "Practiced Lines",
-      count: user?.practicedLines?.length || 0,
-      color: "bg-green-500",
-      icon: Target,
-    },
-    {
-      category: "Quizzed Lines",
-      count: user?.quizzedLines?.length || 0,
-      color: "bg-orange-500",
-      icon: Brain,
-    },
-    {
-      category: "Learned Lines",
-      count: user?.learnedLines?.length || 0,
-      color: "bg-emerald-500",
-      icon: Trophy,
-    },
-  ];
-
-  const StatCard = ({
-    title,
-    value,
-    subtitle,
-    icon: Icon,
-    color = "text-blue-400",
-  }: {
-    title: string;
-    value: string | number;
-    subtitle: string;
-    icon: LucideIcon;
-    color?: string;
-  }) => (
-    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105">
-      <div className="flex items-center justify-between mb-4">
-        <Icon className={`w-8 h-8 ${color}`} />
-        <div className="text-right">
-          <div className="text-2xl font-bold text-white">{value}</div>
-          <div className="text-xs text-gray-300 uppercase tracking-wide">
-            {title}
-          </div>
-        </div>
-      </div>
-      {subtitle && <div className="text-sm text-gray-400">{subtitle}</div>}
-    </div>
-  );
-
-  const ProgressCard = ({
-    category,
-    count,
-    color,
-    icon: Icon,
-  }: ProgressItem) => (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all duration-300">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center space-x-3">
-          <div
-            className={`w-10 h-10 ${color} rounded-lg flex items-center justify-center`}
-          >
-            <Icon className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="text-white font-medium">{category}</div>
-          </div>
-        </div>
-        <div className="text-2xl font-bold text-white">{count}</div>
-      </div>
-    </div>
-  );
-
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
   };
 
+  // Helper function to get gradient colors
+  const getGradientColor = (colorClass: string) => {
+    const colorMap: Record<string, string> = {
+      "text-blue-400": "from-blue-500 to-blue-600",
+      "text-purple-400": "from-purple-500 to-purple-600",
+      "text-green-400": "from-green-500 to-green-600",
+      "text-orange-400": "from-orange-500 to-orange-600",
+      "text-yellow-400": "from-yellow-500 to-yellow-600",
+    };
+    return colorMap[colorClass] || "from-gray-500 to-gray-600";
+  };
+
+  // Calculate user progress from actual data
+  const learningStats = [
+    {
+      name: "Recorded Lines",
+      count: user?.recordedLines?.length || 0,
+      icon: BookOpen,
+      color: "text-blue-400",
+    },
+    {
+      name: "Custom Lines",
+      count: user?.customLines?.length || 0,
+      icon: Edit3,
+      color: "text-purple-400",
+    },
+    {
+      name: "Practiced Lines",
+      count: user?.practicedLines?.length || 0,
+      icon: Target,
+      color: "text-green-400",
+    },
+    {
+      name: "Quizzed Lines",
+      count: user?.quizzedLines?.length || 0,
+      icon: Brain,
+      color: "text-orange-400",
+    },
+    {
+      name: "Learned Lines",
+      count: user?.learnedLines?.length || 0,
+      icon: Trophy,
+      color: "text-yellow-400",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header Section */}
-        <div className="relative mb-8">
-          <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 backdrop-blur-sm border border-white/10 rounded-2xl p-8 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-50"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-6">
-                  <div className="relative">
-                    <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-2xl">
-                      {user?.fullName?.charAt(0).toUpperCase() || "U"}
-                    </div>
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-slate-900 flex items-center justify-center">
-                      <Crown className="w-4 h-4 text-white" />
-                    </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-700">
+        {/* Profile Header */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 backdrop-blur-sm border border-white/30 rounded-3xl p-8 shadow-2xl animate-in slide-in-from-top-4 duration-700">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400"></div>
+          <div className="relative z-10">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <div className="relative group">
+                  <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg ring-4 ring-white/20 group-hover:ring-white/30 transition-all duration-300 group-hover:scale-105">
+                    {user?.fullName?.charAt(0).toUpperCase() || (
+                      <User className="w-8 h-8" />
+                    )}
                   </div>
-                  <div>
-                    <h1 className="text-4xl font-bold text-white mb-2">
-                      {user?.fullName || "Chess Player"}
-                    </h1>
-                    <div className="flex items-center space-x-4 text-gray-300">
-                      <span className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-400" />
-                        <span>Rating: {stats.currentRating}</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <TrendingUp className="w-4 h-4 text-green-400" />
-                        <span>{stats.winRate}% Win Rate</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <Zap className="w-4 h-4 text-orange-400" />
-                        <span>{stats.studyStreak} Day Streak</span>
-                      </span>
-                    </div>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-300 -z-10 blur-sm"></div>
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-slate-900 flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleLogout()}
-                  className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl px-6 py-3 text-white font-medium transition-all duration-300 flex items-center space-x-2"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span>Logout</span>
-                </button>
+                <div className="text-center sm:text-left">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent mb-3 animate-in slide-in-from-left-4 duration-700 delay-200">
+                    {user?.fullName || "Chess Student"}
+                  </h1>
+                  <div className="flex flex-col sm:flex-row items-center gap-4 text-gray-300 animate-in slide-in-from-left-4 duration-700 delay-300">
+                    <span className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/15 transition-colors duration-200">
+                      <Mail className="w-4 h-4" />
+                      <span className="text-sm">
+                        {user?.email || "Not available"}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/15 transition-colors duration-200">
+                      <Calendar className="w-4 h-4" />
+                      <span className="text-sm">
+                        Joined{" "}
+                        {user?.createdAt
+                          ? new Date(user.createdAt).toLocaleDateString()
+                          : "Recently"}
+                      </span>
+                    </span>
+                  </div>
+                </div>
               </div>
+              <button
+                onClick={handleLogout}
+                className="self-center lg:self-start bg-red-500/20 hover:bg-red-500/30 backdrop-blur-sm border border-red-400/30 hover:border-red-400/50 rounded-xl px-6 py-3 text-white font-medium transition-all duration-300 flex items-center gap-2 group hover:scale-105 animate-in slide-in-from-right-4 delay-400"
+              >
+                <LogOut className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+                <span>Logout</span>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex space-x-1 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-1 mb-8">
-          {["overview", "progress", "achievements"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() =>
-                setActiveTab(tab as "overview" | "progress" | "achievements")
-              }
-              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
-                activeTab === tab
-                  ? "bg-white/20 text-white shadow-lg"
-                  : "text-gray-400 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Content */}
-        {activeTab === "overview" && (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard
-                title="Total Games"
-                value={stats.totalGames}
-                subtitle="This month: +23"
-                icon={Target}
-                color="text-blue-400"
-              />
-              <StatCard
-                title="Best Rating"
-                value={stats.bestRating}
-                subtitle="All-time high"
-                icon={Trophy}
-                color="text-yellow-400"
-              />
-              <StatCard
-                title="Study Hours"
-                value={stats.totalStudyTime}
-                subtitle="This month: 28h"
-                icon={Clock}
-                color="text-green-400"
-              />
-              <StatCard
-                title="Win Rate"
-                value={`${stats.winRate}%`}
-                subtitle="Last 50 games"
-                icon={TrendingUp}
-                color="text-purple-400"
-              />
+        {/* Learning Progress */}
+        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/30 rounded-3xl p-8 shadow-xl animate-in slide-in-from-bottom-4 duration-700 delay-500">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg">
+              <Trophy className="w-6 h-6 text-white" />
             </div>
-
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center space-x-2">
-                <Brain className="w-6 h-6 text-purple-400" />
-                <span>Learning Progress</span>
+            <div>
+              <h2 className="text-2xl font-bold text-white">
+                Learning Progress
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {learningProgress.map((item, index) => (
-                  <ProgressCard key={index} {...item} />
-                ))}
-              </div>
+              <p className="text-gray-400">Track your chess opening mastery</p>
             </div>
           </div>
-        )}
 
-        {activeTab === "progress" && (
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-6">
-              Detailed Progress
-            </h2>
-            <div className="space-y-6">
-              {learningProgress.map((item, index) => (
-                <div key={index} className="bg-white/5 rounded-xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={`w-12 h-12 ${item.color} rounded-lg flex items-center justify-center`}
-                      >
-                        <item.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-white">
-                          {item.category}
-                        </h3>
-                        <p className="text-gray-400">
-                          Total: {item.count} items
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-white">
-                        {item.count}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
+          <div className="flex flex-col gap-4">
+            {learningStats.map((stat, index) => (
+              <div
+                key={index}
+                className={`group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:border-white/40 hover:from-white/15 hover:to-white/10 transition-all duration-300 hover:scale-105 hover:shadow-xl animate-in slide-in-from-bottom-4 delay-${600 + index * 100}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
                     <div
-                      className={`h-2 rounded-full ${item.color}`}
-                      style={{
-                        width: `${Math.min((item.count / 20) * 100, 100)}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "achievements" && (
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center space-x-2">
-              <Trophy className="w-6 h-6 text-yellow-400" />
-              <span>Recent Achievements</span>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {stats.recentAchievements.map((achievement, index) => (
-                <div
-                  key={index}
-                  className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-xl p-6 hover:scale-105 transition-all duration-300"
-                >
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
-                      <achievement.icon className="w-6 h-6 text-white" />
+                      className={`p-3 rounded-xl bg-gradient-to-r ${getGradientColor(stat.color)} shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <stat.icon className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white">
-                        {achievement.name}
+                      <h3 className="text-white font-semibold text-lg">
+                        {stat.name}
                       </h3>
-                      <p className="text-gray-400 text-sm">
-                        {achievement.description}
-                      </p>
+                      <p className="text-gray-400 text-sm">Total completed</p>
                     </div>
                   </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-white group-hover:scale-110 transition-transform duration-300">
+                      {stat.count}
+                    </div>
+                    {stat.count > 0 && (
+                      <div className="text-xs text-green-400 font-medium flex items-center gap-1">
+                        <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+                        +{Math.floor(stat.count * 0.1)} this week
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
