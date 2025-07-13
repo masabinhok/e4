@@ -1,0 +1,21 @@
+{
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "build:all": "npm --prefix api run build && npm --prefix web run build",
+    "format:all": "npm --prefix api run format && npm --prefix web run format"
+  },
+  "lint-staged": {
+    "api/**/*.{ts,js,json}": [
+      "npm --prefix api run lint",
+      "npm --prefix api run format"
+    ],
+    "web/**/*.{ts,tsx,js,jsx}": [
+      "npm --prefix web run lint",
+      "npm --prefix web run format"
+    ]
+  }
+}
