@@ -73,7 +73,7 @@ export class UsersService {
   async deleteOne(userId: MongooseId) {
     const deletedUser = await this.userModel.findByIdAndDelete(userId);
     if (!deletedUser) {
-      throw new BadRequestException('No user with such id exist');
+      throw new BadRequestException('No user with such id exists');
     }
     return {
       message: 'Successfully Deleted!',

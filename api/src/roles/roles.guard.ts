@@ -29,7 +29,9 @@ export class RolesGuard implements CanActivate {
     }
 
     if (!requiredRoles.includes(user.role as Role)) {
-      throw new ForbiddenException('You do not have permissionfor this route.');
+      throw new ForbiddenException(
+        'You do not have permission for this route.',
+      );
     }
 
     return true;

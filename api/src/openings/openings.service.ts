@@ -31,7 +31,7 @@ export class OpeningsService {
   async deleteOne(openingId: MongooseId) {
     const deletedOpening = await this.openingModel.findByIdAndDelete(openingId);
     if (!deletedOpening) {
-      throw new BadRequestException('No opening with such id exist');
+      throw new BadRequestException('No opening with such id exists');
     }
     return {
       message: 'Successfully Deleted',
@@ -92,7 +92,7 @@ export class OpeningsService {
       throw new InternalServerErrorException('Failed to create a new opening');
     }
     return {
-      message: 'Successfully Deleted!',
+      message: 'Successfully Added!',
     };
   }
 

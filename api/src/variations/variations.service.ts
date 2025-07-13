@@ -30,7 +30,7 @@ export class VariationsService {
     const deletedVariation =
       await this.variationModel.findByIdAndDelete(variationId);
     if (!deletedVariation) {
-      throw new BadRequestException('No variation with such id exist');
+      throw new BadRequestException('No variation with such id exists');
     }
     return {
       message: 'Successfully Deleted!',
