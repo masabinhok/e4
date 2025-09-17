@@ -244,7 +244,8 @@ export default function ChessGame({
         setTimeout(() => nextMove(), 500);
       }
       const lineLength = currentLine?.length;
-      if (lineLength && currentMoveIndex + 1 >= lineLength) {
+      console.log(lineLength, currentMoveIndex);
+      if (lineLength && currentMoveIndex === lineLength) {
         setLineCompleted(true);
         handleLineCompletion();
       }
