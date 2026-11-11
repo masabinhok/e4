@@ -11,7 +11,7 @@ import ServerStatus from "@/components/ServerStatus";
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const { login, isLoading, isAuthenticated } = useAuth();
+  const { login, demoLogin, isLoading, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const router = useRouter();
 
@@ -33,6 +33,18 @@ export default function Login() {
       router.push("/");
     } catch (err) {
       setError(parseError(err instanceof Error ? err.message : "Login Failed"));
+    }
+  };
+
+  const handleDemo = async () => {
+    setError("");
+    try {
+      await demoLogin();
+      router.push("/lessons");
+    } catch (err) {
+      setError(
+        parseError(err instanceof Error ? err.message : "Demo login failed"),
+      );
     }
   };
 
@@ -92,6 +104,15 @@ export default function Login() {
           disabled={isLoading}
           text={isLoading ? "Logging in" : "Login"}
         />
+
+        <button
+          type="button"
+          onClick={handleDemo}
+          disabled={isLoading}
+          className="w-full mt-4 py-3 rounded-lg border border-blue-400 text-blue-400 hover:bg-blue-400/10 disabled:opacity-50 transition"
+        >
+          Try the demo, no signup
+        </button>
 
         {error && (
           <p className="text-red-600 mt-6 text-center text-sm">{error}</p>

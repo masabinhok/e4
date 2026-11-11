@@ -12,6 +12,7 @@ interface AuthState {
   setLoading: (isLoading: boolean) => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (fullName: string, email: string, password: string) => Promise<void>;
+  demoLogin: () => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<boolean>;
   clearAuth: () => void;
@@ -110,6 +111,20 @@ export const useAuth = create<AuthState>()(
         } catch (error) {
           set({ isLoading: false });
           throw error;
+        }
+      },
+
+      demoLogin: async () => {
+        set({ isLoading: true });
+        try {
+          await apiCall("/auth/demo", { method: "POST" });
+        } catch (error) {
+          set({ isLoading: false });
+          throw error;
+        }
+        // The demo endpoint only sets cookies; load the user it created.
+        if (!(await useAuth.getState().checkAuth())) {
+          throw new Error("Could not start the demo session");
         }
       },
 
