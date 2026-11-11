@@ -1,12 +1,19 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(@InjectConnection() private readonly connection: Connection) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  // Used by Render's health check and the keep-alive pinger.
+  @Get('health')
+  async health() {
+    try {
+      await this.connection.db!.admin().ping();
+    } catch {
+      throw new ServiceUnavailableException({ status: 'error', db: 'down' });
+    }
+    return { status: 'ok', db: 'up' };
   }
 }
