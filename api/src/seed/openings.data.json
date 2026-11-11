@@ -1,0 +1,230 @@
+[
+  {
+    "name": "Caro-Kann Defense",
+    "code": "carokann",
+    "description": "The Caro-Kann Defense is a solid defense to 1.e4. It features clear plans and is excellent for players who prefer structured positions.",
+    "variations": [
+      {
+        "title": "Main Line: Bf5 with h4-h5",
+        "description": "White pushes h4-h5 to restrict Black's bishop, but Black maintains solidity with ...Nd7 and ...e6.",
+        "boardflip": "black",
+        "moves": [
+          "e4",
+          "c6",
+          "d4",
+          "d5",
+          "Nc3",
+          "dxe4",
+          "Nxe4",
+          "Bf5",
+          "Ng3",
+          "Bg6",
+          "h4",
+          "h6",
+          "Nf3",
+          "Nd7",
+          "h5",
+          "Bh7",
+          "Bd3",
+          "Bxd3",
+          "Qxd3"
+        ]
+      },
+      {
+        "title": "Karpov Variation (Nd7)",
+        "description": "Black avoids the bishop trade, aiming for a compact position with ...e6 and ...Be7.",
+        "boardflip": "black",
+        "moves": [
+          "e4",
+          "c6",
+          "d4",
+          "d5",
+          "Nc3",
+          "dxe4",
+          "Nxe4",
+          "Nd7",
+          "Nf3",
+          "Ngf6",
+          "Nxf6+",
+          "Nxf6",
+          "Bc4",
+          "e6",
+          "O-O",
+          "Be7"
+        ]
+      },
+      {
+        "title": "Smyslov Variation (gxf6)",
+        "description": "Similar to Bronstein-Larsen, but Black develops the bishop to f5 early, supporting ...e6.",
+        "boardflip": "black",
+        "moves": [
+          "e4",
+          "c6",
+          "d4",
+          "d5",
+          "Nc3",
+          "dxe4",
+          "Nxe4",
+          "Nf6",
+          "Nxf6+",
+          "gxf6",
+          "c3",
+          "Bf5",
+          "Ne2",
+          "e6",
+          "Ng3",
+          "Bg6"
+        ]
+      },
+      {
+        "title": "Tal Variation (h5 & Bg4)",
+        "description": "White plays f4 to support e5, while Black counters with ...h5 and ...Bg4, leading to a complex middlegame.",
+        "boardflip": "black",
+        "moves": [
+          "e4",
+          "c6",
+          "d4",
+          "d5",
+          "e5",
+          "c5",
+          "c3",
+          "Nc6",
+          "f4",
+          "cxd4",
+          "cxd4",
+          "h5",
+          "Nf3",
+          "Bg4",
+          "Be2",
+          "e6",
+          "O-O",
+          "Qb6"
+        ]
+      },
+      {
+        "title": "Classical Advance (Bg4 & Qxb2)",
+        "description": "Black plays ...Bg4 and ...Qxb2, leading to a sharp position where both sides have chances.",
+        "boardflip": "black",
+        "moves": [
+          "e4",
+          "c6",
+          "d4",
+          "d5",
+          "e5",
+          "c5",
+          "c3",
+          "Nc6",
+          "Nf3",
+          "cxd4",
+          "cxd4",
+          "Bg4",
+          "Be2",
+          "e6",
+          "h3",
+          "Bxf3",
+          "Bxf3",
+          "Qb6",
+          "Be3",
+          "Qxb2",
+          "Nd2",
+          "Bb4"
+        ]
+      },
+      {
+        "title": "Breyer Variation (Bb5)",
+        "description": "The Breyer Variation features Bb5, leading to a solid structure for Black with ...Qa5 and ...Qb6.",
+        "boardflip": "black",
+        "moves": [
+          "e4",
+          "c6",
+          "d4",
+          "d5",
+          "e5",
+          "c5",
+          "c3",
+          "Nc6",
+          "Bb5",
+          "Qa5",
+          "Bxc6+",
+          "bxc6",
+          "Bd2",
+          "Qb6"
+        ]
+      },
+      {
+        "title": "Gurgenidze System (dxc5)",
+        "description": "The Gurgenidze System allows for early ...Bg4, leading to a solid structure with ...e6.",
+        "boardflip": "black",
+        "moves": [
+          "e4",
+          "c6",
+          "d4",
+          "d5",
+          "e5",
+          "c5",
+          "dxc5",
+          "Nc6",
+          "Nf3",
+          "Bg4",
+          "Bb5",
+          "Qa5+",
+          "Nc3",
+          "e6"
+        ]
+      },
+      {
+        "title": "Modern Gurgenidze (Ne7-f5)",
+        "description": "The Modern Gurgenidze features ...Ne7 and ...Nf5, leading to a solid structure with potential for counterplay.",
+        "boardflip": "black",
+        "moves": [
+          "e4",
+          "c6",
+          "d4",
+          "d5",
+          "e5",
+          "c5",
+          "dxc5",
+          "Nc6",
+          "Bb5",
+          "e6",
+          "Be3",
+          "Ne7",
+          "c3",
+          "Nf5",
+          "Bd4",
+          "Bd7"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Jobava London System",
+    "code": "jobava",
+    "description": "The Jobava London System is a solid opening for white that is easy to learn and has a clear plan.",
+    "variations": [
+      {
+        "title": "Standard Setup",
+        "description": "The standard setup for the Jobava London System, where white develops pieces and prepares for a kingside attack.",
+        "boardflip": "white",
+        "moves": [
+          "d4",
+          "d5",
+          "Nc3",
+          "Nf6",
+          "Bf4",
+          "e6",
+          "e3",
+          "c5",
+          "Nb5",
+          "Na6"
+        ]
+      },
+      {
+        "title": "Jobava Gambit",
+        "description": "The Jobava Gambit is an aggressive line where white sacrifices a pawn for rapid development and attacking chances.",
+        "boardflip": "white",
+        "moves": ["d4", "d5", "Nc3", "Nf6", "Bf4", "c5", "e4", "dxe4", "d5"]
+      }
+    ]
+  }
+]
