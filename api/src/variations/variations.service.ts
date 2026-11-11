@@ -85,6 +85,8 @@ export class VariationsService {
     //this should be done after accepted by the admin.
   }
 
+  // shortcut: lines a demo user records or saves outlive the user (TTL only covers users);
+  // they're small and unreachable, so add expiresAt here if the database ever grows.
   async recordVariation(userId: MongooseId, dto: ContributeVariationDto) {
     const variation = {
       ...dto,

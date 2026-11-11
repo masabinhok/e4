@@ -18,8 +18,9 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    if (!requiredRoles) {
-      return true;
+    // Deny by default: a route guarded by RolesGuard must say which roles it allows.
+    if (!requiredRoles?.length) {
+      throw new ForbiddenException('No roles configured for this route.');
     }
 
     const { user } = context.switchToHttp().getRequest();

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   Post,
@@ -32,15 +33,21 @@ export class OpeningsController {
   }
 
   @Delete('cancel/:id')
-  async cancelContribution(@Param('id') openingId: MongooseId) {
-    return this.openingsService.cancelContribution(openingId);
+  async cancelContribution(
+    @Param('id') openingId: MongooseId,
+    @GetUser('sub') userId: MongooseId,
+  ) {
+    return this.openingsService.cancelContribution(openingId, userId);
   }
 
   @Post('add')
   async addOpening(
     @Body() addOpeningDto: AddOpeningDto,
     @GetUser('sub') userId: MongooseId,
+    @GetUser('demo') demo?: boolean,
   ) {
+    // Keeps demo visitors out of the admin review queue.
+    if (demo) throw new ForbiddenException('Sign up to contribute openings.');
     return this.openingsService.addOpening(addOpeningDto, userId);
   }
 

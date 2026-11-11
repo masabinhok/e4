@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
 import { MongooseId } from 'src/types/types';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UsersService {
@@ -48,6 +49,16 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async createDemoUser(passHash: string): Promise<User> {
+    return this.userModel.create({
+      fullName: 'Demo Visitor',
+      email: `demo-${randomUUID()}@demo.local`,
+      passHash,
+      isDemo: true,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
   }
 
   async updateRtHash(userId: MongooseId, rtHash: string | null): Promise<User> {

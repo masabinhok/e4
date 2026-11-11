@@ -16,6 +16,22 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { MongooseId } from 'src/types/types';
 
+function setAuthCookies(
+  res: Response,
+  accessToken: string,
+  refreshToken: string,
+) {
+  const options = { httpOnly: true, secure: true, sameSite: 'none' } as const;
+  res.cookie('accessToken', accessToken, {
+    ...options,
+    maxAge: 15 * 60 * 1000, // 15 minutes
+  });
+  res.cookie('refreshToken', refreshToken, {
+    ...options,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -28,19 +44,7 @@ export class AuthController {
     const { accessToken, refreshToken } =
       await this.authService.signUp(signUpDto);
 
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      maxAge: 15 * 60 * 1000,
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    setAuthCookies(res, accessToken, refreshToken);
 
     return {
       message: 'Signed Up Successfully',
@@ -55,23 +59,18 @@ export class AuthController {
     const { accessToken, refreshToken } =
       await this.authService.login(loginDto);
 
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    setAuthCookies(res, accessToken, refreshToken);
 
     return {
       message: 'Logged In Successfully',
     };
+  }
+
+  @Post('demo')
+  async demo(@Res({ passthrough: true }) res: Response) {
+    const { accessToken, refreshToken } = await this.authService.demo();
+    setAuthCookies(res, accessToken, refreshToken);
+    return { message: 'Demo session started' };
   }
 
   @UseGuards(RefreshTokenGuard)
@@ -110,19 +109,7 @@ export class AuthController {
       userId,
       rt,
     );
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 15 * 60 * 1000,
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    setAuthCookies(res, accessToken, refreshToken);
 
     return {
       message: 'Token Refreshed Successfully',

@@ -1,4 +1,11 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { VariationsService } from './variations.service';
 import { ContributeVariationDto } from './dtos/contribute-variation.dto';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
@@ -34,7 +41,10 @@ export class VariationsController {
     @GetUser('sub') userId: MongooseId,
     @Param('code') code: string,
     @Body() dto: ContributeVariationDto,
+    @GetUser('demo') demo?: boolean,
   ) {
+    // Keeps demo visitors out of the admin review queue.
+    if (demo) throw new ForbiddenException('Sign up to contribute lines.');
     return this.variationsService.contributeVariation(userId, code, dto);
   }
 

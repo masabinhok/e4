@@ -2,9 +2,25 @@
 import Button from "@/components/Button";
 import { useAuth } from "@/store/auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, demoLogin, isLoading } = useAuth();
+  const router = useRouter();
+  const [error, setError] = useState("");
+
+  const startDemo = async () => {
+    setError("");
+    try {
+      await demoLogin();
+      router.push("/lessons");
+    } catch {
+      setError(
+        "Couldn't start the demo. The server may be waking up; try again in a minute.",
+      );
+    }
+  };
 
   return (
     <main className="p-6">
@@ -19,12 +35,21 @@ export default function Home() {
           <Button text="Explore Lessons" />
         </Link>
 
+        {!user && (
+          <Button
+            text={isLoading ? "Starting demo..." : "Try the demo, no signup"}
+            onClick={startDemo}
+            disabled={isLoading}
+          />
+        )}
+
         {user?.role === "ADMIN" && (
           <Link href="/admin" className="w-full">
             <Button color="red" text="Admin Dashboard" />
           </Link>
         )}
       </div>
+      {error && <p className="text-red-400 mt-4 text-sm">{error}</p>}
     </main>
   );
 }
