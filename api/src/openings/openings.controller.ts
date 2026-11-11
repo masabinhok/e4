@@ -32,8 +32,11 @@ export class OpeningsController {
   }
 
   @Delete('cancel/:id')
-  async cancelContribution(@Param('id') openingId: MongooseId) {
-    return this.openingsService.cancelContribution(openingId);
+  async cancelContribution(
+    @Param('id') openingId: MongooseId,
+    @GetUser('sub') userId: MongooseId,
+  ) {
+    return this.openingsService.cancelContribution(openingId, userId);
   }
 
   @Post('add')

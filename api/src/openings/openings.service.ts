@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Opening, OpeningDocument, Status } from './schemas/opening.schema';
@@ -76,8 +77,17 @@ export class OpeningsService {
     };
   }
 
-  async cancelContribution(openingId: MongooseId) {
-    await this.openingModel.findByIdAndDelete(openingId);
+  async cancelContribution(openingId: MongooseId, userId: MongooseId) {
+    const deleted = await this.openingModel.findOneAndDelete({
+      _id: openingId,
+      contributor: userId,
+      status: Status.Pending,
+    });
+    if (!deleted) {
+      throw new NotFoundException(
+        'No pending contribution of yours with that id',
+      );
+    }
     return {
       message: 'Cancelled Contribution!',
     };
