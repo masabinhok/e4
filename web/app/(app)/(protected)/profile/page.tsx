@@ -4,9 +4,7 @@ import React from "react";
 import { useAuth } from "@/store/auth";
 import {
   Trophy,
-  Target,
   BookOpen,
-  Brain,
   Edit3,
   User,
   Mail,
@@ -33,7 +31,7 @@ const Profile = () => {
     return colorMap[colorClass] || "from-gray-500 to-gray-600";
   };
 
-  // Calculate user progress from actual data
+  // Only stats the API actually records; practice/quiz progress is not tracked.
   const learningStats = [
     {
       name: "Recorded Lines",
@@ -46,24 +44,6 @@ const Profile = () => {
       count: user?.customLines?.length || 0,
       icon: Edit3,
       color: "text-purple-400",
-    },
-    {
-      name: "Practiced Lines",
-      count: user?.practicedLines?.length || 0,
-      icon: Target,
-      color: "text-green-400",
-    },
-    {
-      name: "Quizzed Lines",
-      count: user?.quizzedLines?.length || 0,
-      icon: Brain,
-      color: "text-orange-400",
-    },
-    {
-      name: "Learned Lines",
-      count: user?.learnedLines?.length || 0,
-      icon: Trophy,
-      color: "text-yellow-400",
     },
   ];
 
@@ -153,19 +133,13 @@ const Profile = () => {
                       <h3 className="text-white font-semibold text-lg">
                         {stat.name}
                       </h3>
-                      <p className="text-gray-400 text-sm">Total completed</p>
+                      <p className="text-gray-400 text-sm">Saved</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-bold text-white group-hover:scale-110 transition-transform duration-300">
                       {stat.count}
                     </div>
-                    {stat.count > 0 && (
-                      <div className="text-xs text-green-400 font-medium flex items-center gap-1">
-                        <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
-                        +{Math.floor(stat.count * 0.1)} this week
-                      </div>
-                    )}
                   </div>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
