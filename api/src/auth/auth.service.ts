@@ -14,6 +14,7 @@ import { MongooseId } from 'src/types/types';
 import { User } from 'src/users/schema/user.schema';
 import { ConfigService } from '@nestjs/config';
 import { Role } from 'src/roles/roles.enum';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +36,7 @@ export class AuthService {
     userId: MongooseId,
     role: Role,
     email: string,
+    demo = false,
   ): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -43,6 +45,7 @@ export class AuthService {
       sub: userId,
       email,
       role,
+      ...(demo && { demo }),
     };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -154,6 +157,21 @@ export class AuthService {
       user._id as MongooseId,
       user.role,
       user.email,
+      user.isDemo,
+    );
+    await this.storeRefreshToken(user._id as MongooseId, tokens.refreshToken);
+    return tokens;
+  }
+
+  // One throwaway account per visitor, so demo visitors never share data.
+  async demo(): Promise<{ accessToken: string; refreshToken: string }> {
+    const unusablePassword = await this.generateHash(randomUUID());
+    const user = await this.usersService.createDemoUser(unusablePassword);
+    const tokens = await this.getTokens(
+      user._id as MongooseId,
+      user.role,
+      user.email,
+      true,
     );
     await this.storeRefreshToken(user._id as MongooseId, tokens.refreshToken);
     return tokens;

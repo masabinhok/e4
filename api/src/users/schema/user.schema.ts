@@ -20,6 +20,13 @@ export class User extends Document {
   @Prop()
   refreshToken?: string;
 
+  @Prop({ default: false })
+  isDemo: boolean;
+
+  // TTL index: Mongo deletes demo users once this passes (unset for real users).
+  @Prop({ type: Date, expires: 0 })
+  expiresAt?: Date;
+
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Variation' }],
     default: [],

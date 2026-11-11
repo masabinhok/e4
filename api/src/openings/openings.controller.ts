@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   Post,
@@ -43,7 +44,10 @@ export class OpeningsController {
   async addOpening(
     @Body() addOpeningDto: AddOpeningDto,
     @GetUser('sub') userId: MongooseId,
+    @GetUser('demo') demo?: boolean,
   ) {
+    // Keeps demo visitors out of the admin review queue.
+    if (demo) throw new ForbiddenException('Sign up to contribute openings.');
     return this.openingsService.addOpening(addOpeningDto, userId);
   }
 
