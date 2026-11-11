@@ -14,12 +14,12 @@ import { Role } from 'src/roles/roles.enum';
 import { MongooseId } from 'src/types/types';
 
 @UseGuards(AuthGuard, RolesGuard)
+@Roles(Role.Admin)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get()
-  @Roles(Role.Admin)
   async getAdminData() {
     return this.adminService.getAdminData();
   }
