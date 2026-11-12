@@ -9,6 +9,7 @@ import { VariationsModule } from './variations/variations.module';
 import config, { validateEnv } from './config/config';
 import { AdminModule } from './admin/admin.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ProgressModule } from './progress/progress.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     AuthModule,
     VariationsModule,
     AdminModule,
+    ProgressModule,
   ],
   controllers: [AppController],
 })
