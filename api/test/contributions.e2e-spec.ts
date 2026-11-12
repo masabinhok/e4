@@ -56,6 +56,14 @@ describe('contributions and admin cascades', () => {
       .expect(400);
   });
 
+  it('accepts a line with an empty description', async () => {
+    await http()
+      .post('/api/variations/custom')
+      .set('Cookie', user.cookie)
+      .send({ ...line(['e4', 'c5']), description: '' })
+      .expect(201);
+  });
+
   it('returns 404 when contributing to an opening that does not exist', async () => {
     await contribute(['e4', 'e5'], 'no-such-opening').expect(404);
   });
