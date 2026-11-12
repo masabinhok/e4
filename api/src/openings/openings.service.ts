@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -24,19 +23,32 @@ export class OpeningsService {
       .populate('variations');
 
     if (!opening) {
-      throw new BadRequestException(`No Opening for code : ${code}`);
+      throw new NotFoundException(`No opening with code "${code}"`);
     }
     return opening;
   }
 
+  // Returns the deleted opening so the caller can remove its variations.
   async deleteOne(openingId: MongooseId) {
     const deletedOpening = await this.openingModel.findByIdAndDelete(openingId);
     if (!deletedOpening) {
-      throw new BadRequestException('No opening with such id exists');
+      throw new NotFoundException('No opening with such id exists');
     }
-    return {
-      message: 'Successfully Deleted',
-    };
+    return deletedOpening;
+  }
+
+  async pullVariation(variationId: MongooseId) {
+    await this.openingModel.updateMany(
+      { variations: variationId },
+      { $pull: { variations: variationId } },
+    );
+  }
+
+  async deletePendingBy(userId: MongooseId) {
+    await this.openingModel.deleteMany({
+      contributor: userId,
+      status: Status.Pending,
+    });
   }
 
   async findAll() {
@@ -60,17 +72,13 @@ export class OpeningsService {
   }
 
   async acceptOpening(openingId: MongooseId) {
-    await this.openingModel.findByIdAndUpdate(
-      openingId,
-      {
-        $set: {
-          status: Status.Accepted,
-        },
-      },
-      {
-        new: true,
-      },
+    const accepted = await this.openingModel.findOneAndUpdate(
+      { _id: openingId, status: Status.Pending },
+      { $set: { status: Status.Accepted } },
     );
+    if (!accepted) {
+      throw new NotFoundException('No pending opening with that id');
+    }
 
     return {
       message: 'Opening Accepted!',
@@ -106,24 +114,14 @@ export class OpeningsService {
     };
   }
 
-  async addContribution(
-    code: string,
-    variationId: MongooseId,
-  ): Promise<Opening> {
-    const updatedOpening = await this.openingModel.findOneAndUpdate(
-      {
-        code,
-      },
-      {
-        $push: {
-          variations: variationId,
-        },
-      },
+  async addContribution(code: string, variationId: MongooseId) {
+    // $addToSet: approving the same variation twice can't list it twice.
+    const updated = await this.openingModel.findOneAndUpdate(
+      { code },
+      { $addToSet: { variations: variationId } },
     );
-    if (!updatedOpening) {
-      throw new InternalServerErrorException('Failed to update the opening');
+    if (!updated) {
+      throw new NotFoundException(`No opening with code "${code}"`);
     }
-
-    return updatedOpening;
   }
 }
