@@ -12,7 +12,24 @@ import { loadCourses } from './courses';
 // Idempotent. Course lines are upserted by (code, title) and kept in file order.
 // Seeded lines that were removed from the files are deleted; lines that users
 // contributed (they have a contributor) are never touched.
+// Refuse to write to a remote database by accident (e.g. a production URL left
+// in api/.env). Seeding production is deliberate: SEED_CONFIRM=<host>.
+function confirmTarget() {
+  const url = process.env.DATABASE_URL ?? '';
+  const host = url
+    .replace(/^mongodb(\+srv)?:\/\/([^@/]*@)?/, '')
+    .split(/[/?]/)[0];
+  const local = /^(localhost|127\.0\.0\.1|\[::1\]|mongo)(:\d+)?$/.test(host);
+  console.log(`seeding ${host || '(no DATABASE_URL)'}`);
+  if (!local && process.env.SEED_CONFIRM !== host) {
+    throw new Error(
+      `Refusing to seed a non-local database. If you really mean it, run with SEED_CONFIRM=${host}`,
+    );
+  }
+}
+
 async function seed() {
+  confirmTarget();
   const courses = loadCourses();
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['error'],
