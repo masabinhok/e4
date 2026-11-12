@@ -38,7 +38,8 @@ const apiCall = async (
       ...options,
     });
 
-    if (response.status === 401 && !retried) {
+    // A 401 from /auth/* (e.g. a wrong password) is an answer, not an expired session.
+    if (response.status === 401 && !retried && !endpoint.startsWith("/auth/")) {
       retried = true;
       console.warn("401 detected. Attempting token refresh...");
       const success = await useAuth.getState().refreshToken();

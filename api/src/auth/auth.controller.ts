@@ -15,6 +15,9 @@ import { RefreshTokenGuard } from 'src/common/guards/refresh-token.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { MongooseId } from 'src/types/types';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+
+const HOUR = 60 * 60 * 1000;
 
 function setAuthCookies(
   res: Response,
@@ -36,6 +39,8 @@ function setAuthCookies(
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: HOUR } })
   @Post('signup')
   async signUp(
     @Body() signUpDto: SignUpDto,
@@ -51,6 +56,8 @@ export class AuthController {
     };
   }
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60 * 1000 } })
   @Post('login')
   async login(
     @Body() loginDto: LoginDto,
@@ -66,6 +73,8 @@ export class AuthController {
     };
   }
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: HOUR } })
   @Post('demo')
   async demo(@Res({ passthrough: true }) res: Response) {
     const { accessToken, refreshToken } = await this.authService.demo();

@@ -14,7 +14,7 @@ import { MongooseId } from 'src/types/types';
 import { User } from 'src/users/schema/user.schema';
 import { ConfigService } from '@nestjs/config';
 import { Role } from 'src/roles/roles.enum';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID, timingSafeEqual } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -46,6 +46,8 @@ export class AuthService {
       email,
       role,
       ...(demo && { demo }),
+      // Unique per token, so a rotated-out token never equals its replacement.
+      jti: randomUUID(),
     };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -63,9 +65,14 @@ export class AuthService {
     };
   }
 
+  // sha256, not bcrypt: bcrypt only reads the first 72 bytes, and every JWT
+  // shares a longer prefix than that, so any old token used to match.
+  private hashToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
+  }
+
   async storeRefreshToken(userId: MongooseId, rt: string) {
-    const hashedRt = await this.generateHash(rt);
-    return this.usersService.updateRtHash(userId, hashedRt);
+    return this.usersService.updateRtHash(userId, this.hashToken(rt));
   }
 
   async signUp(signUpDto: SignUpDto): Promise<{
@@ -112,14 +119,11 @@ export class AuthService {
 
     //check if the user exists
     const existingUser = await this.usersService.findUserByEmail(email);
-    if (!existingUser) {
-      throw new BadRequestException(`Invalid email`);
-    }
-
-    const isPassValid = await bcrypt.compare(password, existingUser.passHash);
-
-    if (!isPassValid) {
-      throw new BadRequestException('Invalid Password');
+    // Same error for both cases, so login can't be used to probe which emails exist.
+    const isPassValid =
+      existingUser && (await bcrypt.compare(password, existingUser.passHash));
+    if (!existingUser || !isPassValid) {
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     const tokens = await this.getTokens(
@@ -147,7 +151,10 @@ export class AuthService {
       throw new ForbiddenException('Invalid refresh token');
     }
 
-    const matches = await bcrypt.compare(rt, user.refreshToken);
+    const given = Buffer.from(this.hashToken(rt));
+    const stored = Buffer.from(user.refreshToken);
+    const matches =
+      given.length === stored.length && timingSafeEqual(given, stored);
 
     if (!matches) {
       throw new UnauthorizedException('Invalid token');

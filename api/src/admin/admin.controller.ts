@@ -1,3 +1,4 @@
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import {
   Controller,
   Delete,
@@ -25,27 +26,33 @@ export class AdminController {
   }
 
   @Post('variation/toggle-status/:id')
-  async toggleVariationStatus(@Param('id') variationId: MongooseId) {
+  async toggleVariationStatus(
+    @Param('id', ParseObjectIdPipe) variationId: MongooseId,
+  ) {
     return this.adminService.toggleVariationStatus(variationId);
   }
 
   @Post('opening/toggle-status/:id')
-  async toggleOpeningStatus(@Param('id') openingId: MongooseId) {
+  async toggleOpeningStatus(
+    @Param('id', ParseObjectIdPipe) openingId: MongooseId,
+  ) {
     return this.adminService.toggleOpeningStatus(openingId);
   }
 
   @Delete('variation/:id')
-  async deleteVariation(@Param('id') variationId: MongooseId) {
+  async deleteVariation(
+    @Param('id', ParseObjectIdPipe) variationId: MongooseId,
+  ) {
     return this.adminService.deleteVariation(variationId);
   }
 
   @Delete('user/:id')
-  async deleteuser(@Param('id') userId: MongooseId) {
+  async deleteuser(@Param('id', ParseObjectIdPipe) userId: MongooseId) {
     return this.adminService.deleteUser(userId);
   }
 
   @Delete('opening/:id')
-  async deleteOpening(@Param('id') openingId: MongooseId) {
+  async deleteOpening(@Param('id', ParseObjectIdPipe) openingId: MongooseId) {
     return this.adminService.deleteOpening(openingId);
   }
 }
