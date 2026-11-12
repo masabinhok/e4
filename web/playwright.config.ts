@@ -18,7 +18,7 @@ export default defineConfig({
       timeout: 120_000,
       env: {
         PORT: "5055",
-        FRONTEND_URL: WEB,
+        PROXY_SECRET: "e2e-proxy-secret",
         DATABASE_URL:
           process.env.DATABASE_URL ?? "mongodb://localhost:27017/e4",
         JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET ?? "e2e-access",
@@ -30,7 +30,7 @@ export default defineConfig({
       command: "npm run build && npm run start -- --port 3055",
       url: WEB,
       timeout: 240_000,
-      env: { NEXT_PUBLIC_API_URL: `${API}/api` },
+      env: { API_URL: API, PROXY_SECRET: "e2e-proxy-secret" },
     },
   ],
 });

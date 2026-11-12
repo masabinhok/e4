@@ -173,17 +173,14 @@ export default function CustomLine() {
       description: description,
     };
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/variations/custom`,
-      {
-        credentials: "include",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newPGN),
+    const res = await fetch(`/api/variations/custom`, {
+      credentials: "include",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify(newPGN),
+    });
 
     if (!res.ok) {
       throw new Error("Failed to save PGN");

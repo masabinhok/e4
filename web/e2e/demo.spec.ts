@@ -8,6 +8,13 @@ test("a visitor can try the demo and step through a seeded lesson", async ({
   await page.getByRole("button", { name: "Try the demo, no signup" }).click();
   await page.waitForURL("**/lessons");
 
+  // Both auth cookies must survive the /api proxy as first-party cookies.
+  const cookies = await page.context().cookies();
+  expect(cookies.map((c) => c.name).sort()).toEqual(
+    expect.arrayContaining(["accessToken", "refreshToken"]),
+  );
+  expect(cookies.every((c) => c.sameSite === "Lax")).toBe(true);
+
   await page.locator('a[href="/lessons/carokann"]').click();
   await expect(
     page.getByRole("heading", { name: "Caro-Kann Defense" }),
