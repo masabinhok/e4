@@ -1,3 +1,4 @@
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import {
   Body,
   Controller,
@@ -51,7 +52,9 @@ export class VariationsController {
   @UseGuards(RolesGuard)
   @Roles(Role.Admin)
   @Post('accept/:id')
-  async acceptVariation(@Param('id') variationId: MongooseId) {
+  async acceptVariation(
+    @Param('id', ParseObjectIdPipe) variationId: MongooseId,
+  ) {
     return this.variationsService.acceptVariation(variationId);
   }
 }

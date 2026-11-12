@@ -1,3 +1,4 @@
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import {
   Body,
   Controller,
@@ -34,7 +35,7 @@ export class OpeningsController {
 
   @Delete('cancel/:id')
   async cancelContribution(
-    @Param('id') openingId: MongooseId,
+    @Param('id', ParseObjectIdPipe) openingId: MongooseId,
     @GetUser('sub') userId: MongooseId,
   ) {
     return this.openingsService.cancelContribution(openingId, userId);
@@ -59,7 +60,7 @@ export class OpeningsController {
   @UseGuards(RolesGuard)
   @Roles(Role.Admin)
   @Post('accept/:id')
-  async acceptOpening(@Param('id') openingId: MongooseId) {
+  async acceptOpening(@Param('id', ParseObjectIdPipe) openingId: MongooseId) {
     return this.openingsService.acceptOpening(openingId);
   }
 }
