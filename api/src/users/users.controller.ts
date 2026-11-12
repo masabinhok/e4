@@ -10,12 +10,12 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get(':recorded-lines')
+  @Get('recorded-lines')
   async getRecordedPgns(@GetUser('sub') userId: MongooseId) {
     return this.usersService.getRecordedPgns(userId);
   }
 
-  @Get(':custom-pgns')
+  @Get('custom-pgns')
   async getCustomPgns(@GetUser('sub') userId: MongooseId) {
     return this.usersService.getCustomPgns(userId);
   }
