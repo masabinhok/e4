@@ -29,3 +29,14 @@ test("a visitor can try the demo and step through a seeded lesson", async ({
     await page.screenshot({ path: "../docs/screenshot-lesson.png" });
   }
 });
+
+test("leaving a page mid-request doesn't log you out", async ({ page }) => {
+  await page.goto("/auth/login");
+  await page.getByRole("button", { name: "Try the demo, no signup" }).click();
+  await page.waitForURL("**/lessons");
+  // Navigate away at once, aborting the page's in-flight session check.
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Welcome to the demo" }),
+  ).toBeVisible();
+});
