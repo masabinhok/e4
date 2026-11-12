@@ -20,13 +20,10 @@ test("a visitor can try the demo and step through a seeded lesson", async ({
     page.getByRole("heading", { name: "Caro-Kann Defense" }),
   ).toBeVisible();
 
-  // Wait for the line to load; clicks before that are lost to a state reset.
-  await expect(page.getByText("0/19")).toBeVisible();
   const next = page.getByRole("button", { name: "Next", exact: true });
-  for (let i = 1; i <= 7; i++) {
-    await next.click();
-    await expect(page.getByText(`${i}/19`)).toBeVisible();
-  }
+  for (let i = 0; i < 7; i++) await next.click();
+  // 1.e4 c6 2.d4 d5 3.Nc3 dxe4 4.Nxe4: the 7th move is the current one.
+  await expect(page.locator('[aria-current="step"]')).toHaveText("Nxe4");
 
   if (process.env.CAPTURE) {
     await page.screenshot({ path: "../docs/screenshot-lesson.png" });

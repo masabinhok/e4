@@ -1,387 +1,183 @@
 "use client";
-import { useState, useEffect, useCallback, useRef, use } from "react";
-import { Chess } from "chess.js";
-import { Chessboard } from "react-chessboard";
-import useLocalStorage from "@/hooks/useLocalStorage";
+import {
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from "react";
+import {
+  FlipVertical2,
+  Lightbulb,
+  Pause,
+  Play,
+  RotateCcw,
+  SkipBack,
+  SkipForward,
+} from "lucide-react";
+import Board from "@/components/board/Board";
+import MoveList from "@/components/board/MoveList";
 import Button from "@/components/Button";
 import { PageSpinner } from "@/components/ProtectedRoute";
+import useLocalStorage from "@/hooks/useLocalStorage";
 import { api, errorMessage } from "@/lib/api";
-import Image from "next/image";
-import flipBoard from "@/public/icons/flip.svg";
-import { BoardFlip, Opening } from "@/types/types";
+import { positionAfter, soundFor, squaresOf, tryMove } from "@/lib/chess";
+import {
+  initialTrainer,
+  isComplete,
+  isLearnersTurn,
+  Mode,
+  opponentShouldMove,
+  trainerReducer,
+} from "@/lib/trainer";
+import { useAuth } from "@/store/auth";
 import { useSoundStore } from "@/store/useSoundStore";
-import { useMessageStore } from "@/store/messageStore";
+import { BoardFlip, Opening } from "@/types/types";
 
-export default function ChessGame({
+const modes: { id: Mode; label: string; help: string }[] = [
+  {
+    id: "learn",
+    label: "Learn",
+    help: "Step through the line. You can also play the moves on the board.",
+  },
+  {
+    id: "practice",
+    label: "Practice",
+    help: "Play your side; the opponent answers. The next move is shown.",
+  },
+  {
+    id: "quiz",
+    label: "Quiz",
+    help: "Play your side from memory. Mistakes are counted.",
+  },
+];
+
+export default function LessonPage({
   params,
 }: {
   params: Promise<{ code: string }>;
 }) {
   const { code } = use(params);
-  const [currentOpening, setCurrentOpening] = useState<Opening | null>(null);
-  const [game, setGame] = useState(new Chess());
-  const [currentLineIndex, setCurrentLineIndex] = useLocalStorage<number>(
-    "currentLineIndex",
-    0,
-  );
-  const [currentLine, setCurrentLine] = useState<string[] | undefined>(
-    undefined,
-  );
-  const [lineName, setLineName] = useState<string | undefined>(undefined);
-  const [currentMoveIndex, setCurrentMoveIndex] = useState<number>(0);
-  const [moveHistory, setMoveHistory] = useState<string[]>([]);
-  const [autoPlay, setAutoPlay] = useState(false);
-  const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>(
-    "boardFlip",
-    "white",
-  );
-  const [mode, setMode] = useLocalStorage<"learn" | "practice" | "quiz">(
-    "currentMode",
+  const { user } = useAuth();
+  const playSound = useSoundStore((s) => s.playSound);
+  const isPersonal = code === "recorded-lines" || code === "custom-pgns";
+
+  const [opening, setOpening] = useState<Opening | null>(null);
+  const [loadError, setLoadError] = useState("");
+  const [lineIndex, setLineIndex] = useLocalStorage<number>(`line:${code}`, 0);
+  const [savedMode, setSavedMode] = useLocalStorage<Mode>(
+    "trainer-mode",
     "learn",
   );
-  const [moveValidation, setMoveValidation] = useState<{
-    source: string;
-    target: string;
-    valid: boolean;
-  } | null>(null);
-  const [lineCompleted, setLineCompleted] = useState<boolean>(false);
-  const { clearMessages, addMessage } = useMessageStore();
-  const [mistakes, setMistakes] = useState<number>(0);
-  const [isBrowser, setIsBrowser] = useState<boolean>(false);
-  const playSound = useSoundStore((s) => s.playSound);
-  const [isProcessingCompletion, setIsProcessingCompletion] = useState(false);
+  const [state, dispatch] = useReducer(trainerReducer, initialTrainer());
+  const [orientation, setOrientation] = useState<BoardFlip>("white");
+  const [wrongMove, setWrongMove] = useState<[string, string] | null>(null);
+  const [showHint, setShowHint] = useState(false);
+  const [autoplay, setAutoplay] = useState(false);
 
-  const [loadError, setLoadError] = useState("");
   useEffect(() => {
-    const owner =
-      code === "recorded-lines" || code === "custom-pgns"
-        ? "users"
-        : "openings";
-    api<Opening>(`/${owner}/${code}`)
-      .then(setCurrentOpening)
+    api<Opening>(`/${isPersonal ? "users" : "openings"}/${code}`)
+      .then(setOpening)
       .catch((err) =>
         setLoadError(errorMessage(err, "Couldn't load this lesson.")),
       );
-  }, [code]);
+  }, [code, isPersonal]);
 
-  const movesContainerRef = useRef<HTMLDivElement>(null);
+  const lines = useMemo(() => opening?.variations ?? [], [opening]);
+  const index = Math.min(lineIndex, Math.max(lines.length - 1, 0)); // stored index may be stale
+  const line = lines[index];
 
-  const getNewGame = useCallback(() => new Chess(), []);
-
-  useEffect(() => {
-    setIsBrowser(true);
-  }, []);
-
-  useEffect(() => {
-    if (
-      currentOpening &&
-      currentOpening.variations &&
-      currentOpening.variations[currentLineIndex]
-    ) {
-      setCurrentLine(currentOpening.variations[currentLineIndex].moves);
-      setLineName(currentOpening.variations[currentLineIndex].title);
-      setBoardFlip(
-        currentOpening.variations[currentLineIndex].boardflip || "white",
-      );
-    }
-  }, [currentOpening, currentLineIndex, setBoardFlip]);
-
-  const toggleBoardFlip = () => {
-    setBoardFlip(boardFlip === "white" ? "black" : "white");
+  const clearFeedback = () => {
+    setWrongMove(null);
+    setShowHint(false);
+    setAutoplay(false);
   };
 
-  const loadLine = useCallback(
-    (lineKey: number) => {
-      if (!currentOpening?.variations[lineKey]) return;
-      const moves = currentOpening.variations[lineKey].moves;
-      setAutoPlay(false);
-      setCurrentLine(moves);
-      setBoardFlip(currentOpening.variations[lineKey].boardflip || "white");
-      setCurrentLineIndex(lineKey ?? 0);
-      setLineName(currentOpening.variations[lineKey].title);
-      setCurrentMoveIndex(0);
-      setMoveHistory([]);
-      setMoveValidation(null);
-      setMistakes(0);
-      setGame(getNewGame());
-    },
-    [currentOpening?.variations, getNewGame, setBoardFlip, setCurrentLineIndex],
-  );
-
+  // Load the chosen line (and keep the saved mode) whenever it changes.
   useEffect(() => {
-    if (movesContainerRef.current) {
-      movesContainerRef.current.lastElementChild?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "end",
-      });
-    }
-  }, [currentMoveIndex, currentLine]);
+    if (!line) return;
+    dispatch({ type: "mode", mode: savedMode });
+    dispatch({
+      type: "load",
+      moves: line.moves,
+      side: line.boardflip ?? "white",
+    });
+    setOrientation(line.boardflip ?? "white");
+    clearFeedback();
+  }, [line, savedMode]);
 
-  const loadRandomLine = useCallback(() => {
-    if (!currentOpening?.variations?.length) return;
-    const randomLineIndex = Math.floor(
-      Math.random() * currentOpening.variations.length,
+  const playNext = useCallback(() => {
+    if (isComplete(state)) return;
+    const move = positionAfter(state.moves, state.index).move(
+      state.moves[state.index],
     );
-    loadLine(randomLineIndex);
-  }, [loadLine, currentOpening?.variations]);
+    playSound(soundFor(move));
+    dispatch({ type: "next" });
+  }, [state, playSound]);
 
-  const handleLineCompletion = useCallback(() => {
-    if (isProcessingCompletion || !lineCompleted) return;
-
-    setIsProcessingCompletion(true);
-    clearMessages();
-    if (lineCompleted && mode === "practice") {
-      setTimeout(() => {
-        playSound("achievement");
-      }, 1);
-
-      addMessage({
-        content: "Congratulations! You've completed the line.",
-        type: "success",
-      });
-
-      setTimeout(() => {
-        setLineCompleted(false);
-        loadRandomLine();
-        playSound("scatter");
-        setIsProcessingCompletion(false); // Reset guard
-      }, 3000);
-    }
-    if (lineCompleted && mode === "quiz") {
-      setTimeout(() => {
-        playSound("lessonPass");
-      }, 1);
-
-      addMessage({
-        content: `Congratulations! You've completed the line. You made ${mistakes} mistakes.`,
-        type: "success",
-      });
-
-      setTimeout(() => {
-        setLineCompleted(false);
-        setCurrentLineIndex(() => {
-          const randomLineIndex = Math.floor(
-            Math.random() * (currentOpening?.variations.length ?? 1),
-          );
-          return randomLineIndex;
-        });
-        loadRandomLine();
-        playSound("scatter");
-        setIsProcessingCompletion(true);
-      }, 3000);
-    }
-  }, [
-    lineCompleted,
-    mode,
-    playSound,
-    mistakes,
-    currentOpening?.variations,
-    loadRandomLine,
-    setCurrentLineIndex,
-    clearMessages,
-    addMessage,
-    setLineCompleted,
-    isProcessingCompletion,
-  ]);
-
-  const handleModeChange = (newMode: "learn" | "practice" | "quiz") => {
-    setMode(newMode);
-    loadLine(currentLineIndex);
-  };
-
-  const nextMove = useCallback(() => {
-    const lineLength = currentLine?.length ?? 0;
-    if (currentMoveIndex < lineLength && currentLine) {
-      const move = currentLine[currentMoveIndex];
-      const gameCopy = new Chess(game.fen());
-      const result = gameCopy.move(move);
-      setGame(gameCopy);
-      setMoveHistory([...moveHistory, move]);
-      setCurrentMoveIndex(currentMoveIndex + 1);
-      setMoveValidation(null);
-
-      if (gameCopy.inCheck()) {
-        playSound("check");
-      } else if (result.captured) {
-        playSound("capture");
-      } else {
-        playSound("moveSelf");
-      }
-
-      if (result.isKingsideCastle && result.isKingsideCastle()) {
-        playSound("castle");
-      }
-
-      return true;
-    }
-    return false;
-  }, [currentLine, currentMoveIndex, game, moveHistory, playSound]);
+  // The opponent replies on its own in practice and quiz.
+  useEffect(() => {
+    if (!opponentShouldMove(state)) return;
+    const t = setTimeout(playNext, 450);
+    return () => clearTimeout(t);
+  }, [state, playNext]);
 
   useEffect(() => {
-    if ((!autoPlay && mode === "practice") || mode === "quiz") {
-      if (
-        currentOpening?.variations[currentLineIndex]?.boardflip === "black" &&
-        currentMoveIndex % 2 === 0
-      ) {
-        setTimeout(() => nextMove(), 500);
-      }
-      if (
-        currentOpening?.variations[currentLineIndex]?.boardflip === "white" &&
-        currentMoveIndex % 2 !== 0
-      ) {
-        setTimeout(() => nextMove(), 500);
-      }
-      const lineLength = currentLine?.length;
-      if (lineLength && currentMoveIndex === lineLength) {
-        setLineCompleted(true);
-        handleLineCompletion();
-      }
-    }
-  }, [
-    currentLineIndex,
-    currentMoveIndex,
-    mode,
-    currentOpening,
-    currentLine,
-    nextMove,
-    handleLineCompletion,
-    autoPlay,
-  ]);
+    if (!autoplay) return;
+    if (isComplete(state)) return setAutoplay(false);
+    const t = setTimeout(playNext, 900);
+    return () => clearTimeout(t);
+  }, [autoplay, state, playNext]);
 
-  const previousMove = () => {
-    if (currentMoveIndex > 0) {
-      playSound("moveSelf");
-      const newHistory = moveHistory.slice(0, -1);
-      const newGame = new Chess();
-      newHistory.forEach((move) => newGame.move(move));
-      setGame(newGame);
-      setMoveHistory(newHistory);
-      setCurrentMoveIndex(currentMoveIndex - 1);
-      setMoveValidation(null);
-      return true;
-    }
-    return false;
-  };
-
+  const done = isComplete(state) && state.mode !== "learn";
   useEffect(() => {
-    if (autoPlay) {
-      const lineLength = currentLine?.length ?? 0;
-      if (currentMoveIndex < lineLength) {
-        clearMessages();
-        const timer = setTimeout(() => {
-          nextMove();
-        }, 1000);
-        return () => clearTimeout(timer);
-      } else {
-        setAutoPlay(false);
-      }
-    }
-  }, [autoPlay, currentMoveIndex, currentLine, nextMove, clearMessages]);
+    if (done) playSound(state.mode === "quiz" ? "lessonPass" : "achievement");
+  }, [done, state.mode, playSound]);
 
-  const onDrop = (sourceSquare: string, targetSquare: string) => {
-    if (autoPlay) return false;
-    try {
-      const move = {
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: "q",
-      };
-
-      const gameCopy = new Chess(game.fen());
-      const result = gameCopy.move(move);
-
+  // ← and → step through the line in learn mode.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
       if (
-        currentOpening?.variations[currentLineIndex]?.boardflip === "black" &&
-        currentMoveIndex % 2 === 0
-      ) {
-        return false;
-      }
-      if (
-        currentOpening?.variations[currentLineIndex]?.boardflip === "white" &&
-        currentMoveIndex % 2 !== 0
-      ) {
-        return false;
-      }
+        state.mode !== "learn" ||
+        (e.target as HTMLElement).closest("input, select, textarea")
+      )
+        return;
+      if (e.key === "ArrowRight") playNext();
+      if (e.key === "ArrowLeft") dispatch({ type: "back" });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [state.mode, playNext]);
 
-      if (!result) {
-        playSound("illegal");
-        setMoveValidation({
-          source: sourceSquare,
-          target: targetSquare,
-          valid: false,
-        });
-        addMessage({
-          content: "Invalid move",
-          type: "error",
-        });
-        return false;
-      }
-
-      const expectedMove = currentLine?.[currentMoveIndex];
-      if (!expectedMove || result.san !== expectedMove) {
-        playSound("incorrect");
-        setMistakes(mistakes + 1);
-        setMoveValidation({
-          source: sourceSquare,
-          target: targetSquare,
-          valid: false,
-        });
-        addMessage({
-          content: "Move does not match the expected line.",
-          type: "error",
-        });
-        return false;
-      }
-
-      setMoveValidation({
-        source: sourceSquare,
-        target: targetSquare,
-        valid: true,
-      });
-      setGame(gameCopy);
-      setMoveHistory([...moveHistory, result.san]);
-      setCurrentMoveIndex(currentMoveIndex + 1);
-
-      if (gameCopy.inCheck()) {
-        playSound("check");
-      } else if (result.captured) {
-        playSound("capture");
-      } else {
-        playSound("moveSelf");
-      }
-
-      if (result.isKingsideCastle && result.isKingsideCastle()) {
-        playSound("castle");
-      }
-
-      return true;
-    } catch {
+  const onMove = (from: string, to: string) => {
+    if (!isLearnersTurn(state)) return false;
+    const move = tryMove(positionAfter(state.moves, state.index), from, to);
+    if (!move) {
       playSound("illegal");
-      setMoveValidation({
-        source: sourceSquare,
-        target: targetSquare,
-        valid: false,
-      });
-      addMessage({
-        content: "Invalid move",
-        type: "error",
-      });
       return false;
     }
+    dispatch({ type: "attempt", san: move.san });
+    if (move.san !== state.moves[state.index]) {
+      playSound("incorrect");
+      setWrongMove([from, to]);
+      return false;
+    }
+    playSound(soundFor(move));
+    setWrongMove(null);
+    setShowHint(false);
+    return true;
   };
 
-  const getSquareStyles = () => {
-    if (!moveValidation) return {};
-    const { source, target, valid } = moveValidation;
-    const color = valid ? "rgba(0, 255, 0, 0.4)" : "rgba(255, 0, 0, 0.4)";
-    return {
-      [source]: { backgroundColor: color },
-      [target]: { backgroundColor: color },
-    };
+  const chooseMode = (mode: Mode) => {
+    setSavedMode(mode);
+    dispatch({ type: "mode", mode });
+    clearFeedback();
   };
+  const chooseLine = (i: number) => setLineIndex(i);
+  const nextLine = () => chooseLine((index + 1) % lines.length);
 
-  if (!currentOpening) {
+  if (!opening) {
     return loadError ? (
       <div className="max-w-md py-10">
         <p role="alert" className="text-ember">
@@ -399,180 +195,213 @@ export default function ChessGame({
     );
   }
 
+  const fen = positionAfter(state.moves, state.index).fen();
+  const nextSquares = squaresOf(state.moves, state.index);
+  const hint = state.mode === "learn" || showHint ? nextSquares : null;
+  const yourTurn = isLearnersTurn(state);
+
   return (
-    <div className=" flex flex-col lg:flex-row relative">
-      {/* Chessboard */}
-      <div className="flex-1 flex items-center justify-center p-6 relative">
-        {isBrowser ? (
-          <Chessboard
-            onPieceDrop={onDrop}
-            position={game.fen()}
-            boardWidth={Math.min(window.innerWidth * 0.85, 520)}
-            customDarkSquareStyle={{ backgroundColor: "#334155" }}
-            customLightSquareStyle={{ backgroundColor: "#cbd5e1" }}
-            customSquareStyles={getSquareStyles()}
-            boardOrientation={boardFlip}
-          />
-        ) : (
-          <div className="text-7xl text-blue-400">LOADING...</div>
-        )}
-      </div>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] lg:items-start">
+      <section aria-label="Board" className="flex flex-col gap-4">
+        <Board
+          fen={fen}
+          orientation={orientation}
+          onMove={onMove}
+          lastMove={squaresOf(state.moves, state.index - 1)}
+          wrongMove={wrongMove}
+          hint={isComplete(state) ? null : hint}
+        />
 
-      {/* Controls/Info Panel */}
-      <aside className="w-full lg:w-[430px] bg-gray-800/95 p-8 flex flex-col gap-5 shadow-xl rounded-t-3xl lg:rounded-t-none lg:rounded-l-3xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-extrabold text-blue-400 tracking-tight">
-            {currentOpening?.name}
-          </h1>
-          <button
-            className=" bg-blue-500 hover:brightness-110 transition p-2 rounded-full shadow-lg cursor-pointer"
-            onClick={toggleBoardFlip}
-            aria-label="Flip Board"
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {state.mode === "learn" ? (
+            <>
+              <Button
+                variant="secondary"
+                icon={<SkipBack className="size-4" />}
+                onClick={() => dispatch({ type: "back" })}
+                disabled={state.index === 0}
+              >
+                Back
+              </Button>
+              <Button
+                icon={<SkipForward className="size-4" />}
+                onClick={playNext}
+                disabled={isComplete(state)}
+                className="min-w-28"
+              >
+                Next
+              </Button>
+              <Button
+                variant="secondary"
+                icon={
+                  autoplay ? (
+                    <Pause className="size-4" />
+                  ) : (
+                    <Play className="size-4" />
+                  )
+                }
+                onClick={() => setAutoplay((a) => !a)}
+                disabled={isComplete(state)}
+              >
+                {autoplay ? "Pause" : "Autoplay"}
+              </Button>
+            </>
+          ) : (
+            state.mode === "practice" && (
+              <Button
+                variant="secondary"
+                icon={<Lightbulb className="size-4" />}
+                onClick={() => setShowHint(true)}
+                disabled={!yourTurn || showHint}
+              >
+                Hint
+              </Button>
+            )
+          )}
+          <Button
+            variant="ghost"
+            icon={<RotateCcw className="size-4" />}
+            onClick={() => {
+              dispatch({ type: "reset" });
+              clearFeedback();
+            }}
           >
-            <Image
-              src={flipBoard}
-              alt="Flip board"
-              width={28}
-              height={28}
-              className="invert"
-            />
-          </button>
+            Restart
+          </Button>
+          <Button
+            variant="ghost"
+            aria-label="Flip board"
+            icon={<FlipVertical2 className="size-4" />}
+            onClick={() =>
+              setOrientation((o) => (o === "white" ? "black" : "white"))
+            }
+          />
+        </div>
+      </section>
+
+      <aside className="flex flex-col gap-5">
+        <div>
+          <h1 className="text-3xl">{opening.name}</h1>
+          {lines.length > 0 && (
+            <p className="mt-1 text-sm text-muted">
+              You play {line?.boardflip ?? "white"} · line {index + 1} of{" "}
+              {lines.length}
+            </p>
+          )}
         </div>
 
-        {/* Mode Tabs */}
-        <div className="flex gap-2 mb-4">
-          {["learn", "practice", "quiz"].map((modeOption) => (
-            <button
-              key={modeOption}
-              className={`px-4 py-2 rounded-full font-semibold transition ${
-                mode === modeOption
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-700 text-gray-300 hover:bg-blue-500"
-              }`}
-              onClick={() =>
-                handleModeChange(modeOption as "learn" | "practice" | "quiz")
-              }
-            >
-              {modeOption.charAt(0).toUpperCase() + modeOption.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Variation Selector */}
-        {(mode === "learn" || mode === "practice") && (
-          <div>
-            <label className="block text-sm font-medium mb-1">Variation</label>
-            <select
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 mb-2"
-              value={lineName}
-              onChange={(e) => loadLine(e.target.selectedIndex)}
-            >
-              {currentOpening?.variations.map((v, i) => (
-                <option key={i} value={v.title}>
-                  {v.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Line Info & Progress */}
-        <div className="bg-gray-700 p-4 rounded-xl mb-4 shadow-inner">
-          <h2 className="font-bold text-blue-400 mb-1">{lineName}</h2>
-          <p className="text-xs text-gray-300 mb-2">
-            {currentOpening?.variations[currentLineIndex]?.description}
+        {lines.length === 0 ? (
+          <p className="text-muted">
+            No lines here yet.{" "}
+            {isPersonal
+              ? code === "recorded-lines"
+                ? "Record one from the Record tab."
+                : "Paste one in the PGNs tab."
+              : ""}
           </p>
-          <div className="flex items-center gap-2">
-            <div
-              ref={movesContainerRef}
-              className="font-mono text-base bg-gray-800 p-2 rounded flex-1 whitespace-nowrap overflow-x-hidden"
-            >
-              {currentLine?.map((move, i) => {
-                // Show moves up to and including the current move index
-                if (i < currentMoveIndex - 1) {
-                  return <span key={i}>{move} </span>;
-                }
-                // Highlight the last played move in yellow
-                if (i === currentMoveIndex - 1) {
-                  return (
-                    <span key={i} className="text-yellow-400 font-bold">
-                      {move}{" "}
-                    </span>
-                  );
-                }
-                // Show the next move as green (quiz/learn mode)
-                if (i === currentMoveIndex) {
-                  return (
-                    <span key={i} className="text-green-400">
-                      {mode === "quiz" ? " ?" : " " + move}
-                    </span>
-                  );
-                }
-                return null;
-              })}
-              <span className=" text-red-500 rounded-full">!</span>
+        ) : (
+          <>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="line" className="text-sm font-medium">
+                Line
+              </label>
+              <select
+                id="line"
+                value={index}
+                onChange={(e) => chooseLine(Number(e.target.value))}
+                className="min-h-11 rounded-lg border border-line bg-raised px-3 focus:border-brass focus:outline-none"
+              >
+                {lines.map((v, i) => (
+                  <option key={v._id} value={i}>
+                    {v.title}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <span className="ml-2 text-xs text-gray-400">
-              {currentMoveIndex}/{currentLine?.length ?? 0}
-            </span>
-          </div>
-          {/* Progress bar */}
-          <div className="h-2 bg-gray-600 rounded mt-2">
             <div
-              className="h-2 bg-blue-500 rounded transition-all"
-              style={{
-                width: `${((currentMoveIndex / (currentLine?.length || 1)) * 100).toFixed(1)}%`,
-              }}
+              role="radiogroup"
+              aria-label="Mode"
+              className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-surface p-1"
+            >
+              {modes.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={state.mode === m.id}
+                  onClick={() => chooseMode(m.id)}
+                  className={`min-h-11 rounded-lg text-sm font-medium ${state.mode === m.id ? "bg-raised text-ivory" : "text-muted hover:text-ivory"}`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+            <p className="-mt-2 text-sm text-muted">
+              {modes.find((m) => m.id === state.mode)?.help}
+            </p>
+
+            {line?.description && (
+              <p className="font-serif text-lg italic leading-relaxed text-ivory/90">
+                {line.description}
+              </p>
+            )}
+
+            <MoveList
+              moves={state.moves}
+              played={state.index}
+              next={state.mode === "quiz" ? "hide" : "show"}
             />
-          </div>
-        </div>
 
-        {/* Controls */}
-        <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
-          {mode === "learn" && (
-            <>
-              <Button
-                onClick={previousMove}
-                disabled={currentMoveIndex === 0}
-                text="Previous"
-                icon="←"
-              />
-              <Button
-                onClick={nextMove}
-                disabled={currentMoveIndex >= (currentLine?.length ?? 0)}
-                text="Next"
-                icon="→"
-              />
-            </>
-          )}
-          {(mode === "learn" || mode === "practice") && (
-            <>
-              <Button
-                onClick={() => setAutoPlay(!autoPlay)}
-                text={autoPlay ? "Pause" : "Autoplay"}
-                icon={autoPlay ? "⏸" : "▶"}
-              />
-              <Button
-                onClick={() => loadLine(currentLineIndex)}
-                text="Reset"
-                icon="⟳"
-              />
-            </>
-          )}
-          {mode === "quiz" && (
-            <Button onClick={loadRandomLine} text="Random Line" icon="🎲" />
-          )}
-        </div>
+            <div aria-live="polite" className="min-h-6 text-sm">
+              {done ? (
+                <div className="flex flex-col gap-3 rounded-xl border border-moss/40 bg-moss/10 p-4">
+                  <p className="text-ivory">
+                    Line complete
+                    {state.mode === "quiz" &&
+                      (state.mistakes === 0
+                        ? " with no mistakes."
+                        : ` with ${state.mistakes} ${state.mistakes === 1 ? "mistake" : "mistakes"}.`)}
+                    {state.mode === "practice" && "."}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        dispatch({ type: "reset" });
+                        clearFeedback();
+                      }}
+                    >
+                      Again
+                    </Button>
+                    {lines.length > 1 && (
+                      <Button onClick={nextLine}>Next line</Button>
+                    )}
+                  </div>
+                </div>
+              ) : wrongMove ? (
+                <p className="text-ember">
+                  Not the move in this line. Try again
+                  {state.mode === "practice" ? ", or take a hint" : ""}.
+                </p>
+              ) : state.mode !== "learn" ? (
+                <p className="text-muted">
+                  {yourTurn ? "Your move." : "Opponent is replying…"}
+                </p>
+              ) : null}
+            </div>
+          </>
+        )}
 
-        {/* Contribute Button */}
-        <Button
-          href={`/record?code=${code}`}
-          variant="secondary"
-          className="mt-4"
-          text="Contribute a line"
-        />
+        {!isPersonal && !user?.isDemo && (
+          <Button
+            href={`/record?code=${code}`}
+            variant="ghost"
+            className="self-start"
+          >
+            Suggest a line for this opening
+          </Button>
+        )}
       </aside>
     </div>
   );
