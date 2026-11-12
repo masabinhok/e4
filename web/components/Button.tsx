@@ -1,51 +1,68 @@
+import Link from "next/link";
 import React from "react";
 
-type ButtonProps = {
-  text: string;
-  color?: string;
+const variants = {
+  primary: "bg-brass text-night hover:bg-brass-bright",
+  secondary: "border border-line bg-surface text-ivory hover:bg-raised",
+  ghost: "text-muted hover:bg-raised hover:text-ivory",
+  danger: "border border-ember/50 text-ember hover:bg-ember/10",
+};
+
+const sizes = {
+  md: "min-h-11 px-4 text-sm",
+  lg: "min-h-12 px-6 text-base",
+};
+
+type Common = {
+  text?: string;
   icon?: React.ReactNode;
-  disabled?: boolean;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  type?: string;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>;
-
-const colorMap = {
-  red: "bg-red-400",
-  sky: "bg-sky-400",
+  variant?: keyof typeof variants;
+  size?: keyof typeof sizes;
+  className?: string;
+  children?: React.ReactNode;
 };
 
-const hoverMap = {
-  red: "bg-red-700",
-  sky: "bg-sky-700",
-};
+type ButtonProps = Common &
+  Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children">;
+type LinkProps = Common & { href: string };
 
-export default function Button({
-  text,
-  color,
-  icon,
-  disabled = false,
-  onClick,
-  type,
-  ...props
-}: ButtonProps) {
+// A <Link> when given `href`, so links never wrap buttons (invalid HTML and two tab stops).
+export default function Button(props: ButtonProps | LinkProps) {
+  const {
+    text,
+    icon,
+    variant = "primary",
+    size = "md",
+    className = "",
+    children,
+    ...rest
+  } = props;
+  const classes = `inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`;
+  const content = (
+    <>
+      {icon && (
+        <span aria-hidden="true" className="flex">
+          {icon}
+        </span>
+      )}
+      {children ?? text}
+    </>
+  );
+
+  if ("href" in rest && rest.href) {
+    return (
+      <Link href={rest.href} className={classes}>
+        {content}
+      </Link>
+    );
+  }
   return (
     <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      aria-disabled={disabled}
-      className={`relative box-border inline-flex items-center justify-center h-11 px-4 py-3 rounded-lg border-b-4 border-solid border-transparent ${color ? colorMap.red : colorMap.sky} text-sm font-bold uppercase tracking-wider text-white transition-all duration-200
-        brightness-110 active:border-b-0 active:border-t-4 active:bg-none w-full self-center
-        ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
-      `}
-      {...props}
+      type="button"
+      {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+      className={classes}
     >
-      {icon && <span className="mr-2 flex items-center">{icon}</span>}
-      {text}
-      {/* Optional background effect */}
-      <span
-        className={`absolute inset-0 -z-10 rounded-lg border-b-4 border-solid border-transparent ${color === "red" ? hoverMap.red : hoverMap.sky}`}
-      />
+      {content}
     </button>
   );
 }
