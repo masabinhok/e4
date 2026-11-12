@@ -31,20 +31,39 @@ test("quiz: a white line played from memory completes with no mistakes", async (
 }) => {
   await demo(page);
   await page.goto("/lessons/jobava");
-  await page.getByLabel("Line").selectOption({ label: "Jobava Gambit" });
+  await page.getByLabel("Line").selectOption({ label: "Punishing 4...Nc6" });
   await page.getByRole("radio", { name: "Quiz" }).click();
 
+  // 1.d4 d5 2.Nc3 Nf6 3.Bf4 c5 4.e3 Nc6 5.Nb5 e5 6.Bxe5 Nxe5 7.dxe5
   for (const [from, to] of [
     ["d2", "d4"],
     ["b1", "c3"],
     ["c1", "f4"],
-    ["e2", "e4"],
-    ["d4", "d5"],
+    ["e2", "e3"],
+    ["c3", "b5"],
+    ["f4", "e5"],
+    ["d4", "e5"],
   ]) {
     await expect(page.getByText("Your move.")).toBeVisible();
     await tap(page, from, to);
   }
   await expect(page.getByText("Line complete with no mistakes.")).toBeVisible();
+});
+
+test("learn: each move comes with its note", async ({ page }) => {
+  await demo(page);
+  await page.goto("/lessons/carokann");
+  await page.getByLabel("Line").selectOption({ index: 0 });
+  await expect(page.getByText("White grabs space with 3.e5")).toBeVisible(); // the line's introduction
+  const next = page.getByRole("button", { name: "Next", exact: true });
+  await next.click();
+  await next.click();
+  await expect(
+    page.getByText("Prepares ...d5, so Black can challenge"),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Caro-Kann Defense: Advance Variation, Short Variation"),
+  ).toBeVisible();
 });
 
 test("PGNs: a full PGN loads and saves", async ({ page }) => {
