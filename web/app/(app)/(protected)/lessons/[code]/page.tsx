@@ -85,6 +85,20 @@ export default function LessonPage({
   }, [code, isPersonal]);
 
   const lines = useMemo(() => opening?.variations ?? [], [opening]);
+  // Lines grouped by chapter, keeping their order; contributed lines have no chapter.
+  const chapters = useMemo(() => {
+    const groups = new Map<
+      string,
+      { v: (typeof lines)[number]; i: number }[]
+    >();
+    lines.forEach((v, i) =>
+      groups.set(v.chapter ?? "", [
+        ...(groups.get(v.chapter ?? "") ?? []),
+        { v, i },
+      ]),
+    );
+    return [...groups.entries()];
+  }, [lines]);
   const index = Math.min(lineIndex, Math.max(lines.length - 1, 0)); // stored index may be stale
   const line = lines[index];
 
@@ -199,6 +213,9 @@ export default function LessonPage({
   const nextSquares = squaresOf(state.moves, state.index);
   const hint = state.mode === "learn" || showHint ? nextSquares : null;
   const yourTurn = isLearnersTurn(state);
+  const coachNote =
+    (state.index > 0 ? line?.notes?.[state.index - 1] : "") ||
+    (state.index === 0 ? line?.description : "");
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] lg:items-start">
@@ -311,12 +328,27 @@ export default function LessonPage({
                 onChange={(e) => chooseLine(Number(e.target.value))}
                 className="min-h-11 rounded-lg border border-line bg-raised px-3 focus:border-brass focus:outline-none"
               >
-                {lines.map((v, i) => (
-                  <option key={v._id} value={i}>
-                    {v.title}
-                  </option>
-                ))}
+                {chapters.map(([chapter, entries]) =>
+                  chapter ? (
+                    <optgroup key={chapter} label={chapter}>
+                      {entries.map(({ v, i }) => (
+                        <option key={v._id} value={i}>
+                          {v.title}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ) : (
+                    entries.map(({ v, i }) => (
+                      <option key={v._id} value={i}>
+                        {v.title}
+                      </option>
+                    ))
+                  ),
+                )}
               </select>
+              {line?.officialName && (
+                <p className="text-xs text-muted">{line.officialName}</p>
+              )}
             </div>
 
             <div
@@ -341,9 +373,13 @@ export default function LessonPage({
               {modes.find((m) => m.id === state.mode)?.help}
             </p>
 
-            {line?.description && (
-              <p className="font-serif text-lg italic leading-relaxed text-ivory/90">
-                {line.description}
+            {/* The coach's voice: the note on the move just played, or the line's introduction. */}
+            {coachNote && (
+              <p
+                aria-live="polite"
+                className="font-serif text-lg italic leading-relaxed text-ivory/90"
+              >
+                {coachNote}
               </p>
             )}
 
@@ -391,6 +427,24 @@ export default function LessonPage({
               ) : null}
             </div>
           </>
+        )}
+
+        {opening.summary && (
+          <details className="rounded-xl border border-line bg-surface">
+            <summary className="flex min-h-11 cursor-pointer items-center px-4 font-medium">
+              About this opening
+            </summary>
+            <div className="flex flex-col gap-3 px-4 pb-4 text-sm text-muted">
+              <p className="leading-relaxed">{opening.summary}</p>
+              {opening.keyIdeas?.length ? (
+                <ul className="flex list-disc flex-col gap-1.5 pl-5">
+                  {opening.keyIdeas.map((idea) => (
+                    <li key={idea}>{idea}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          </details>
         )}
 
         {!isPersonal && !user?.isDemo && (
