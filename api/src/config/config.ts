@@ -25,8 +25,5 @@ export default () => ({
     accessExpire: process.env.JWT_ACCESS_EXPIRE || '15m',
     refreshExpire: process.env.JWT_REFRESH_EXPIRE || '7d',
   },
-  cors: {
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
-  },
   port: process.env.PORT,
 });
