@@ -7,3 +7,4 @@ process.env.JWT_ACCESS_EXPIRE = '15m';
 process.env.JWT_REFRESH_EXPIRE = '7d';
 // Rate limits would trip on the many signups in these suites; throttle.e2e-spec turns them back on.
 process.env.DISABLE_THROTTLE = 'true';
+process.env.PROXY_SECRET = 'test-proxy-secret';

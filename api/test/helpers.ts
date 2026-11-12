@@ -19,7 +19,7 @@ export async function createApp() {
   return { app, db };
 }
 
-// Cookies are Secure, so supertest won't replay them over http; pass them by hand.
+// Pass cookies by hand: tests make independent requests rather than share an agent.
 export function cookiesOf(res: request.Response): string {
   const raw = res.headers['set-cookie'] as unknown as string[];
   return raw.map((c) => c.split(';')[0]).join('; ');
