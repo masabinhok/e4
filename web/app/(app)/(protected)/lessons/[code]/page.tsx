@@ -2,10 +2,10 @@
 import { useState, useEffect, useCallback, useRef, use } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
-import Message from "@/components/Message";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Button from "@/components/Button";
-import Link from "next/link";
+import { PageSpinner } from "@/components/ProtectedRoute";
+import { api, errorMessage } from "@/lib/api";
 import Image from "next/image";
 import flipBoard from "@/public/icons/flip.svg";
 import { BoardFlip, Opening } from "@/types/types";
@@ -45,34 +45,23 @@ export default function ChessGame({
     valid: boolean;
   } | null>(null);
   const [lineCompleted, setLineCompleted] = useState<boolean>(false);
-  const { messages, clearMessages, addMessage, removeMessage } =
-    useMessageStore();
+  const { clearMessages, addMessage } = useMessageStore();
   const [mistakes, setMistakes] = useState<number>(0);
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const playSound = useSoundStore((s) => s.playSound);
   const [isProcessingCompletion, setIsProcessingCompletion] = useState(false);
 
+  const [loadError, setLoadError] = useState("");
   useEffect(() => {
-    const fetchCurrentOpening = async () => {
-      const fetchUrl = `/api${code === "recorded-lines" || code === "custom-pgns" ? "/users" : "/openings"}/${code}`;
-      await fetch(fetchUrl, {
-        credentials: "include",
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("Network Error");
-          }
-          return res.json();
-        })
-        .then((data) => {
-          setCurrentOpening(data);
-        });
-    };
-    fetchCurrentOpening();
+    const owner =
+      code === "recorded-lines" || code === "custom-pgns"
+        ? "users"
+        : "openings";
+    api<Opening>(`/${owner}/${code}`)
+      .then(setCurrentOpening)
+      .catch((err) =>
+        setLoadError(errorMessage(err, "Couldn't load this lesson.")),
+      );
   }, [code]);
 
   const movesContainerRef = useRef<HTMLDivElement>(null);
@@ -244,7 +233,6 @@ export default function ChessGame({
         setTimeout(() => nextMove(), 500);
       }
       const lineLength = currentLine?.length;
-      console.log(lineLength, currentMoveIndex);
       if (lineLength && currentMoveIndex === lineLength) {
         setLineCompleted(true);
         handleLineCompletion();
@@ -394,23 +382,25 @@ export default function ChessGame({
   };
 
   if (!currentOpening) {
-    return <section>Loading...</section>;
+    return loadError ? (
+      <div className="max-w-md py-10">
+        <p role="alert" className="text-ember">
+          {loadError}
+        </p>
+        <Button
+          href="/lessons"
+          variant="secondary"
+          className="mt-4"
+          text="Back to lessons"
+        />
+      </div>
+    ) : (
+      <PageSpinner />
+    );
   }
 
   return (
-    <div className=" flex flex-col lg:flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 relative">
-      {/* Toasts */}
-      <div className="fixed top-6 right-6 z-50 space-y-2">
-        {messages.map((msg) => (
-          <Message
-            key={msg.id}
-            message={msg.content}
-            type={msg.type}
-            onClose={() => removeMessage(msg.id!)}
-          />
-        ))}
-      </div>
-
+    <div className=" flex flex-col lg:flex-row relative">
       {/* Chessboard */}
       <div className="flex-1 flex items-center justify-center p-6 relative">
         {isBrowser ? (
@@ -577,9 +567,12 @@ export default function ChessGame({
         </div>
 
         {/* Contribute Button */}
-        <Link href={`/record?code=${code}`} className="mt-4">
-          <Button text="Contribute a Variation" icon="✍️" />
-        </Link>
+        <Button
+          href={`/record?code=${code}`}
+          variant="secondary"
+          className="mt-4"
+          text="Contribute a line"
+        />
       </aside>
     </div>
   );
