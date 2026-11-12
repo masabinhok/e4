@@ -1,19 +1,25 @@
 "use client";
 import { useAuth } from "@/store/auth";
 import { useRouter } from "next/navigation";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { PageSpinner } from "@/components/ProtectedRoute";
 
+// Checks with the API before deciding; the persisted user may be stale. The API
+// enforces the admin role either way.
 export default function RequireAdmin({ children }: { children: ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, checkAuth } = useAuth();
   const router = useRouter();
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "ADMIN")) {
-      router.push("/unauthorized");
-    }
-  }, [user, isLoading, router]);
+    checkAuth().then(() => setChecked(true));
+  }, [checkAuth]);
 
-  if (isLoading || !user) return <div> Loading... </div>;
+  useEffect(() => {
+    if (checked && user?.role !== "ADMIN")
+      router.push(user ? "/unauthorized" : "/auth/login");
+  }, [checked, user, router]);
 
+  if (!checked || user?.role !== "ADMIN") return <PageSpinner />;
   return <>{children}</>;
 }

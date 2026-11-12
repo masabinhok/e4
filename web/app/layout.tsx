@@ -1,41 +1,43 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Poppins } from "next/font/google";
+import { Schibsted_Grotesk, Spectral } from "next/font/google";
+import Toaster from "@/components/Toaster";
 
-//init poppins font
-const poppins = Poppins({
+const schibsted = Schibsted_Grotesk({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-poppins",
+  variable: "--font-schibsted",
 });
 
-//create metadata for app
+// Book serif for headings and move notes, in the spirit of printed opening books.
+const spectral = Spectral({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-spectral",
+});
+
 export const metadata: Metadata = {
   title: "e4.learnchess",
-  description: "The Anti-Video Chess Openings Coach",
+  description:
+    "Learn chess openings by playing them: step through a line, drill it from memory, and quiz yourself.",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
-    other: {
-      rel: "apple-touch-icon-precomposed",
-      url: "/apple-touch-icon.png",
-    },
   },
   manifest: "/site.webmanifest",
 };
 
+export const viewport: Viewport = { themeColor: "#121a24" };
+
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${poppins.variable} font-poppins antialiased bg-gray-900 text-gray-100`}
-      >
+    <html lang="en" className={`${schibsted.variable} ${spectral.variable}`}>
+      <body>
         {children}
+        <Toaster />
       </body>
     </html>
   );

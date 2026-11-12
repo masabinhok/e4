@@ -2,14 +2,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
-import Message from "@/components/Message";
-import Link from "next/link";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useSearchParams } from "next/navigation";
 import { BoardFlip } from "@/types/types";
 import Image from "next/image";
 import flipBoard from "@/public/icons/flip.svg";
 import Button from "@/components/Button";
+import { api, errorMessage } from "@/lib/api";
 import { useSoundStore } from "@/store/useSoundStore";
 import { useMessageStore } from "@/store/messageStore";
 
@@ -30,7 +29,7 @@ export default function RecordLine() {
     target: string;
     valid: boolean;
   } | null>(null);
-  const { messages, addMessage, removeMessage } = useMessageStore();
+  const { addMessage } = useMessageStore();
   const [isBrowser, setIsBrowser] = useState<boolean>(false);
   const playSound = useSoundStore((s) => s.playSound);
   const [isContributed, setIsContributed] = useLocalStorage<boolean>(
@@ -155,19 +154,17 @@ export default function RecordLine() {
       boardflip: boardFlip,
     };
 
-    const res = await fetch(
-      `/api/variations/${code ? `contribute/${code}` : "record"}`,
-      {
-        credentials: "include",
+    try {
+      await api(`/variations/${code ? `contribute/${code}` : "record"}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(newVariation),
-      },
-    );
-    if (!res.ok) {
-      throw new Error("Failed to contribute variation");
+      });
+    } catch (err) {
+      addMessage({
+        content: errorMessage(err, "Couldn't save the line."),
+        type: "error",
+      });
+      return;
     }
 
     setPgnName("");
@@ -205,18 +202,7 @@ export default function RecordLine() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 relative">
-      <div className="fixed top-6 right-6 z-50 space-y-2">
-        {messages.map((msg) => (
-          <Message
-            key={msg.id}
-            message={msg.content}
-            type={msg.type}
-            onClose={() => removeMessage(msg.id!)}
-          />
-        ))}
-      </div>
-
+    <div className="flex flex-col lg:flex-row relative">
       <div className="flex-1 flex items-center justify-center p-6 relative">
         {isBrowser ? (
           <Chessboard
@@ -331,22 +317,16 @@ export default function RecordLine() {
           <Button onClick={savePGN} text="Save PGN" icon="#" />
         </div>
         <div className="flex flex-col w-full gap-2">
-          <Link
+          <Button
             href={`/lessons/recorded-lines`}
-            className="flex flex-col gap-4 w-full"
-          >
-            <Button text="Play Recorded Lines" icon="→" />
-          </Link>
+            text="Play Recorded Lines"
+            icon="→"
+          />
           {isContributed && (
-            <Link href={`/lessons/${code ? code : "recorded-lines"}`}>
-              <Button
-                text="Visit Latest Contribution"
-                icon="→"
-                onClick={() => {
-                  setIsContributed(false);
-                }}
-              />
-            </Link>
+            <Button
+              href={`/lessons/${code ? code : "recorded-lines"}`}
+              text="View your saved line"
+            />
           )}
         </div>
       </aside>

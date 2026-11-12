@@ -1,91 +1,63 @@
 @import "tailwindcss";
 
-/* 🌍 Global Theme Variables */
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --primary: #2563eb;
-  /* Blue-600 */
-  --secondary: #9333ea;
-  /* Purple-600 */
-  --accent: #eab308;
-  /* Yellow-500 */
-  --border-color: #d1d5db;
-  /* Gray-300 */
+/*
+  e4 palette: a wooden board under a desk lamp at night.
+  Dark only; every colour below is checked for AA contrast on `night`.
+*/
+@theme {
+  --color-night: #121a24; /* page background */
+  --color-surface: #1b2532; /* panels, cards */
+  --color-raised: #243142; /* inputs, hover, selected rows */
+  --color-line: #33425a; /* borders and dividers */
+  --color-ivory: #ece4d2; /* primary text */
+  --color-muted: #a3afbf; /* secondary text */
+  --color-brass: #d2a843; /* primary actions, focus */
+  --color-brass-bright: #e2bd5f;
+  --color-moss: #7fb37a; /* correct move, success */
+  --color-ember: #e5775f; /* wrong move, destructive */
+  --color-board-light: #e6d5b0; /* boxwood */
+  --color-board-dark: #9c7653; /* walnut */
 
-  --radius-small: 4px;
-  --radius-medium: 8px;
-  --radius-large: 16px;
+  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-spectral), ui-serif, Georgia, serif;
 }
 
-/* 🎨 Tailwind v4 Theming */
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
-  --color-border: var(--border-color);
-
-  --font-sans: "Poppins", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
-
-  --radius-lg: var(--radius-small);
-  --radius-md: var(--radius-medium);
-  --radius-lg: var(--radius-large);
-}
-
-/* 🌙 Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --primary: #3b82f6;
-    /* Blue-500 */
-    --secondary: #a855f7;
-    /* Purple-500 */
-    --accent: #facc15;
-    /* Yellow-400 */
-    --border-color: #4b5563;
-    /* Gray-600 */
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-night);
   }
-}
 
-/* 🏗️ Base Styles */
-body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
-  line-height: 1.6;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+  body {
+    min-height: 100dvh;
+    background: var(--color-night);
+    color: var(--color-ivory);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
 
-/* 📏 Utility Enhancements */
-.container {
-  max-width: 1200px;
-  padding: 1rem;
-}
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
 
-.border-radius-sm {
-  border-radius: var(--radius-sm);
-}
+  :focus-visible {
+    outline: 2px solid var(--color-brass);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
 
-.border-radius-md {
-  border-radius: var(--radius-md);
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-.border-radius-lg {
-  border-radius: var(--radius-lg);
-}
-
-button {
-  cursor: pointer;
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
