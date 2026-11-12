@@ -1,12 +1,16 @@
 import { expect, Page, test } from "@playwright/test";
 
-// Every page must fit the screen at phone, tablet and desktop widths, and the
-// redesigned pages must have tap targets of at least 44 px. The board pages
-// (lesson, record, custom) only get the overflow check until their redesign.
+// Every page must fit the screen at phone, tablet and desktop widths, with tap
+// targets of at least 44 px.
 const widths = [375, 768, 1280];
 const publicPages = ["/", "/auth/login", "/auth/signup", "/credit"];
-const appPages = ["/lessons", "/profile"];
-const boardPages = ["/lessons/carokann", "/record", "/custom"];
+const appPages = [
+  "/lessons",
+  "/profile",
+  "/lessons/carokann",
+  "/record",
+  "/custom",
+];
 
 async function check(
   page: Page,
@@ -59,6 +63,5 @@ for (const width of widths) {
     await page.getByRole("button", { name: "Try the demo, no signup" }).click();
     await page.waitForURL("**/lessons");
     for (const path of appPages) await check(page, path, width, true);
-    for (const path of boardPages) await check(page, path, width, false);
   });
 }
