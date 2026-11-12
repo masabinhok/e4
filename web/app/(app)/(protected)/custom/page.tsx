@@ -1,317 +1,124 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { Chess } from "chess.js";
-import { Chessboard } from "react-chessboard";
-import useLocalStorage from "@/hooks/useLocalStorage";
-import { BoardFlip } from "@/types/types";
-import flipBoard from "@/public/icons/flip.svg";
-import Image from "next/image";
+import { FormEvent, useState } from "react";
+import { SkipBack, SkipForward } from "lucide-react";
+import Board from "@/components/board/Board";
+import MoveList from "@/components/board/MoveList";
+import SaveLineForm from "@/components/board/SaveLineForm";
 import Button from "@/components/Button";
-import { api, errorMessage } from "@/lib/api";
-import { useSoundStore } from "@/store/useSoundStore";
-import { useMessageStore } from "@/store/messageStore";
+import Field from "@/components/Field";
+import { parseMoves, positionAfter, squaresOf } from "@/lib/chess";
+import { BoardFlip } from "@/types/types";
 
 export default function CustomLine() {
-  const [pgnName, setPgnName] = useState<string>("");
-  const [pgn, setPgn] = useState<string>("");
-  const [game, setGame] = useState(new Chess());
-  const [currentLine, setCurrentLine] = useState<string[]>([]);
-  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
-  const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>(
-    "boardFlip",
-    "white",
-  );
-  const { clearMessages, addMessage } = useMessageStore();
-  const [isBrowser, setIsBrowser] = useState<boolean>(false);
-  const [description, setDescription] = useState<string>("");
-  const playSound = useSoundStore((s) => s.playSound);
+  const [moves, setMoves] = useState<string[]>([]);
+  const [cursor, setCursor] = useState(0);
+  const [side, setSide] = useState<BoardFlip>("white");
+  const [error, setError] = useState("");
 
-  const toggleBoardFlip = () => {
-    setBoardFlip(boardFlip === "white" ? "black" : "white");
-  };
-
-  const movesContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setIsBrowser(true);
-  }, []);
-
-  const loadPGN = () => {
+  const load = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
     try {
-      const moves = pgn
-        .replace(/\d+\./g, "")
-        .split(" ")
-        .map((m) => m.trim())
-        .filter(Boolean);
-
-      // Validate moves first
-      const validationGame = new Chess();
-      moves.forEach((move) => {
-        if (!validationGame.move(move))
-          throw new Error(`Invalid move: ${move}`);
-      });
-
-      clearMessages();
-      setGame(new Chess());
-      setCurrentLine(moves);
-      setCurrentMoveIndex(0);
-
-      // Use a local game object for playback
-      const gameCopy = new Chess();
-
-      const playNextMove = (index: number) => {
-        if (index >= moves.length) {
-          addMessage({ content: "PGN loaded successfully", type: "success" });
-          setTimeout(() => playSound("achievement"), 1);
-          return;
-        }
-
-        setTimeout(() => {
-          const move = moves[index];
-          const result = gameCopy.move(move);
-
-          // Update React state with the latest position
-          setGame(new Chess(gameCopy.fen()));
-          setCurrentMoveIndex(index + 1);
-
-          if (gameCopy.inCheck()) playSound("check");
-          else if (result.captured) playSound("capture");
-          else playSound("moveSelf");
-
-          playNextMove(index + 1);
-        }, 100);
-      };
-
-      playNextMove(0);
-    } catch (error) {
-      playSound("illegal");
-      addMessage({ content: `Invalid PGN format: ${error}`, type: "error" });
-    }
-  };
-
-  const onDrop = (sourceSquare: string, targetSquare: string) => {
-    try {
-      const move = {
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: "q",
-      };
-
-      const gameCopy = new Chess(game.fen());
-      const result = gameCopy.move(move);
-
-      if (!result) {
-        playSound("illegal");
-
-        addMessage({
-          content: "Invalid move",
-          type: "error",
-        });
-        return false;
-      }
-
-      setGame(gameCopy);
-
-      if (gameCopy.inCheck()) {
-        playSound("check");
-      } else if (result.captured) {
-        playSound("capture");
-      } else {
-        playSound("moveSelf");
-      }
-
-      if (result.isKingsideCastle && result.isKingsideCastle()) {
-        playSound("castle");
-      }
-
-      return true;
-    } catch {
-      playSound("illegal");
-      addMessage({
-        content: "Invalid move",
-        type: "error",
-      });
-      return false;
-    }
-  };
-
-  useEffect(() => {
-    if (movesContainerRef.current) {
-      movesContainerRef.current.lastElementChild?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "end",
-      });
-    }
-  }, [currentMoveIndex]);
-
-  const savePGN = async () => {
-    if (!pgn) {
-      addMessage({ content: "No moves to save", type: "error" });
-      return;
-    }
-
-    if (!pgnName) {
-      addMessage({ content: "Please enter a name", type: "error" });
-      return;
-    }
-
-    if (!description) {
-      addMessage({
-        content: "Please describe your custom loaded pgn",
-        type: "error",
-      });
-      return;
-    }
-
-    const newPGN = {
-      title: pgnName,
-      moves: currentLine,
-      boardflip: boardFlip,
-      description: description,
-    };
-
-    try {
-      await api("/variations/custom", {
-        method: "POST",
-        body: JSON.stringify(newPGN),
-      });
+      const parsed = parseMoves(
+        String(new FormData(e.currentTarget).get("pgn")),
+      );
+      setMoves(parsed);
+      setCursor(parsed.length);
     } catch (err) {
-      addMessage({
-        content: errorMessage(err, "Couldn't save the PGN."),
-        type: "error",
-      });
-      return;
+      setMoves([]);
+      setError(err instanceof Error ? err.message : "Couldn't read that PGN.");
     }
-    setPgnName("");
-    setDescription("");
-    setPgn("");
-    setCurrentLine([]);
-    setCurrentMoveIndex(0);
-    addMessage({ content: "PGN saved successfully", type: "success" });
   };
 
   return (
-    <div className="flex flex-col lg:flex-row relative">
-      <div className="flex-1 flex items-center justify-center p-6 relative">
-        {isBrowser ? (
-          <Chessboard
-            onPieceDrop={onDrop}
-            position={game.fen()}
-            boardWidth={Math.min(window.innerWidth * 0.85, 520)}
-            customDarkSquareStyle={{ backgroundColor: "#334155" }}
-            customLightSquareStyle={{ backgroundColor: "#cbd5e1" }}
-            boardOrientation={boardFlip}
-          />
-        ) : (
-          <div className="text-7xl text-blue-400">LOADING...</div>
-        )}
-      </div>
-
-      <aside className="w-full lg:w-[430px] bg-gray-800/95 p-8 flex flex-col gap-5 shadow-xl rounded-t-3xl lg:rounded-l-3xl">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-extrabold text-blue-400">
-            Custom Lines
-          </h1>
-          <button
-            className=" bg-blue-500 hover:brightness-110 transition p-2 rounded-full shadow-lg cursor-pointer"
-            onClick={toggleBoardFlip}
-            aria-label="Flip Board"
-          >
-            <Image
-              src={flipBoard}
-              alt="Flip board"
-              width={28}
-              height={28}
-              className="invert"
-            />
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <input
-            type="text"
-            value={pgn}
-            onChange={(e) => setPgn(e.target.value)}
-            className="w-full p-2 bg-white rounded-lg px-4 text-black"
-            placeholder="Paste PGN here"
-          />
-
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] lg:items-start">
+      <section aria-label="Board" className="flex flex-col gap-4">
+        <Board
+          fen={positionAfter(moves, cursor).fen()}
+          orientation={side}
+          lastMove={squaresOf(moves, cursor - 1)}
+          interactive={false}
+        />
+        <div className="flex justify-center gap-2">
           <Button
-            onClick={loadPGN}
-            disabled={!pgn}
-            text="Load & Verify PGN"
-            icon="!"
-          />
+            variant="secondary"
+            icon={<SkipBack className="size-4" />}
+            onClick={() => setCursor(cursor - 1)}
+            disabled={cursor === 0}
+          >
+            Back
+          </Button>
+          <Button
+            variant="secondary"
+            icon={<SkipForward className="size-4" />}
+            onClick={() => setCursor(cursor + 1)}
+            disabled={cursor >= moves.length}
+          >
+            Next
+          </Button>
+        </div>
+      </section>
+
+      <aside className="flex flex-col gap-5">
+        <div>
+          <h1 className="text-3xl">Add a PGN</h1>
+          <p className="mt-2 text-muted">
+            Paste a game or a move list. Headers, comments and the result are
+            fine; the main line is kept.
+          </p>
         </div>
 
-        <div className="bg-gray-700 p-4 rounded-xl mb-4 shadow-inner">
-          <div className="flex items-center gap-2">
-            <div
-              ref={movesContainerRef}
-              className="font-mono text-base bg-gray-800 p-2 rounded flex-1 whitespace-nowrap overflow-x-hidden"
-            >
-              {currentLine?.map((move, i) => {
-                // Show moves up to and including the current move index
-                if (i < currentMoveIndex - 1) {
-                  return <span key={i}>{move} </span>;
-                }
-                // Highlight the last played move in yellow
-                if (i === currentMoveIndex - 1) {
-                  return (
-                    <span key={i} className="text-yellow-400 font-bold">
-                      {move}{" "}
-                    </span>
-                  );
-                }
-                // Show the next move as green (quiz/learn mode)
-                return null;
-              })}
-              <span className=" text-red-500 rounded-full">!</span>
-            </div>
+        <form onSubmit={load} className="flex flex-col gap-3">
+          <Field
+            label="PGN or moves"
+            id="pgn"
+            multiline
+            rows={4}
+            required
+            placeholder="1. e4 c6 2. d4 d5 3. e5 Bf5"
+          />
+          {error && (
+            <p role="alert" className="text-sm text-ember">
+              {error}
+            </p>
+          )}
+          <Button type="submit" variant="secondary">
+            Load
+          </Button>
+        </form>
 
-            <span className="ml-2 text-xs text-gray-400">
-              {currentMoveIndex}/{currentLine?.length ?? 0}
-            </span>
-          </div>
-          {/* Progress bar */}
-          <div className="h-2 bg-gray-600 rounded mt-2">
-            <div
-              className="h-2 bg-blue-500 rounded transition-all"
-              style={{
-                width: `${((currentMoveIndex / (currentLine?.length || 1)) * 100).toFixed(1)}%`,
+        {moves.length > 0 && (
+          <>
+            <MoveList moves={moves} played={cursor} />
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-1.5 text-sm font-medium">You play</legend>
+              <div className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-surface p-1">
+                {(["white", "black"] as const).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    aria-pressed={side === s}
+                    onClick={() => setSide(s)}
+                    className={`min-h-11 rounded-lg text-sm font-medium capitalize ${side === s ? "bg-raised text-ivory" : "text-muted hover:text-ivory"}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <SaveLineForm
+              endpoint="/variations/custom"
+              moves={moves}
+              side={side}
+              saveLabel="Save PGN"
+              savedMessage="Saved to your PGNs."
+              onSaved={() => {
+                setMoves([]);
+                setCursor(0);
               }}
             />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <label htmlFor="name" className="text-sm font-semibold text-gray-200">
-            Opening Name
-          </label>
-          <input
-            type="text"
-            value={pgnName}
-            onChange={(e) => setPgnName(e.target.value)}
-            className="w-full p-2 bg-white rounded-lg px-4 text-black"
-            placeholder="Name your variation"
-          />
-          <label
-            htmlFor="description"
-            className="text-sm font-semibold text-gray-200"
-          >
-            Description
-          </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-2 bg-white resize-none rounded-lg px-4 text-black"
-            placeholder="Describe your variation"
-          />
-          <Button onClick={savePGN} text="Save PGN" icon="#" />
-        </div>
-
-        <Button href="/lessons/custom-pgns" text="View Saved PGNs" icon="@" />
+          </>
+        )}
       </aside>
     </div>
   );
