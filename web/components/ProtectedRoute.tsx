@@ -1,44 +1,36 @@
 "use client";
 
 import { useAuth } from "@/store/auth";
-
 import { useRouter } from "next/navigation";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-  fallback?: ReactNode;
+export function PageSpinner() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className="flex min-h-[50vh] items-center justify-center"
+    >
+      <div className="size-8 animate-spin rounded-full border-2 border-line border-t-brass" />
+    </div>
+  );
 }
 
-export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, user, checkAuth } = useAuth();
+// Redirect only after the session check has finished. Deciding earlier bounced
+// every reload of a protected page to the login page (and from there to /lessons).
+export function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { isAuthenticated, user, checkAuth } = useAuth();
   const router = useRouter();
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    // Always check auth on mount
-    checkAuth();
-    // eslint-disable-next-line
-  }, []);
+    checkAuth().finally(() => setChecked(true));
+  }, [checkAuth]);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/auth/login");
-    }
-  }, [isAuthenticated, isLoading, user, router]);
+    if (checked && !isAuthenticated) router.replace("/auth/login");
+  }, [checked, isAuthenticated, router]);
 
-  if (isLoading) {
-    return (
-      fallback || (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
-        </div>
-      )
-    );
-  }
-
-  if (!isAuthenticated || !user) {
-    return null;
-  }
-
+  if (!user) return checked ? null : <PageSpinner />;
   return <>{children}</>;
 }
