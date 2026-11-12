@@ -96,6 +96,8 @@ export default function Signup() {
           <input
             type={showPassword ? "text" : "password"}
             name="password"
+            minLength={8}
+            maxLength={72}
             id="password"
             placeholder="••••••••"
             onChange={handleChange}
