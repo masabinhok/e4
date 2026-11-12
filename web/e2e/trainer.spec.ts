@@ -11,28 +11,28 @@ const tap = async (page: Page, from: string, to: string) => {
   await page.locator(`[data-square="${to}"]`).click();
 };
 
-test("practice: the opponent replies, a wrong move is flagged, the right one advances", async ({
+test("drill: the opponent replies, a wrong move shows the right one, which then advances", async ({
   page,
 }) => {
   await demo(page);
   await page.goto("/lessons/carokann");
   await page.getByLabel("Line").selectOption({ index: 0 });
-  await page.getByRole("radio", { name: "Practice" }).click();
+  await page.getByRole("radio", { name: "Drill" }).click();
 
   await expect(page.getByText("Your move.")).toBeVisible(); // after the opponent's 1.e4
   await tap(page, "e7", "e5");
-  await expect(page.getByText("Not the move in this line")).toBeVisible();
+  await expect(page.getByText("Not e5. This line plays c6.")).toBeVisible();
   await tap(page, "c7", "c6");
   await expect(page.locator('[aria-current="step"]')).toHaveText(/d4/); // opponent replied 2.d4
 });
 
-test("quiz: a white line played from memory completes with no mistakes", async ({
+test("drill: a clean run schedules the line and it shows up in progress", async ({
   page,
 }) => {
   await demo(page);
   await page.goto("/lessons/jobava");
   await page.getByLabel("Line").selectOption({ label: "Punishing 4...Nc6" });
-  await page.getByRole("radio", { name: "Quiz" }).click();
+  await page.getByRole("radio", { name: "Drill" }).click();
 
   // 1.d4 d5 2.Nc3 Nf6 3.Bf4 c5 4.e3 Nc6 5.Nb5 e5 6.Bxe5 Nxe5 7.dxe5
   for (const [from, to] of [
@@ -47,7 +47,14 @@ test("quiz: a white line played from memory completes with no mistakes", async (
     await expect(page.getByText("Your move.")).toBeVisible();
     await tap(page, from, to);
   }
-  await expect(page.getByText("Line complete with no mistakes.")).toBeVisible();
+  await expect(
+    page.getByText("Clean run. You'll see this line again tomorrow."),
+  ).toBeVisible();
+
+  await page.goto("/review");
+  await expect(page.getByText("All caught up.")).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByText("1 / 9 learned")).toBeVisible();
 });
 
 test("learn: each move comes with its note", async ({ page }) => {
