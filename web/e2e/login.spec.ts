@@ -6,7 +6,7 @@ test("a wrong password shows an error and stays on the login page", async ({
   await page.goto("/auth/login");
   await page.getByLabel("Email").fill("nobody@example.com");
   await page.getByLabel("Password", { exact: true }).fill("wrong-password");
-  await page.getByRole("button", { name: "Login" }).click();
+  await page.getByRole("button", { name: "Log in" }).click();
 
   await expect(page.getByText("Invalid email or password")).toBeVisible();
   await expect(page).toHaveURL(/\/auth\/login$/);
