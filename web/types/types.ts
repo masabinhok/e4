@@ -23,6 +23,7 @@ export type User = {
   practicedLines?: string[];
   quizzedLines?: string[];
   learnedLines?: string[];
+  isDemo?: boolean;
   __v?: number;
   createdAt: string;
 };
