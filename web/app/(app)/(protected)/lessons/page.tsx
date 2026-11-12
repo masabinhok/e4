@@ -1,166 +1,175 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import Button from "@/components/Button";
+import { PageSpinner } from "@/components/ProtectedRoute";
+import { api, errorMessage } from "@/lib/api";
+import { useAuth } from "@/store/auth";
+import { useMessageStore } from "@/store/messageStore";
 import { Opening } from "@/types/types";
 
-const LessonsPage = () => {
-  const [openings, setOpenings] = useState<Opening[] | []>([]);
-  const [pendingOpenings, setPendingOpenings] = useState<Opening[] | []>([]);
+function Row({
+  href,
+  title,
+  detail,
+}: {
+  href: string;
+  title: string;
+  detail: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center justify-between gap-4 rounded-xl border border-line bg-surface px-5 py-4 transition-colors hover:border-brass/60 hover:bg-raised"
+    >
+      <div className="min-w-0">
+        <p className="font-serif text-xl">{title}</p>
+        <p className="mt-1 line-clamp-2 text-sm text-muted">{detail}</p>
+      </div>
+      <ChevronRight
+        className="size-5 shrink-0 text-muted group-hover:text-brass"
+        aria-hidden="true"
+      />
+    </Link>
+  );
+}
 
-  const fetchPendingOpenings = async () => {
+export default function LessonsPage() {
+  const { user } = useAuth();
+  const addMessage = useMessageStore((s) => s.addMessage);
+  const [openings, setOpenings] = useState<Opening[] | null>(null);
+  const [pending, setPending] = useState<Opening[]>([]);
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState("");
+
+  const load = useCallback(async () => {
+    setLoadError("");
     try {
-      await fetch(`/api/openings/pending`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("network error");
-          }
-          return res.json();
-        })
-        .then((data) => {
-          setPendingOpenings(data);
-        });
-    } catch (error) {
-      throw new Error(`Error: ${error}`);
+      const [accepted, mine] = await Promise.all([
+        api<Opening[]>("/openings"),
+        api<Opening[]>("/openings/pending"),
+      ]);
+      setOpenings(accepted);
+      setPending(mine);
+    } catch (err) {
+      setLoadError(errorMessage(err, "Couldn't load the lessons."));
     }
-  };
-
-  const fetchOpenings = async () => {
-    try {
-      await fetch(`/api/openings`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("network error");
-          }
-          return res.json();
-        })
-        .then((data) => {
-          setOpenings(data);
-        });
-    } catch (error) {
-      throw new Error(`Error: ${error}`);
-    }
-  };
-
-  const handleCancel = async (openingId: string) => {
-    try {
-      await fetch(`/api/openings/cancel/${openingId}`, {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then((res) => {
-        if (!res.ok) {
-          throw new Error("network error");
-        }
-        fetchPendingOpenings();
-      });
-    } catch (error) {
-      throw new Error(`Error: ${error}`);
-    }
-  };
-
-  useEffect(() => {
-    fetchPendingOpenings();
-    fetchOpenings();
   }, []);
 
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const cancel = async (id: string) => {
+    try {
+      await api(`/openings/cancel/${id}`, { method: "DELETE" });
+      addMessage({ content: "Submission withdrawn.", type: "success" });
+      setConfirming(null);
+      load();
+    } catch (err) {
+      addMessage({ content: errorMessage(err), type: "error" });
+    }
+  };
+
+  if (loadError) {
+    return (
+      <div className="max-w-md py-10">
+        <p role="alert" className="text-ember">
+          {loadError}
+        </p>
+        <Button variant="secondary" className="mt-4" onClick={load}>
+          Try again
+        </Button>
+      </div>
+    );
+  }
+  if (!openings) return <PageSpinner />;
+
   return (
-    <main className="p-4 lg:p-10 lg:ml-10">
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-[1100px] max-lg:p-5">
-        <div className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all">
-          <h1 className="text-2xl lg:text-3xl text-blue-400 font-bold mb-4">
-            Add New Opening
-          </h1>
-          <p className="text-gray-600 mb-6 line-clamp-2">
-            You can add a new opening by clicking the button below. This will
-            allow you to contribute a new opening for everyone to use.
-          </p>
-          <Link href="/lessons/add" className="inline-block">
-            <Button text="Contribute" icon="✨" />
-          </Link>
-        </div>
-        <div className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all">
-          <h1 className="text-2xl lg:text-3xl text-blue-400 font-bold mb-4">
-            Recorded Lines
-          </h1>
-          <p className="text-gray-600 mb-6 line-clamp-2">
-            Here are the list of recorded lines, you can record lines by playing
-            it and save it to practice, learn or quiz.
-          </p>
-          <Link href="/lessons/recorded-lines" className="inline-block">
-            <Button text="Play Recorded Lines" icon="✨" />
-          </Link>
-        </div>
-        <div className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all">
-          <h1 className="text-2xl lg:text-3xl text-blue-400 font-bold mb-4">
-            Custom PGNs
-          </h1>
-          <p className="text-gray-600 mb-6 line-clamp-2">
-            Here are the list of custom PGNs, you can add custom lines directly
-            by pasting a valid pgn and save it to practice, learn or quiz.
-          </p>
-          <Link href="/lessons/custom-pgns" className="inline-block">
-            <Button text="Play Custom PGNs" icon="✨" />
-          </Link>
-        </div>
-        {openings.map((lesson, index) => (
-          <div
-            key={index}
-            className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all "
-          >
-            <h1 className="text-2xl lg:text-3xl font-bold mb-4">
-              {lesson.name}
-            </h1>
-            <p className="text-gray-600 mb-6 line-clamp-2">
-              {lesson.description}
-            </p>
+    <div className="flex flex-col gap-12">
+      <header>
+        <h1 className="text-4xl">Lessons</h1>
+        <p className="mt-2 text-muted">Choose an opening to learn its lines.</p>
+      </header>
 
-            <Link href={`/lessons/${lesson.code}`} className="inline-block">
-              <Button text="Practice Lines" />
-            </Link>
-          </div>
-        ))}
-        {pendingOpenings.map((lesson, index) => (
-          <div
-            key={index}
-            className="border p-6 rounded-xl shadow-md hover:shadow-xl transition-all "
-          >
-            <h1 className="text-2xl lg:text-3xl font-bold mb-4">
-              {lesson.name}
-            </h1>
-            <p className="text-gray-600 mb-6 line-clamp-2">
-              {lesson.description}
-            </p>
-
-            <div className="flex items-center justify-between gap-5">
-              <Link href={`/lessons/${lesson.code}`} className="w-full">
-                <Button disabled={true} text="Pending..." />
-              </Link>
-              <Button
-                onClick={() => handleCancel(lesson._id)}
-                color="red"
-                text="Cancel Request"
-              />
-            </div>
-          </div>
-        ))}
+      <section aria-labelledby="openings" className="flex flex-col gap-3">
+        <h2 id="openings" className="text-xl">
+          Openings
+        </h2>
+        {openings.length === 0 ? (
+          <p className="text-muted">
+            No openings yet. Run the seed script to add the starter courses.
+          </p>
+        ) : (
+          openings.map((o) => (
+            <Row
+              key={o._id}
+              href={`/lessons/${o.code}`}
+              title={o.name}
+              detail={`${o.variations.length} ${o.variations.length === 1 ? "line" : "lines"} · ${o.description}`}
+            />
+          ))
+        )}
       </section>
-    </main>
-  );
-};
 
-export default LessonsPage;
+      <section aria-labelledby="yours" className="flex flex-col gap-3">
+        <h2 id="yours" className="text-xl">
+          Your lines
+        </h2>
+        <div className="grid gap-3 md:grid-cols-2">
+          <Row
+            href="/lessons/recorded-lines"
+            title="Recorded lines"
+            detail="Lines you played on the board and saved."
+          />
+          <Row
+            href="/lessons/custom-pgns"
+            title="Saved PGNs"
+            detail="Move lists you pasted in."
+          />
+        </div>
+      </section>
+
+      {!user?.isDemo && (
+        <section aria-labelledby="contribute" className="flex flex-col gap-3">
+          <h2 id="contribute" className="text-xl">
+            Contribute
+          </h2>
+          {pending.map((o) => (
+            <div
+              key={o._id}
+              className="flex flex-col gap-3 rounded-xl border border-line px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p className="font-serif text-lg">{o.name}</p>
+                <p className="text-sm text-muted">
+                  Waiting for an admin to review it.
+                </p>
+              </div>
+              {confirming === o._id ? (
+                <div className="flex gap-2">
+                  <Button variant="danger" onClick={() => cancel(o._id)}>
+                    Withdraw it
+                  </Button>
+                  <Button variant="ghost" onClick={() => setConfirming(null)}>
+                    Keep
+                  </Button>
+                </div>
+              ) : (
+                <Button variant="ghost" onClick={() => setConfirming(o._id)}>
+                  Withdraw
+                </Button>
+              )}
+            </div>
+          ))}
+          <div>
+            <Button href="/lessons/add" variant="secondary">
+              Suggest a new opening
+            </Button>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}

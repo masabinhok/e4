@@ -1,125 +1,74 @@
 "use client";
+import { FormEvent, useState } from "react";
 import Button from "@/components/Button";
-import Message from "@/components/Message";
+import Field from "@/components/Field";
+import { api, errorMessage } from "@/lib/api";
 import { useMessageStore } from "@/store/messageStore";
 import { useSoundStore } from "@/store/useSoundStore";
-import React, { FormEvent, useState } from "react";
 
-const ContributeOpening = () => {
-  const [name, setName] = useState<string>("");
-  const [code, setCode] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
+export default function ContributeOpening() {
+  const addMessage = useMessageStore((s) => s.addMessage);
+  const playSound = useSoundStore((s) => s.playSound);
+  const [submitting, setSubmitting] = useState(false);
 
-  const { messages, removeMessage, addMessage } = useMessageStore();
-  const { playSound } = useSoundStore();
-
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    const data = Object.fromEntries(new FormData(form));
+    setSubmitting(true);
     try {
-      const res = await fetch(`/api/openings/add`, {
-        credentials: "include",
+      await api("/openings/add", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          description,
-          code,
-        }),
+        body: JSON.stringify(data),
       });
-
-      if (!res.ok) {
-        throw new Error("Failed to submit opening");
-      }
-
-      const data = await res.json();
-      addMessage({ content: data.message, type: "success" });
-      setTimeout(() => playSound("achievement"), 1);
-      // Reset form fields after successful submission
-      setName("");
-      setCode("");
-      setDescription("");
-    } catch (error) {
-      console.error("Error submitting form:", error);
+      addMessage({
+        content: "Submitted. An admin will review it.",
+        type: "success",
+      });
+      playSound("achievement");
+      form.reset();
+    } catch (err) {
+      addMessage({ content: errorMessage(err), type: "error" });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-6 flex-col">
-      <div className="fixed top-6 right-6 z-50 space-y-2">
-        {messages.map((msg) => (
-          <Message
-            key={msg.id}
-            message={msg.content}
-            type={msg.type}
-            onClose={() => removeMessage(msg.id!)}
-          />
-        ))}
-      </div>
-      <form
-        onSubmit={(e: FormEvent) => {
-          handleSubmit(e);
-        }}
-        className="shadow-lg rounded-xl p-8 w-full max-w-md space-y-6"
-      >
-        <h1 className="text-2xl font-bold text-center text-blue-600">
-          ♟️ Contribute New Opening
-        </h1>
-
-        <div className="flex flex-col space-y-2">
-          <label htmlFor="name" className="text-sm font-semibold text-gray-700">
-            Opening Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="e.g., Caro-Kann Defense"
-          />
-        </div>
-        <div className="flex flex-col space-y-2">
-          <label htmlFor="code" className="text-sm font-semibold text-gray-700">
-            Code
-          </label>
-          <input
-            type="text"
-            id="code"
-            name="code"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            required
-            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="e.g., carokann"
-          />
-        </div>
-        <div className="flex flex-col space-y-2">
-          <label
-            htmlFor="description"
-            className="text-sm font-semibold text-gray-700"
-          >
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            rows={4}
-            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="A solid defense against 1.e4, emphasizing structure and counterattack..."
-          ></textarea>
-        </div>
-
-        <Button type="submit" text="Submit Opening" />
+    <div className="mx-auto max-w-lg py-4 lg:py-10">
+      <h1 className="text-3xl">Suggest a new opening</h1>
+      <p className="mt-2 text-muted">
+        Once an admin approves it, everyone can add lines to it.
+      </p>
+      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
+        <Field
+          label="Opening name"
+          id="name"
+          required
+          maxLength={100}
+          placeholder="Caro-Kann Defense"
+        />
+        <Field
+          label="Short code"
+          id="code"
+          required
+          maxLength={40}
+          pattern="[a-z0-9-]+"
+          placeholder="caro-kann"
+          hint="Lowercase letters, numbers and dashes. Used in the lesson's web address."
+        />
+        <Field
+          label="Description"
+          id="description"
+          multiline
+          rows={4}
+          required
+          maxLength={1000}
+        />
+        <Button type="submit" size="lg" disabled={submitting}>
+          {submitting ? "Submitting…" : "Submit for review"}
+        </Button>
       </form>
     </div>
   );
-};
-
-export default ContributeOpening;
+}
