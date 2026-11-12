@@ -156,7 +156,7 @@ export default function RecordLine() {
     };
 
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/variations/${code ? `contribute/${code}` : "record"}`,
+      `/api/variations/${code ? `contribute/${code}` : "record"}`,
       {
         credentials: "include",
         method: "POST",

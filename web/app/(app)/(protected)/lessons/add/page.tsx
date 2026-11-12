@@ -16,21 +16,18 @@ const ContributeOpening = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/openings/add`,
-        {
-          credentials: "include",
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name,
-            description,
-            code,
-          }),
+      const res = await fetch(`/api/openings/add`, {
+        credentials: "include",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          name,
+          description,
+          code,
+        }),
+      });
 
       if (!res.ok) {
         throw new Error("Failed to submit opening");

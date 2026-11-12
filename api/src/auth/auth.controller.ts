@@ -15,16 +15,28 @@ import { RefreshTokenGuard } from 'src/common/guards/refresh-token.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { MongooseId } from 'src/types/types';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
+import { ClientThrottlerGuard } from 'src/common/guards/client-throttler.guard';
 
 const HOUR = 60 * 60 * 1000;
+
+// The web app reaches the API through its own /api proxy, so cookies are
+// first-party: SameSite=Lax blocks cross-site use, and Secure is on wherever
+// there's HTTPS (production) and off on http://localhost.
+function cookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  } as const;
+}
 
 function setAuthCookies(
   res: Response,
   accessToken: string,
   refreshToken: string,
 ) {
-  const options = { httpOnly: true, secure: true, sameSite: 'none' } as const;
+  const options = cookieOptions();
   res.cookie('accessToken', accessToken, {
     ...options,
     maxAge: 15 * 60 * 1000, // 15 minutes
@@ -39,7 +51,7 @@ function setAuthCookies(
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @UseGuards(ThrottlerGuard)
+  @UseGuards(ClientThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: HOUR } })
   @Post('signup')
   async signUp(
@@ -56,7 +68,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(ThrottlerGuard)
+  @UseGuards(ClientThrottlerGuard)
   @Throttle({ default: { limit: 10, ttl: 60 * 1000 } })
   @Post('login')
   async login(
@@ -73,7 +85,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(ThrottlerGuard)
+  @UseGuards(ClientThrottlerGuard)
   @Throttle({ default: { limit: 10, ttl: HOUR } })
   @Post('demo')
   async demo(@Res({ passthrough: true }) res: Response) {
@@ -89,17 +101,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.authService.logout(userId);
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-    });
+    res.clearCookie('accessToken', cookieOptions());
 
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-    });
+    res.clearCookie('refreshToken', cookieOptions());
 
     return {
       message: 'Logged Out Successfully',

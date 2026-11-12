@@ -3,7 +3,6 @@
 Learn chess openings by playing them, not watching them. Pick an opening, then step through its lines in **Learn** mode, play them against the board in **Practice**, and test yourself in **Quiz**.
 
 **Live demo:** https://e4-learnchess.vercel.app. Click **Try the demo, no signup** to get a private throwaway account.
-The API runs on Render's free tier, so the first request after a quiet spell can take up to about a minute.
 
 ![Caro-Kann lesson in Learn mode](docs/screenshot-lesson.png)
 
@@ -28,10 +27,13 @@ The API runs on Render's free tier, so the first request after a quiet spell can
 
 ```mermaid
 flowchart LR
-  B[Browser] --> W[Next.js on Vercel]
-  B -- fetch, cookies --> A[NestJS API on Render]
+  B[Browser] -- pages + /api --> W[Next.js on Vercel]
+  W -- /api proxy: cookies, visitor IP + shared secret --> A[NestJS API on Render]
   A --> M[(MongoDB Atlas)]
+  P[cron-job.org] -- GET /api/health every 10 min --> A
 ```
+
+The browser only talks to the Vercel domain. A Next.js route (`web/app/api/[...path]/route.ts`) forwards `/api/*` to the API, so auth cookies are first-party with `SameSite=Lax`, and there's no CORS.
 
 ## Run it locally
 
@@ -66,15 +68,17 @@ SEED_ADMIN_EMAIL=you@example.com SEED_ADMIN_PASSWORD='a-long-password' npm run s
 | `JWT_REFRESH_SECRET` | yes | | Different from the access secret |
 | `JWT_ACCESS_EXPIRE` | no | `15m` | |
 | `JWT_REFRESH_EXPIRE` | no | `7d` | |
-| `FRONTEND_URL` | no | `http://localhost:3000` | Allowed CORS origin |
 | `PORT` | no | `5000` | Render sets this itself |
-| `TRUST_PROXY_HOPS` | no | `0` | Proxies in front of the API. Rate limits key on the client IP, so this must match the host |
+| `PROXY_SECRET` | yes in prod | | Same value as the web app's. Lets the API trust the visitor IP the proxy forwards for rate limits |
+| `TRUST_PROXY_HOPS` | no | `0` | Proxies in front of the API, for requests that skip the web proxy. `1` on Render |
+| `NODE_ENV` | prod | | `production` turns on `Secure` cookies |
 
 **Web** (`web/.env.local`)
 
 | Variable | Default | Notes |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:5000/api` | Read at build time |
+| `API_URL` | `http://localhost:5000` | Where the `/api` proxy forwards. Server-side only |
+| `PROXY_SECRET` | | Must match the API's |
 
 ## Tests
 
@@ -90,7 +94,7 @@ The API e2e suite covers the admin role guard on every admin route, ownership ch
 
 ## Known limitations
 
-- The free Render instance sleeps after 15 minutes idle; waking it takes about a minute.
+- The API runs on Render's free tier, which sleeps after 15 minutes idle. A cron-job.org ping every 10 minutes keeps it awake; if a ping is missed, the first request takes about a minute.
 - Practice and quiz progress isn't saved. The profile only counts recorded and saved lines.
 - Pasted PGNs must be plain move lists; headers, comments and result markers aren't parsed yet.
 

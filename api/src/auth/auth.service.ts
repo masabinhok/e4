@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -146,9 +145,10 @@ export class AuthService {
     accessToken: string;
     refreshToken: string;
   }> {
-    const user = await this.usersService.findUserById(userId);
+    // A deleted user (e.g. an expired demo account) gets a 401, not a 404.
+    const user = await this.usersService.findUserById(userId).catch(() => null);
     if (!user || !user.refreshToken) {
-      throw new ForbiddenException('Invalid refresh token');
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     const given = Buffer.from(this.hashToken(rt));

@@ -10,7 +10,7 @@ const LessonsPage = () => {
 
   const fetchPendingOpenings = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings/pending`, {
+      await fetch(`/api/openings/pending`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -33,7 +33,7 @@ const LessonsPage = () => {
 
   const fetchOpenings = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/openings`, {
+      await fetch(`/api/openings`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -56,16 +56,13 @@ const LessonsPage = () => {
 
   const handleCancel = async (openingId: string) => {
     try {
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/openings/cancel/${openingId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      await fetch(`/api/openings/cancel/${openingId}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
         },
-      ).then((res) => {
+      }).then((res) => {
         if (!res.ok) {
           throw new Error("network error");
         }

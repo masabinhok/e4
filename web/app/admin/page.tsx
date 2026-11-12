@@ -20,7 +20,7 @@ const AdminPage = () => {
   const { playSound } = useSoundStore();
 
   const fetchAdminData = useCallback(async () => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin`, {
+    await fetch(`/api/admin`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -47,16 +47,13 @@ const AdminPage = () => {
 
   const toggleStatus = async (type: string, id: string) => {
     try {
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/${type}/toggle-status/${id}`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      await fetch(`/api/admin/${type}/toggle-status/${id}`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
         },
-      )
+      })
         .then((res) => {
           if (!res.ok) {
             addMessage({ content: "Network Error", type: "error" });
@@ -76,7 +73,7 @@ const AdminPage = () => {
 
   const handleDelete = async (type: string, id: string) => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/${type}/${id}`, {
+      await fetch(`/api/admin/${type}/${id}`, {
         method: "DELETE",
         credentials: "include",
         headers: {

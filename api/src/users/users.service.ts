@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
@@ -21,7 +22,7 @@ export class UsersService {
   async findUserById(userId: MongooseId): Promise<User> {
     const user = await this.userModel.findById(userId);
     if (!user) {
-      throw new InternalServerErrorException('User not found');
+      throw new NotFoundException('User not found');
     }
     return user;
   }
@@ -84,7 +85,7 @@ export class UsersService {
   async deleteOne(userId: MongooseId) {
     const deletedUser = await this.userModel.findByIdAndDelete(userId);
     if (!deletedUser) {
-      throw new BadRequestException('No user with such id exists');
+      throw new NotFoundException('No user with such id exists');
     }
     return {
       message: 'Successfully Deleted!',
@@ -132,7 +133,7 @@ export class UsersService {
     variationId: MongooseId,
   ): Promise<User> {
     const updatedUser = await this.userModel.findByIdAndUpdate(userId, {
-      $push: {
+      $addToSet: {
         contributedLines: variationId,
       },
     });

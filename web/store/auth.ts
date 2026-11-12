@@ -19,8 +19,8 @@ interface AuthState {
   refreshToken: () => Promise<boolean>;
 }
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+// Same origin: app/api/[...path]/route.ts proxies to the NestJS API.
+const API_BASE_URL = "/api";
 
 let retried = false;
 

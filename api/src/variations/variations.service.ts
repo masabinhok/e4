@@ -1,16 +1,31 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Variation, VariationDocument } from './schema/variation.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Chess } from 'chess.js';
 import { OpeningsService } from 'src/openings/openings.service';
 import { ContributeVariationDto } from './dtos/contribute-variation.dto';
 import { UsersService } from 'src/users/users.service';
 import { MongooseId } from 'src/types/types';
 import { Status } from 'src/openings/schemas/opening.schema';
+
+// Replays the line from the starting position; the client is never trusted to send legal moves.
+export function assertLegalLine(moves: string[]) {
+  const chess = new Chess();
+  moves.forEach((move, i) => {
+    try {
+      chess.move(move);
+    } catch {
+      throw new BadRequestException(
+        `Illegal move ${i + 1}: "${move}" is not legal in this position`,
+      );
+    }
+  });
+}
 
 @Injectable()
 export class VariationsService {
@@ -22,48 +37,64 @@ export class VariationsService {
   ) {}
 
   async findAll() {
-    const variations = await this.variationModel.find();
-    return variations;
+    return this.variationModel.find();
   }
 
   async deleteOne(variationId: MongooseId) {
-    const deletedVariation =
-      await this.variationModel.findByIdAndDelete(variationId);
-    if (!deletedVariation) {
-      throw new BadRequestException('No variation with such id exists');
+    const deleted = await this.variationModel.findByIdAndDelete(variationId);
+    if (!deleted) {
+      throw new NotFoundException('No variation with such id exists');
     }
-    return {
-      message: 'Successfully Deleted!',
-    };
+    await this.openingsService.pullVariation(variationId);
+    return { message: 'Successfully Deleted!' };
+  }
+
+  async deleteByCode(code: string) {
+    await this.variationModel.deleteMany({ code });
+  }
+
+  // A deleted user's private lines and pending submissions go with them;
+  // accepted contributions stay, because they are now part of a public opening.
+  async deleteOwnedBy(userId: MongooseId) {
+    await this.variationModel.deleteMany({
+      contributor: userId,
+      status: Status.Pending,
+    });
+    await this.variationModel.deleteMany({
+      contributor: userId,
+      code: { $in: ['recorded-pgns', 'custom-pgns'] },
+    });
   }
 
   async acceptVariation(variationId: MongooseId) {
-    const variation = await this.variationModel
-      .findByIdAndUpdate(
-        variationId,
-        {
-          $set: {
-            status: Status.Accepted,
-          },
-        },
-        {
-          new: true,
-        },
-      )
-      .populate('contributor');
-    if (!variation) {
-      throw new BadRequestException('No such variation exists.');
+    const pending = await this.variationModel.findOne({
+      _id: variationId,
+      status: Status.Pending,
+    });
+    if (!pending) {
+      throw new NotFoundException('No pending variation with that id');
+    }
+    // Check the target first, so a variation is never marked accepted without a home.
+    await this.openingsService.getOpening(pending.code);
+
+    // Conditional update: a second, concurrent approval matches nothing and stops here.
+    const accepted = await this.variationModel.findOneAndUpdate(
+      { _id: variationId, status: Status.Pending },
+      { $set: { status: Status.Accepted } },
+      { new: true },
+    );
+    if (!accepted) {
+      throw new NotFoundException('No pending variation with that id');
     }
 
-    await this.openingsService.addContribution(variation.code, variationId);
-    await this.usersService.addContributedLines(
-      variation.contributor?._id as MongooseId,
-      variationId,
-    );
-
-    return {
-      message: 'Variation Accepted!',
-    };
+    await this.openingsService.addContribution(accepted.code, variationId);
+    if (accepted.contributor) {
+      await this.usersService.addContributedLines(
+        accepted.contributor as unknown as MongooseId,
+        variationId,
+      );
+    }
+    return { message: 'Variation Accepted!' };
   }
 
   async contributeVariation(
@@ -71,63 +102,36 @@ export class VariationsService {
     code: string,
     dto: ContributeVariationDto,
   ) {
-    const newVariation = await this.variationModel.create({
-      code,
-      ...dto,
-      contributor: userId,
-    });
-    if (!newVariation) {
-      throw new InternalServerErrorException(
-        'Failed to create a new variation',
-      );
-    }
-
-    //this should be done after accepted by the admin.
+    assertLegalLine(dto.moves);
+    await this.openingsService.getOpening(code);
+    await this.variationModel.create({ ...dto, code, contributor: userId });
+    return { message: 'Variation submitted for review!' };
   }
 
-  // shortcut: lines a demo user records or saves outlive the user (TTL only covers users);
-  // they're small and unreachable, so add expiresAt here if the database ever grows.
   async recordVariation(userId: MongooseId, dto: ContributeVariationDto) {
-    const variation = {
+    assertLegalLine(dto.moves);
+    const variation = await this.variationModel.create({
       ...dto,
       code: 'recorded-pgns',
       status: Status.Accepted,
-    };
-
-    const newVariation = await this.variationModel.create(variation);
-    if (!newVariation) {
-      throw new InternalServerErrorException(
-        'Failed to create a new variation',
-      );
-    }
-
+      contributor: userId,
+    });
     await this.usersService.addRecordedLines(
       userId,
-      newVariation._id as MongooseId,
+      variation._id as MongooseId,
     );
-
-    return {
-      message: 'Successfully recorded a variation!',
-    };
+    return { message: 'Successfully recorded a variation!' };
   }
 
   async addCustomVariation(userId: MongooseId, dto: ContributeVariationDto) {
-    const variation = { ...dto, code: 'custom-pgns', status: Status.Accepted };
-
-    const newVariation = await this.variationModel.create(variation);
-    if (!newVariation) {
-      throw new InternalServerErrorException(
-        'Failed to create a new variation',
-      );
-    }
-
-    await this.usersService.addCustomPgns(
-      userId,
-      newVariation._id as MongooseId,
-    );
-
-    return {
-      message: 'Successfully saved a custom pgn!',
-    };
+    assertLegalLine(dto.moves);
+    const variation = await this.variationModel.create({
+      ...dto,
+      code: 'custom-pgns',
+      status: Status.Accepted,
+      contributor: userId,
+    });
+    await this.usersService.addCustomPgns(userId, variation._id as MongooseId);
+    return { message: 'Successfully saved a custom pgn!' };
   }
 }

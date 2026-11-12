@@ -35,9 +35,14 @@ export class AdminService {
     return this.variationsService.deleteOne(variationId);
   }
   async deleteUser(userId: MongooseId) {
-    return this.usersService.deleteOne(userId);
+    const result = await this.usersService.deleteOne(userId);
+    await this.variationsService.deleteOwnedBy(userId);
+    await this.openingsService.deletePendingBy(userId);
+    return result;
   }
   async deleteOpening(openingId: MongooseId) {
-    return this.openingsService.deleteOne(openingId);
+    const opening = await this.openingsService.deleteOne(openingId);
+    await this.variationsService.deleteByCode(opening.code);
+    return { message: 'Successfully Deleted' };
   }
 }
