@@ -68,6 +68,7 @@ SEED_ADMIN_EMAIL=you@example.com SEED_ADMIN_PASSWORD='a-long-password' npm run s
 | `JWT_REFRESH_EXPIRE` | no | `7d` | |
 | `FRONTEND_URL` | no | `http://localhost:3000` | Allowed CORS origin |
 | `PORT` | no | `5000` | Render sets this itself |
+| `TRUST_PROXY_HOPS` | no | `0` | Proxies in front of the API. Rate limits key on the client IP, so this must match the host |
 
 **Web** (`web/.env.local`)
 
@@ -85,7 +86,7 @@ npm run test:e2e --prefix web      # Playwright: builds and starts both apps on 
 
 The first Playwright run needs a browser: `npx --prefix web playwright install chromium`. It also expects the seeded openings in the local `e4` database.
 
-The API e2e suite covers the admin role guard on every admin route, ownership checks on cancelling contributions, the demo login, and the health check.
+The API e2e suite covers the admin role guard on every admin route, ownership checks on cancelling contributions, the demo login, refresh-token rotation, login rate limiting, input validation, and the health check.
 
 ## Known limitations
 
