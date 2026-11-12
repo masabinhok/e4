@@ -1,16 +1,20 @@
 import type { BoardFlip } from "@/types/types";
 
-// Pure state for training one line. The page owns timers and sounds; this only
-// decides what a move means, so it can be tested without a browser.
+// Pure state for training one line. The page owns timers, sounds and saving;
+// this only decides what a move means, so it can be tested without a browser.
+//
+// Learn: step through the line freely. Drill: play your side from memory; the
+// opponent replies automatically, and wrong moves and hints count as mistakes,
+// which decides when the line comes back for review.
 
-export type Mode = "learn" | "practice" | "quiz";
+export type Mode = "learn" | "drill";
 
 export type TrainerState = {
   moves: string[];
   side: BoardFlip; // the side the learner plays
   mode: Mode;
   index: number; // moves played so far
-  mistakes: number;
+  mistakes: number; // wrong moves + hints, in drill mode
   wrong: number; // bumps on each wrong attempt, so the UI can react to repeats
 };
 
@@ -20,6 +24,8 @@ export type TrainerAction =
   | { type: "next" }
   | { type: "back" }
   | { type: "reset" }
+  | { type: "hint" }
+  | { type: "jump"; index: number }
   | { type: "attempt"; san: string };
 
 export const initialTrainer = (
@@ -42,9 +48,23 @@ export const isComplete = (s: TrainerState) =>
 export const isLearnersTurn = (s: TrainerState) =>
   !isComplete(s) && (s.index % 2 === 0) === (s.side === "white");
 
-/** In practice and quiz the opponent's replies play automatically. */
+/** In drill mode the opponent's replies play automatically. */
 export const opponentShouldMove = (s: TrainerState) =>
-  s.mode !== "learn" && !isComplete(s) && !isLearnersTurn(s);
+  s.mode === "drill" && !isComplete(s) && !isLearnersTurn(s);
+
+/**
+ * How far this line shares its moves with another line of the course: the
+ * point where it branches off. Drilling can skip straight there.
+ */
+export function branchPoint(moves: string[], others: string[][]): number {
+  let shared = 0;
+  for (const other of others) {
+    let n = 0;
+    while (n < moves.length && n < other.length && moves[n] === other[n]) n++;
+    if (n < moves.length) shared = Math.max(shared, n);
+  }
+  return shared;
+}
 
 export function trainerReducer(
   s: TrainerState,
@@ -63,10 +83,18 @@ export function trainerReducer(
       return s.mode === "learn" && s.index > 0
         ? { ...s, index: s.index - 1 }
         : s;
+    case "jump":
+      return s.index === 0 && a.index > 0 && a.index < s.moves.length
+        ? { ...s, index: a.index }
+        : s;
+    case "hint":
+      return s.mode === "drill" && isLearnersTurn(s)
+        ? { ...s, mistakes: s.mistakes + 1 }
+        : s;
     case "attempt":
       if (!isLearnersTurn(s)) return s;
       if (a.san === s.moves[s.index]) return { ...s, index: s.index + 1 };
-      // Learn mode is for exploring, so only practice and quiz count mistakes.
+      // Learn mode is for exploring, so only drills count mistakes.
       return {
         ...s,
         wrong: s.wrong + 1,
