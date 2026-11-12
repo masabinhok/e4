@@ -2,21 +2,22 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Button from "@/components/Button";
+import Dashboard from "@/components/Dashboard";
 import { errorMessage } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 
 const steps = [
   {
     title: "Learn",
-    text: "Step through a line one move at a time, with the board in front of you.",
+    text: "Step through a line move by move, with a short note on why each move is played.",
   },
   {
-    title: "Practice",
-    text: "Play your side from memory. The opponent's replies come automatically.",
+    title: "Drill",
+    text: "Play your side from memory. The opponent answers; wrong moves and hints are counted.",
   },
   {
-    title: "Quiz",
-    text: "The next move is hidden. Your mistakes are counted, so you can see what hasn't stuck yet.",
+    title: "Review",
+    text: "Each line comes back when it's due: soon after a mistake, weeks later once it sticks.",
   },
 ];
 
@@ -40,6 +41,8 @@ export default function Home() {
     }
   };
 
+  if (isAuthenticated) return <Dashboard />;
+
   return (
     <div className="flex flex-col gap-16 py-4 lg:py-16">
       <section className="max-w-2xl">
@@ -51,20 +54,12 @@ export default function Home() {
           them until you know what comes next.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          {isAuthenticated ? (
-            <Button href="/lessons" size="lg">
-              Go to lessons
-            </Button>
-          ) : (
-            <>
-              <Button size="lg" onClick={startDemo} disabled={isLoading}>
-                {isLoading ? "Starting the demo…" : "Try the demo, no signup"}
-              </Button>
-              <Button href="/auth/login" variant="secondary" size="lg">
-                Log in
-              </Button>
-            </>
-          )}
+          <Button size="lg" onClick={startDemo} disabled={isLoading}>
+            {isLoading ? "Starting the demo…" : "Try the demo, no signup"}
+          </Button>
+          <Button href="/auth/login" variant="secondary" size="lg">
+            Log in
+          </Button>
         </div>
         {error && (
           <p role="alert" className="mt-4 text-sm text-ember">
