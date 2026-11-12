@@ -1,0 +1,14 @@
+{
+  "code": "carokann",
+  "name": "Caro-Kann Defense",
+  "side": "black",
+  "description": "A solid answer to 1.e4. Black supports ...d5 with ...c6, develops the light-squared bishop before ...e6, and gets a sound pawn structure.",
+  "summary": "The Caro-Kann is one of the most reliable defences to 1.e4. It is less sharp than the Sicilian and avoids the French's main problem: Black plays ...c6 and ...d5, gets the light-squared bishop out to f5 or g4, and only then closes the position with ...e6. Black usually gets a healthy structure and fewer weaknesses, at the cost of a little less space early on. This course covers the replies you will meet most often: the Advance, Exchange, Panov–Botvinnik, Classical and Two Knights, plus common sidelines.",
+  "keyIdeas": [
+    "...c6 then ...d5 challenges e4 without blocking the c8 bishop.",
+    "Develop the light-squared bishop (to f5 or g4) before playing ...e6.",
+    "Against the Advance, strike at the base of White's pawn chain with ...c5.",
+    "When White gets an isolated d-pawn (Panov), blockade it on d5 and trade pieces.",
+    "A solid position first, counterplay later: Black rarely needs to hurry."
+  ]
+}
