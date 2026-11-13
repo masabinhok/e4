@@ -15,7 +15,9 @@ Learn chess openings by playing them, not watching them. Annotated opening cours
   - If your move belongs to a different line of the course, it tells you which one.
   - Hints are allowed but count as mistakes.
 - **Review (spaced repetition):** a clean drill pushes the next review out (1 → 3 → 7 → 14 → 30 days); any mistake brings the line back tomorrow. The dashboard and the Review tab show what's due.
-- **Your own lines:** record a line by playing it on the board, or paste a PGN (headers, comments and variations are fine). Both can be drilled like course lines.
+- **AI coach (optional):** "Ask the coach" gives a playful take on any course move or wrong attempt, from an open-weight model on Groq's free tier. It only builds on the checked note, never replaces it, and says so. Without a key, e4 simply shows the note.
+- **Feel:** e4's own look (a warm dark palette, Nunito and Inter), licensed piece sets, three board themes, and a synthesised sound set with mute and volume. ✓/✗ badges and legal-move dots show on the board.
+- **My lines:** save a line by playing it on the board, or paste a PGN (headers, comments and variations are fine). Both can be drilled like course lines.
 - **Contribute** openings and lines; an admin approves them before they go public.
 - **Works on a phone:** bottom tabs, a board that fits the screen, and tap-to-move as well as drag.
 
@@ -84,6 +86,10 @@ The seed refuses to write to anything but a local database unless you confirm th
 | `PROXY_SECRET` | yes in prod | | Same value as the web app's. Lets the API trust the visitor IP the proxy forwards for rate limits |
 | `TRUST_PROXY_HOPS` | no | `0` | Proxies in front of the API, for requests that skip the web proxy. `1` on Render |
 | `NODE_ENV` | prod | | `production` turns on `Secure` cookies |
+| `COACH_API_KEY` | no | | Enables the AI coach. A free key from console.groq.com works |
+| `COACH_API_URL` | no | Groq's OpenAI-compatible URL | Any OpenAI-compatible chat API |
+| `COACH_MODEL` | no | `llama-3.1-8b-instant` | An open-weight model the provider hosts |
+| `COACH_DAILY_LIMIT` | no | `500` | Model calls per day; then the coach shows the note |
 
 **Web** (`web/.env.local`)
 
@@ -102,8 +108,8 @@ npm run test:e2e --prefix web      # Playwright: builds and starts both apps on 
 
 The first Playwright run needs a browser: `npx --prefix web playwright install chromium`. It also expects the seeded courses in the local `e4` database.
 
-- **API (29 unit, 49 e2e):** the admin role on every admin route, ownership checks, the demo login, refresh-token rotation, rate limits (including the proxy's IP forwarding), input validation, contributions and cascades, and spaced-repetition scheduling.
-- **Web (23 Playwright):** demo login; learn notes; drill corrections; a clean drill that shows up in Review and on the dashboard; PGN import; no sideways scroll and 44 px tap targets at 375, 768 and 1280 px; and a regression test for a bug where navigating away mid-request logged you out.
+- **API (33 unit, 54 e2e):** the admin role on every admin route, ownership checks, the demo login, refresh-token rotation, rate limits (including the proxy's IP forwarding), input validation, contributions and cascades, spaced-repetition scheduling, and the AI coach (prompt built from stored facts only, shared cache, daily cap, fallback) against a stub provider.
+- **Web (26 Playwright):** demo login; the coach's fallback; learn notes; drill corrections; a clean drill that shows up in Review and on the dashboard; PGN import; no sideways scroll and 44 px tap targets at 375, 768 and 1280 px; and a regression test for a bug where navigating away mid-request logged you out.
 
 README media is recorded by `MEDIA=1 npx playwright test e2e/media.spec.ts`.
 
@@ -113,17 +119,22 @@ Lighthouse 12, mobile preset, local production build:
 
 | Page | Performance | Accessibility | Best practices | SEO |
 |---|---|---|---|---|
-| Landing | 76 | 100 | 100 | 100 |
-| Login | 75 | 100 | 100 | 100 |
-| Lesson (signed in) | 51 | 100 | 100 | 100 |
+| Landing | 83 | 100 | 100 | 100 |
+| Login | 87 | 100 | 100 | 100 |
+| Lesson (signed in) | 73 | 100 | 100 | 91 |
 
-The performance scores use Lighthouse's default simulated throttling; with real (DevTools) throttling the landing page scores 87. The lesson page is slowest on a first visit because it waits for the session check before loading the course. Returning visitors skip that wait. Shared JavaScript is 103 kB.
+The scores use Lighthouse's default simulated throttling. The lesson page's SEO score is a Lighthouse artefact: Next.js streams metadata on dynamic routes for regular browsers, while search bots get it up front. Shared JavaScript is 103 kB.
 
 ## Known limitations
 
 - The API runs on Render's free tier, which sleeps after 15 minutes idle. A ping every 10 minutes keeps it awake; if one is missed, the first request takes about a minute.
 - Only two courses so far. The notes are short explanations of ideas, not deep analysis.
 - There's no engine or game analysis in the app; it trains opening lines only.
+- The AI coach is extra flavour on top of checked notes. A small model can still be wrong, and the app labels it that way.
+
+## Credits
+
+e4 is MIT-licensed. The piece sets are papercut by Nikolay Anzarov (CC BY 4.0) and chessnut by Alexis Luengas (Apache-2.0), both from Lichess's list of free sets, with licence files in [`web/public/pieces`](web/public/pieces). Opening names come from Lichess's CC0 [chess-openings](https://github.com/lichess-org/chess-openings) dataset. The fonts are Nunito and Inter (SIL OFL). The sounds are synthesised for e4 by [`web/scripts/render-sounds.mjs`](web/scripts/render-sounds.mjs).
 
 ## License
 

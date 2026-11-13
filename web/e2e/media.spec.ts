@@ -92,3 +92,16 @@ test("mobile screenshot", async ({ browser }) => {
   await page.screenshot({ path: "../docs/media/mobile-lesson.png" });
   await context.close();
 });
+
+test("social preview", async ({ browser }) => {
+  // 1280x640 is GitHub's social preview size; reduced motion stills the hero board.
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 640 },
+    reducedMotion: "reduce",
+  });
+  const page = await context.newPage();
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  await page.screenshot({ path: "../docs/media/social-preview.png" });
+  await context.close();
+});
