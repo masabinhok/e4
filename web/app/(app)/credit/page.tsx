@@ -10,7 +10,7 @@ const CreditPage = () => {
       <section className="max-w-4xl">
         <div className="flex flex-col md:flex-row gap-8 items-center">
           <div className="flex-shrink-0 flex flex-col items-center justify-center gap-3">
-            <div className="rounded-full border-2 border-brass/60 p-1">
+            <div className="rounded-full border-2 border-amber/60 p-1">
               <Image
                 src={sabinOg}
                 alt="Sabin Shrestha"
@@ -21,7 +21,7 @@ const CreditPage = () => {
                 sizes="(max-width: 768px) 100vw, 160px"
               />
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-1 text-sm text-brass">
+            <div className="flex flex-wrap items-center justify-center gap-x-1 text-sm text-amber">
               <Link href="https://www.chess.com/member/sabinshrestha9">
                 <span className="inline-flex min-h-11 items-center px-2">
                   chess.com: sabinshrestha9
@@ -92,7 +92,7 @@ const CreditPage = () => {
                       );
                     }
                   }}
-                  className="inline-flex min-h-11 cursor-pointer items-center text-sm text-brass underline"
+                  className="inline-flex min-h-11 cursor-pointer items-center text-sm text-amber underline"
                 >
                   <br />
                   sabin.shrestha.er@gmail.com
@@ -101,7 +101,7 @@ const CreditPage = () => {
             </div>
 
             <div className="pt-2">
-              <span className="font-serif italic text-brass">
+              <span className="font-display text-amber">
                 Happy Chess Learning!
               </span>
             </div>

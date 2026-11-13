@@ -10,7 +10,7 @@ type FieldProps = {
   React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 const inputClasses =
-  "w-full rounded-lg border border-line bg-raised px-4 py-3 text-ivory placeholder:text-muted/70 focus:border-brass focus:outline-none";
+  "w-full rounded-xl border border-line bg-raised px-4 py-3 text-ivory placeholder:text-muted/70 focus:border-amber focus:outline-none";
 
 export default function Field({
   label,

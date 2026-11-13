@@ -399,7 +399,7 @@ export default function LessonPage({
       <aside className="flex flex-col gap-5">
         <div>
           {reviewing && (
-            <p className="mb-1 text-sm font-medium text-brass">Review</p>
+            <p className="mb-1 text-sm font-medium text-amber">Review</p>
           )}
           <h1 className="text-3xl">{opening.name}</h1>
           {lines.length > 0 && (
@@ -430,7 +430,7 @@ export default function LessonPage({
                 id="line"
                 value={index}
                 onChange={(e) => chooseLine(Number(e.target.value))}
-                className="min-h-11 rounded-lg border border-line bg-raised px-3 focus:border-brass focus:outline-none"
+                className="min-h-11 rounded-lg border border-line bg-raised px-3 focus:border-amber focus:outline-none"
               >
                 {chapters.map(([chapter, entries]) => {
                   const options = entries.map(({ v, i }) => (
@@ -478,7 +478,7 @@ export default function LessonPage({
             {coachNote && !wrong && (
               <p
                 aria-live="polite"
-                className="font-serif text-lg italic leading-relaxed text-ivory/90"
+                className="font-display text-lg font-bold leading-relaxed text-ivory/90"
               >
                 {coachNote}
               </p>
@@ -525,9 +525,7 @@ export default function LessonPage({
                       : `Not ${wrong.san}. This line plays ${state.moves[state.index]}.`}
                   </p>
                   {correctNote && (
-                    <p className="font-serif italic text-ivory/90">
-                      {correctNote}
-                    </p>
+                    <p className="font-display text-ivory/90">{correctNote}</p>
                   )}
                 </div>
               ) : drilling ? (

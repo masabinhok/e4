@@ -7,7 +7,7 @@ export default function AppLayout({
     <>
       <a
         href="#main"
-        className="sr-only z-50 rounded-lg bg-brass font-semibold text-night focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:px-4 focus:py-3"
+        className="sr-only z-50 rounded-lg bg-amber font-semibold text-night focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:px-4 focus:py-3"
       >
         Skip to content
       </a>

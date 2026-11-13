@@ -37,7 +37,7 @@ export default function ReviewPage() {
         </div>
       ) : due.length === 0 ? (
         <div className="flex flex-col items-start gap-2 rounded-xl border border-moss/40 bg-moss/10 p-6">
-          <p className="font-serif text-xl">All caught up.</p>
+          <p className="font-display text-xl">All caught up.</p>
           <p className="text-muted">
             Next up: {upcoming[0].variation.title}, {whenDue(upcoming[0].dueAt)}
             .
@@ -58,7 +58,7 @@ export default function ReviewPage() {
               <li key={p._id}>
                 <Link
                   href={reviewLink(p)}
-                  className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-line bg-surface px-5 py-3 hover:border-brass/60"
+                  className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-line bg-surface px-5 py-3 hover:border-amber/60"
                 >
                   <span className="min-w-0">
                     <span className="block truncate">{p.variation.title}</span>

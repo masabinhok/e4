@@ -82,10 +82,10 @@ export default function Dashboard() {
             <Link
               key={o._id}
               href={`/lessons/${o.code}`}
-              className="flex flex-col gap-3 rounded-xl border border-line bg-surface px-5 py-4 hover:border-brass/60"
+              className="flex flex-col gap-3 rounded-xl border border-line bg-surface px-5 py-4 hover:border-amber/60"
             >
               <div className="flex items-baseline justify-between gap-3">
-                <span className="font-serif text-xl">{o.name}</span>
+                <span className="font-display text-xl">{o.name}</span>
                 <span className="shrink-0 text-sm text-muted tabular-nums">
                   {learned} / {total} learned
                 </span>
@@ -99,7 +99,7 @@ export default function Dashboard() {
                 className="h-1.5 overflow-hidden rounded-full bg-raised"
               >
                 <div
-                  className="h-full rounded-full bg-brass"
+                  className="h-full rounded-full bg-amber"
                   style={{ width: `${total ? (learned / total) * 100 : 0}%` }}
                 />
               </div>

@@ -11,7 +11,7 @@ export function PageSpinner() {
       aria-label="Loading"
       className="flex min-h-[50vh] items-center justify-center"
     >
-      <div className="size-8 animate-spin rounded-full border-2 border-line border-t-brass" />
+      <div className="size-8 animate-spin rounded-full border-2 border-line border-t-amber" />
     </div>
   );
 }

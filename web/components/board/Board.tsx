@@ -16,7 +16,7 @@ type BoardProps = {
 };
 
 const tint = {
-  last: "rgba(210, 168, 67, 0.42)", // brass
+  last: "rgba(210, 168, 67, 0.42)", // amber
   wrong: "rgba(229, 119, 95, 0.55)", // ember
   selected: "rgba(127, 179, 122, 0.5)", // moss
 };

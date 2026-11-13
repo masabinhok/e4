@@ -88,7 +88,7 @@ export default function RecordLine() {
           <p className="rounded-xl border border-line p-4 text-sm text-muted">
             Demo accounts can record private lines but can&apos;t suggest lines
             for everyone.{" "}
-            <a href="/auth/signup" className="text-brass underline">
+            <a href="/auth/signup" className="text-amber underline">
               Create an account
             </a>{" "}
             to contribute.

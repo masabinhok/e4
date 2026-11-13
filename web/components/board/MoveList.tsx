@@ -39,7 +39,7 @@ export default function MoveList({
                 isNext
                   ? "text-muted"
                   : isLast
-                    ? "rounded bg-brass/20 px-1 font-semibold text-brass-bright"
+                    ? "rounded bg-amber/20 px-1 font-semibold text-amber-bright"
                     : "text-ivory"
               }
             >

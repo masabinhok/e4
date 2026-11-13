@@ -1,16 +1,20 @@
 import Link from "next/link";
 import React from "react";
 
+// Pressable: a soft inner bottom edge that flattens on press (e4's own take,
+// not a raised slab).
+const press =
+  "active:translate-y-px active:shadow-none disabled:active:translate-y-0";
 const variants = {
-  primary: "bg-brass text-night hover:bg-brass-bright",
-  secondary: "border border-line bg-surface text-ivory hover:bg-raised",
+  primary: `bg-amber text-on-amber shadow-[inset_0_-3px_0_var(--color-amber-deep)] hover:bg-amber-bright ${press}`,
+  secondary: `bg-raised text-ivory shadow-[inset_0_-3px_0_rgba(0,0,0,0.3)] hover:bg-line ${press}`,
   ghost: "text-muted hover:bg-raised hover:text-ivory",
   danger: "border border-ember/50 text-ember hover:bg-ember/10",
 };
 
 const sizes = {
-  md: "min-h-11 px-4 text-sm",
-  lg: "min-h-12 px-6 text-base",
+  md: "min-h-11 px-4 text-[15px]",
+  lg: "min-h-13 px-6 text-base",
 };
 
 type Common = {
@@ -37,7 +41,7 @@ export default function Button(props: ButtonProps | LinkProps) {
     children,
     ...rest
   } = props;
-  const classes = `inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`;
+  const classes = `inline-flex items-center justify-center gap-2 rounded-xl font-display font-extrabold tracking-[0.01em] transition disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`;
   const content = (
     <>
       {icon && (
