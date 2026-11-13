@@ -37,6 +37,10 @@ export type OpeningVariation = {
   status: Status;
   code: string;
   contributor: string;
+  // Course lines only:
+  chapter?: string;
+  officialName?: string;
+  notes?: string[]; // notes[i] explains moves[i]
 };
 
 export type Opening = {
@@ -46,4 +50,7 @@ export type Opening = {
   code: string;
   variations: OpeningVariation[];
   status: Status;
+  side?: BoardFlip;
+  summary?: string;
+  keyIdeas?: string[];
 };

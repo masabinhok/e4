@@ -1,0 +1,5 @@
+[Chapter "Panov–Botvinnik Attack"]
+[Line "Isolated d-pawn (6...Be7)"]
+[Opening "Caro-Kann Defense: Panov Attack"]
+
+{White plays c4 and usually ends up with an isolated d-pawn. Black blockades it and trades pieces.} 1. e4 c6 {Prepares ...d5, so Black can challenge the centre with a pawn while the c8 bishop keeps its diagonal open.} 2. d4 d5 {The point of the Caro-Kann: hit e4 straight away, backed up by the c6 pawn.} 3. exd5 cxd5 {Recapture with the pawn.} 4. c4 {The Panov: White attacks d5 again and fights for the initiative.} 4... Nf6 {Develop and defend d5 with a piece.} 5. Nc3 e6 {Support d5 and open the way for the f8 bishop.} 6. Nf3 Be7 {Simple, safe development. (...Bb4 is the sharper option.)} 7. cxd5 Nxd5 {White is left with an isolated d-pawn. Black's plan: blockade it on d5 and trade pieces, because the weak pawn matters more as the board empties.} 8. Bd3 Nc6 {Pressure on d4.} 9. O-O O-O {King safety first.} 10. Re1 Bf6 {A third attacker on d4, and the bishop covers the long diagonal.} *

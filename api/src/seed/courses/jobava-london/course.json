@@ -1,0 +1,14 @@
+{
+  "code": "jobava",
+  "name": "Jobava London System",
+  "side": "white",
+  "description": "An aggressive London setup for White: Nc3 before c4, Bf4, and the threat of Nb5. Easy to learn, and it gets opponents out of their preparation early.",
+  "summary": "The Jobava London (Lichess calls it the Rapport–Jobava System) starts 1.d4, 2.Nc3 and 3.Bf4. Unlike the regular London, the knight goes to c3, so White can jump to b5 and hit c7, or play e4 in one go. The same few ideas work against almost every Black setup: Nb5 when c7 is weak, f3 and g4 against an early ...Bf5, and the h-pawn against a kingside fianchetto.",
+  "keyIdeas": [
+    "Nb5 attacks c7. If Black can't cover it comfortably, it gains time or material.",
+    "Against ...Bf5, f3 and g4 chase the bishop and gain space on the kingside.",
+    "Against a fianchetto (...g6, ...Bg7), push the h-pawn: h4–h5.",
+    "e3 and a light-squared bishop on d3 or e2 give White a solid base.",
+    "Watch for tactics on c7: a careless ...Nc6 can lose a pawn."
+  ]
+}

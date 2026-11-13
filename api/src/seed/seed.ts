@@ -7,10 +7,30 @@ import { Opening, Status } from 'src/openings/schemas/opening.schema';
 import { Variation } from 'src/variations/schema/variation.schema';
 import { User } from 'src/users/schema/user.schema';
 import { Role } from 'src/roles/roles.enum';
-import { openings } from './openings';
+import { loadCourses } from './courses';
 
-// Idempotent: upserts by opening code and variation (code, title).
+// Idempotent. Course lines are upserted by (code, title) and kept in file order.
+// Seeded lines that were removed from the files are deleted; lines that users
+// contributed (they have a contributor) are never touched.
+// Refuse to write to a remote database by accident (e.g. a production URL left
+// in api/.env). Seeding production is deliberate: SEED_CONFIRM=<host>.
+function confirmTarget() {
+  const url = process.env.DATABASE_URL ?? '';
+  const host = url
+    .replace(/^mongodb(\+srv)?:\/\/([^@/]*@)?/, '')
+    .split(/[/?]/)[0];
+  const local = /^(localhost|127\.0\.0\.1|\[::1\]|mongo)(:\d+)?$/.test(host);
+  console.log(`seeding ${host || '(no DATABASE_URL)'}`);
+  if (!local && process.env.SEED_CONFIRM !== host) {
+    throw new Error(
+      `Refusing to seed a non-local database. If you really mean it, run with SEED_CONFIRM=${host}`,
+    );
+  }
+}
+
 async function seed() {
+  confirmTarget();
+  const courses = loadCourses();
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['error'],
   });
@@ -20,25 +40,64 @@ async function seed() {
   );
   const userModel = app.get<Model<User>>(getModelToken(User.name));
 
-  for (const { variations, ...opening } of openings) {
+  for (const { lines, ...course } of courses) {
     const ids: unknown[] = [];
-    for (const v of variations) {
+    for (const [order, line] of lines.entries()) {
       const doc = await variationModel.findOneAndUpdate(
-        { code: opening.code, title: v.title },
-        { ...v, code: opening.code, status: Status.Accepted },
+        {
+          code: course.code,
+          title: line.title,
+          contributor: { $exists: false },
+        },
+        {
+          title: line.title,
+          description: line.description,
+          moves: line.moves,
+          notes: line.notes,
+          chapter: line.chapter,
+          officialName: line.officialName,
+          order,
+          boardflip: course.side,
+          code: course.code,
+          status: Status.Accepted,
+        },
         { upsert: true, new: true },
       );
       ids.push(doc._id);
     }
+
+    const stale = await variationModel.deleteMany({
+      code: course.code,
+      contributor: { $exists: false },
+      _id: { $nin: ids },
+    });
+    const contributed = await variationModel
+      .find({
+        code: course.code,
+        contributor: { $exists: true },
+        status: Status.Accepted,
+      })
+      .distinct('_id');
+
     await openingModel.updateOne(
-      { code: opening.code },
+      { code: course.code },
       {
-        $set: { ...opening, status: Status.Accepted },
-        $addToSet: { variations: { $each: ids } },
+        $set: {
+          name: course.name,
+          description: course.description,
+          summary: course.summary,
+          keyIdeas: course.keyIdeas,
+          side: course.side,
+          status: Status.Accepted,
+          variations: [...ids, ...contributed],
+        },
       },
       { upsert: true },
     );
-    console.log(`seeded ${opening.code} (${variations.length} lines)`);
+    console.log(
+      `seeded ${course.code}: ${lines.length} lines` +
+        (stale.deletedCount ? `, removed ${stale.deletedCount} old` : ''),
+    );
   }
 
   const { SEED_ADMIN_EMAIL: email, SEED_ADMIN_PASSWORD: password } =
