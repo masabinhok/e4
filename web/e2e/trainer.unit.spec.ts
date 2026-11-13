@@ -108,6 +108,22 @@ test.describe("drill extras", () => {
   });
 });
 
+test.describe("goto", () => {
+  test("jumps to any position in learn mode, clamped to the line", () => {
+    const s = initialTrainer(line, "white", "learn");
+    expect(run(s, { type: "goto", index: 3 }).index).toBe(3);
+    expect(run(s, { type: "goto", index: 99 }).index).toBe(line.length);
+    expect(run(s, { type: "goto", index: -2 }).index).toBe(0);
+  });
+
+  test("does nothing in a drill, so a drill can't be skipped", () => {
+    expect(
+      run(initialTrainer(line, "white", "drill"), { type: "goto", index: 3 })
+        .index,
+    ).toBe(0);
+  });
+});
+
 test.describe("progress", () => {
   const p = (box: number, dueInDays: number): Progress => ({
     _id: "p",

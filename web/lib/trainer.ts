@@ -26,6 +26,7 @@ export type TrainerAction =
   | { type: "reset" }
   | { type: "hint" }
   | { type: "jump"; index: number }
+  | { type: "goto"; index: number }
   | { type: "attempt"; san: string };
 
 export const initialTrainer = (
@@ -86,6 +87,11 @@ export function trainerReducer(
     case "jump":
       return s.index === 0 && a.index > 0 && a.index < s.moves.length
         ? { ...s, index: a.index }
+        : s;
+    case "goto":
+      // Learn mode only: click any move in the table to see that position.
+      return s.mode === "learn"
+        ? { ...s, index: Math.max(0, Math.min(a.index, s.moves.length)) }
         : s;
     case "hint":
       return s.mode === "drill" && isLearnersTurn(s)
