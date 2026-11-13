@@ -7,7 +7,7 @@ import {
 import { SignUpDto } from './dtos/sign-up.dto';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { LoginDto } from './dtos/login.dto';
 import { MongooseId } from 'src/types/types';
 import { User } from 'src/users/schema/user.schema';
@@ -51,11 +51,15 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.config.get<string>('jwt.accessSecret'),
-        expiresIn: this.config.get<string>('jwt.accessExpire'),
+        expiresIn: this.config.get<string>(
+          'jwt.accessExpire',
+        ) as JwtSignOptions['expiresIn'],
       }),
       this.jwtService.signAsync(payload, {
         secret: this.config.get<string>('jwt.refreshSecret'),
-        expiresIn: this.config.get<string>('jwt.refreshExpire'),
+        expiresIn: this.config.get<string>(
+          'jwt.refreshExpire',
+        ) as JwtSignOptions['expiresIn'],
       }),
     ]);
     return {
