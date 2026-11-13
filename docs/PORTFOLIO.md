@@ -10,7 +10,7 @@ An opening trainer that teaches chess openings by playing them: annotated lines,
 
 **e4.learnchess.** Learn chess openings by playing them, not watching them.
 
-- Two annotated courses (Caro-Kann for Black, Jobava London for White), 21 lines. Every move you play is explained. Lines are drilled from memory and come back on a 1/3/7/14/30-day spaced-repetition schedule.
+- Four annotated courses forming a full repertoire (Jobava London and Italian for White, Caro-Kann and Slav for Black), 45 lines. Every move you play is explained. Lines are drilled from memory and come back on a 1/3/7/14/30-day spaced-repetition schedule.
 - Next.js 15 + NestJS 11 + MongoDB. JWT auth with rotating refresh tokens, served through a same-origin proxy so cookies are first-party and rate limits are per visitor.
 - An optional AI coach (an open-weight model on Groq's free tier) jokes about your moves, but only builds on the checked notes, with a shared cache and a hard daily cap.
 - 113 automated tests (33 API unit, 54 API end-to-end, 26 Playwright). Lighthouse mobile: accessibility 100 on every page measured. $0 hosting on Vercel, Render and Atlas free tiers.
@@ -30,7 +30,7 @@ Links: live demo https://e4-learnchess.vercel.app (one-click demo account) · co
 
 **AI coach.** "Ask the coach" sends only database facts to the model: the opening, the line, the move, the checked note, and the learner's wrong move if any. The browser can't send free text, so the key can't be abused as a chatbot. Replies are cached per situation and shared by everyone, a daily cap keeps it inside the free tier, and without a key or after an error the app shows the checked note.
 
-**Content quality.** Tests replay every line in chess.js and check that each learner move has a note. They also compare every opening name with Lichess's open dataset by position; that check caught two of my own mislabels. A dev-only script asks Lichess's cloud engine about every learner move: 0 flags across the 21 lines.
+**Content quality.** Tests replay every line in chess.js and check that each learner move has a note. They also compare every opening name with Lichess's open dataset by position; that check caught 14 of my own mislabels and missed transpositions. A dev-only script asks Lichess's cloud engine about every learner move: 0 flags across the 45 lines.
 
 **Engineering.**
 - The app started as an unreviewed side project. The audit found:
@@ -50,4 +50,4 @@ Links: live demo https://e4-learnchess.vercel.app (one-click demo account) · co
 - Hosting cost: $0.
 - The free API instance sleeps when idle; the cold start measured during the audit was 52.6 s. [Confirm the 10-minute keep-alive ping is running before claiming the API stays warm.]
 
-**What I'd do next.** The Slav and Italian courses (in progress), an engine for analysing your own games, and streaks and reminders.
+**What I'd do next.** More courses (answers to the Sicilian and French for 1.e4 players), an engine for analysing your own games, and streaks and reminders.

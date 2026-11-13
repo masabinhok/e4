@@ -18,6 +18,14 @@ const COVERS: Record<string, { fen: string; side: "white" | "black" }> = {
     fen: "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/2N5/PPP1PPPP/R2QKBNR b KQkq - 3 3",
     side: "white",
   },
+  slav: {
+    fen: "rnbqkbnr/pp2pppp/2p5/3p4/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3",
+    side: "black",
+  },
+  italian: {
+    fen: "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+    side: "white",
+  },
 };
 
 // Home for a signed-in learner: what's due, and how far each course has got.

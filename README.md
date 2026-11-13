@@ -8,7 +8,7 @@ Learn chess openings by playing them, not watching them. Annotated opening cours
 
 ## What it does
 
-- **Two courses, 21 annotated lines.** The **Caro-Kann Defense** for Black (12 lines: Advance, Exchange, Panov, Classical, Two Knights and sidelines) and the **Jobava London System** for White (9 lines). Every move you play has a short note explaining it.
+- **Four courses, 45 annotated lines, a full repertoire.** As White: the **Jobava London** against 1...d5 (9 lines) and the **Italian Game** against 1...e5 (11 lines). As Black: the **Caro-Kann** against 1.e4 (12 lines) and the **Slav** against 1.d4 (13 lines). Every move you play has a short note explaining it.
 - **Learn:** step through a line on the board with the notes, using arrows or ←/→.
 - **Drill:** play your side from memory while the opponent replies.
   - A wrong move shows the right one and its note.
@@ -30,8 +30,8 @@ Learn chess openings by playing them, not watching them. Annotated opening cours
 The courses are plain PGN files in [`api/src/seed/courses/`](api/src/seed/courses), so a chess player can review them in a pull request or a Lichess Study. Tests check that:
 
 - **every line replays legally** (chess.js), and every move the learner plays has a note;
-- **every opening name matches Lichess's** open opening dataset (CC0) for that position. This caught two of my own mislabels before release;
-- **no learner move is a blunder**, using `npm run check:evals`, a dev-only script that asks Lichess's cloud engine about each position. It currently reports 0 flags across all 21 lines.
+- **every opening name matches Lichess's** open opening dataset (CC0) for that position. Across the four courses it caught 14 of my own mislabels and missed transpositions before release;
+- **no learner move is a blunder**, using `npm run check:evals`, a dev-only script that asks Lichess's cloud engine about each position. It currently reports 0 flags across all 45 lines.
 
 ## Stack
 
@@ -128,7 +128,7 @@ The scores use Lighthouse's default simulated throttling. The lesson page's SEO 
 ## Known limitations
 
 - The API runs on Render's free tier, which sleeps after 15 minutes idle. A ping every 10 minutes keeps it awake; if one is missed, the first request takes about a minute.
-- Only two courses so far. The notes are short explanations of ideas, not deep analysis.
+- Four courses so far, and the Italian covers 1...e5 only. The notes are short explanations of ideas, not deep analysis.
 - There's no engine or game analysis in the app; it trains opening lines only.
 - The AI coach is extra flavour on top of checked notes. A small model can still be wrong, and the app labels it that way.
 
