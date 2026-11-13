@@ -522,8 +522,8 @@ export default function LessonPage({
             No lines here yet.{" "}
             {isPersonal
               ? code === "recorded-lines"
-                ? "Record one from the Record tab."
-                : "Paste one in the PGNs tab."
+                ? "Save one from My lines."
+                : "Paste one in My lines."
               : ""}
           </p>
         ) : (
