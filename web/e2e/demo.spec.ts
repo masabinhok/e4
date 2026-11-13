@@ -22,10 +22,17 @@ test("a visitor can try the demo and step through a seeded lesson", async ({
 
   const next = page.getByRole("button", { name: "Next", exact: true });
   for (let i = 0; i < 7; i++) await next.click();
-  // 1.e4 c6 2.d4 d5 3.Nc3 dxe4 4.Nxe4: the 7th move is the current one.
-  await expect(page.locator('[aria-current="step"]')).toHaveText("Nxe4");
+  // 1.e4 c6 2.d4 d5 3.e5 Bf5 4.Nf3: the 7th move is the current one.
+  await expect(page.locator('[aria-current="step"]')).toHaveText("Nf3");
+});
 
-  if (process.env.CAPTURE) {
-    await page.screenshot({ path: "../docs/screenshot-lesson.png" });
-  }
+test("leaving a page mid-request doesn't log you out", async ({ page }) => {
+  await page.goto("/auth/login");
+  await page.getByRole("button", { name: "Try the demo, no signup" }).click();
+  await page.waitForURL("**/lessons");
+  // Navigate away at once, aborting the page's in-flight session check.
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Welcome to the demo" }),
+  ).toBeVisible();
 });

@@ -2,21 +2,36 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Button from "@/components/Button";
+import Dashboard from "@/components/Dashboard";
+import HeroBoard from "@/components/HeroBoard";
 import { errorMessage } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 
 const steps = [
   {
     title: "Learn",
-    text: "Step through a line one move at a time, with the board in front of you.",
+    text: "Step through a line move by move, with a short note on why each move is played.",
   },
   {
-    title: "Practice",
-    text: "Play your side from memory. The opponent's replies come automatically.",
+    title: "Drill",
+    text: "Play your side from memory. The opponent answers; wrong moves and hints are counted.",
   },
   {
-    title: "Quiz",
-    text: "The next move is hidden. Your mistakes are counted, so you can see what hasn't stuck yet.",
+    title: "Review",
+    text: "Each line comes back when it's due: soon after a mistake, weeks later once it sticks.",
+  },
+];
+
+const courses = [
+  {
+    name: "Caro-Kann Defense",
+    side: "For Black against 1.e4",
+    text: "Solid and reliable: the Advance, Exchange, Panov, Classical and Two Knights, plus the common sidelines.",
+  },
+  {
+    name: "Jobava London System",
+    side: "For White with 1.d4",
+    text: "An aggressive London with Nc3 and Bf4: Nb5 tricks, the f3–g4 plan, and an h-pawn attack against ...g6.",
   },
 ];
 
@@ -40,37 +55,35 @@ export default function Home() {
     }
   };
 
+  if (isAuthenticated) return <Dashboard />;
+
   return (
-    <div className="flex flex-col gap-16 py-4 lg:py-16">
-      <section className="max-w-2xl">
-        <h1 className="text-4xl leading-tight sm:text-5xl">
-          Learn chess openings by playing them, not watching them.
-        </h1>
-        <p className="mt-5 max-w-xl text-lg text-muted">
-          Pick an opening, play through its main lines on the board, and drill
-          them until you know what comes next.
-        </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          {isAuthenticated ? (
-            <Button href="/lessons" size="lg">
-              Go to lessons
+    <div className="flex flex-col gap-20 py-4 lg:py-10">
+      <section className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div>
+          <h1 className="text-4xl leading-tight sm:text-5xl">
+            Learn chess openings by playing them, not watching them.
+          </h1>
+          <p className="mt-5 max-w-xl text-lg text-muted">
+            Annotated opening courses you play on the board. Drill your moves
+            from memory, and each line comes back for review when you&apos;re
+            about to forget it.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button size="lg" onClick={startDemo} disabled={isLoading}>
+              {isLoading ? "Starting the demo…" : "Try the demo, no signup"}
             </Button>
-          ) : (
-            <>
-              <Button size="lg" onClick={startDemo} disabled={isLoading}>
-                {isLoading ? "Starting the demo…" : "Try the demo, no signup"}
-              </Button>
-              <Button href="/auth/login" variant="secondary" size="lg">
-                Log in
-              </Button>
-            </>
+            <Button href="/auth/login" variant="secondary" size="lg">
+              Log in
+            </Button>
+          </div>
+          {error && (
+            <p role="alert" className="mt-4 text-sm text-ember">
+              {error}
+            </p>
           )}
         </div>
-        {error && (
-          <p role="alert" className="mt-4 text-sm text-ember">
-            {error}
-          </p>
-        )}
+        <HeroBoard />
       </section>
 
       <section aria-labelledby="how" className="max-w-4xl">
@@ -87,6 +100,24 @@ export default function Home() {
             </li>
           ))}
         </ol>
+      </section>
+
+      <section aria-labelledby="courses" className="max-w-4xl">
+        <h2 id="courses" className="text-2xl">
+          Courses
+        </h2>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+          {courses.map((c) => (
+            <li
+              key={c.name}
+              className="rounded-xl border border-line bg-surface p-5"
+            >
+              <p className="font-serif text-xl">{c.name}</p>
+              <p className="mt-1 text-sm text-brass">{c.side}</p>
+              <p className="mt-3 text-sm text-muted">{c.text}</p>
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   );

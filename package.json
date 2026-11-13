@@ -5,12 +5,11 @@
   },
   "scripts": {
     "prepare": "husky",
-    "build:all": "npm --prefix api run build && npm --prefix web run build",
-    "format:all": "npm --prefix api run format && npm --prefix web run format"
+    "build:all": "npm --prefix api run build && npm --prefix web run build"
   },
   "lint-staged": {
-    "api/**/*.{ts,js,json}": [
-      "npm --prefix api run lint",
+    "api/**/*.ts": [
+      "npm --prefix api run lint:fix",
       "npm --prefix api run format"
     ],
     "web/**/*.{ts,tsx,js,jsx}": [

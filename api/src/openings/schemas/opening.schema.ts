@@ -20,6 +20,16 @@ export class Opening {
   @Prop({ required: true, unique: true })
   code: string;
 
+  // Course metadata (seeded openings only).
+  @Prop({ type: String, enum: ['white', 'black'] })
+  side?: 'white' | 'black';
+
+  @Prop()
+  summary?: string;
+
+  @Prop({ type: [String], default: undefined })
+  keyIdeas?: string[];
+
   @Prop({ required: true, type: String, default: Status.Pending, enum: Status })
   status: Status;
 

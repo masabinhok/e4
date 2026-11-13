@@ -1,5 +1,4 @@
 "use client";
-import { motion } from "motion/react";
 import { CircleAlert, CircleCheck, Info, X } from "lucide-react";
 
 interface MessageProps {
@@ -21,11 +20,9 @@ export default function Message({
 }: MessageProps) {
   const { tone, Icon } = styles[type];
   return (
-    <motion.div
+    <div
       role={type === "error" ? "alert" : "status"}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border bg-surface px-4 py-3 shadow-lg shadow-black/30 ${tone}`}
+      className={`toast-in pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border bg-surface px-4 py-3 shadow-lg shadow-black/30 ${tone}`}
     >
       <Icon className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
       <p className="flex-1 text-sm text-ivory">{message}</p>
@@ -39,6 +36,6 @@ export default function Message({
           <X className="size-4" />
         </button>
       )}
-    </motion.div>
+    </div>
   );
 }

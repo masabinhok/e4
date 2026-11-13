@@ -28,6 +28,19 @@ export class Variation {
 
   @Prop({ required: true })
   code: string;
+
+  // Course lines only (seeded from api/src/seed/courses).
+  @Prop()
+  chapter?: string;
+
+  @Prop()
+  order?: number;
+
+  @Prop()
+  officialName?: string; // the Lichess opening name for this line
+
+  @Prop({ type: [String], default: undefined })
+  notes?: string[]; // notes[i] explains moves[i]
 }
 
 export type VariationDocument = Variation & Document;

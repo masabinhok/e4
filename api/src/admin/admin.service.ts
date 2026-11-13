@@ -3,6 +3,7 @@ import { OpeningsService } from 'src/openings/openings.service';
 import { MongooseId } from 'src/types/types';
 import { UsersService } from 'src/users/users.service';
 import { VariationsService } from 'src/variations/variations.service';
+import { ProgressService } from 'src/progress/progress.service';
 
 @Injectable()
 export class AdminService {
@@ -10,6 +11,7 @@ export class AdminService {
     private usersService: UsersService,
     private openingsService: OpeningsService,
     private variationsService: VariationsService,
+    private progressService: ProgressService,
   ) {}
   async getAdminData() {
     const users = await this.usersService.findUsers();
@@ -32,11 +34,14 @@ export class AdminService {
   }
 
   async deleteVariation(variationId: MongooseId) {
-    return this.variationsService.deleteOne(variationId);
+    const result = await this.variationsService.deleteOne(variationId);
+    await this.progressService.deleteForVariations([variationId]);
+    return result;
   }
   async deleteUser(userId: MongooseId) {
     const result = await this.usersService.deleteOne(userId);
     await this.variationsService.deleteOwnedBy(userId);
+    await this.progressService.deleteForUser(userId);
     await this.openingsService.deletePendingBy(userId);
     return result;
   }

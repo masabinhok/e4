@@ -1,5 +1,5 @@
 import { User } from "@/types/types";
-import { api, setOnUnauthorized } from "@/lib/api";
+import { api, ApiError, setOnUnauthorized } from "@/lib/api";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -59,8 +59,11 @@ export const useAuth = create<AuthState>()(
             const user = await api<User>("/auth/me");
             set({ user, isAuthenticated: true, isLoading: false });
             return true;
-          } catch {
-            set(signedOut);
+          } catch (err) {
+            // Only the API saying 401 means signed out. A network error or a request
+            // aborted by navigating away must not wipe the saved session.
+            if (err instanceof ApiError && err.status === 401) set(signedOut);
+            else set({ isLoading: false });
             return false;
           }
         },

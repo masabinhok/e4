@@ -1,15 +1,33 @@
 "use client";
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
+import { isDue } from "@/lib/progress";
+import { useLearning } from "@/lib/useLearning";
 import { useAuth } from "@/store/auth";
 
 export default function Profile() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { progress } = useLearning();
   if (!user) return null;
 
-  // Only what the API actually records; practice and quiz progress isn't saved yet.
   const stats = [
+    { label: "Lines learned", value: progress.length, href: "/lessons" },
+    {
+      label: "Mastered (2+ weeks)",
+      value: progress.filter((p) => p.box >= 4).length,
+      href: "/lessons",
+    },
+    {
+      label: "Due now",
+      value: progress.filter((p) => isDue(p)).length,
+      href: "/review",
+    },
+    {
+      label: "Drills done",
+      value: progress.reduce((n, p) => n + p.reviews, 0),
+      href: "/review",
+    },
     {
       label: "Recorded lines",
       value: user.recordedLines?.length ?? 0,

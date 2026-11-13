@@ -107,7 +107,7 @@ export default function LessonsPage() {
               key={o._id}
               href={`/lessons/${o.code}`}
               title={o.name}
-              detail={`${o.variations.length} ${o.variations.length === 1 ? "line" : "lines"} · ${o.description}`}
+              detail={`${o.variations.length} ${o.variations.length === 1 ? "line" : "lines"}${o.side ? ` · you play ${o.side}` : ""} · ${o.description}`}
             />
           ))
         )}
