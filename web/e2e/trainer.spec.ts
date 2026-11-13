@@ -77,7 +77,7 @@ test("learn: each move comes with its note", async ({ page }) => {
 
 test("PGNs: a full PGN loads and saves", async ({ page }) => {
   await demo(page);
-  await page.goto("/custom");
+  await page.goto("/my-lines?tab=paste");
   await page
     .getByLabel("PGN or moves")
     .fill('[Event "Test"]\n\n1. e4 {main} c6 2. d4 d5 1/2-1/2');

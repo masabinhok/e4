@@ -10,8 +10,8 @@ const appPages = [
   "/lessons",
   "/profile",
   "/lessons/carokann",
+  "/my-lines",
   "/record",
-  "/custom",
 ];
 
 async function check(
