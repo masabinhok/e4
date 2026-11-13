@@ -24,10 +24,6 @@ test("a visitor can try the demo and step through a seeded lesson", async ({
   for (let i = 0; i < 7; i++) await next.click();
   // 1.e4 c6 2.d4 d5 3.e5 Bf5 4.Nf3: the 7th move is the current one.
   await expect(page.locator('[aria-current="step"]')).toHaveText("Nf3");
-
-  if (process.env.CAPTURE) {
-    await page.screenshot({ path: "../docs/screenshot-lesson.png" });
-  }
 });
 
 test("leaving a page mid-request doesn't log you out", async ({ page }) => {

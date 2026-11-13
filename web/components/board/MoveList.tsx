@@ -37,7 +37,7 @@ export default function MoveList({
               aria-current={isLast ? "step" : undefined}
               className={
                 isNext
-                  ? "text-muted/70"
+                  ? "text-muted"
                   : isLast
                     ? "rounded bg-brass/20 px-1 font-semibold text-brass-bright"
                     : "text-ivory"

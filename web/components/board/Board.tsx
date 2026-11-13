@@ -21,26 +21,19 @@ const tint = {
   selected: "rgba(127, 179, 122, 0.5)", // moss
 };
 
-// Fits the board to its container (and to the screen height on desktop), so it
-// resizes with the window instead of being measured once.
+// CSS sizes the square (container width, capped by the screen height), so the
+// space is reserved from the first paint; JS only reads the size for the board.
 function useBoardWidth() {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const measure = () =>
-      setWidth(
-        Math.floor(Math.min(el.clientWidth, window.innerHeight - 140, 640)),
-      );
-    measure();
-    const observer = new ResizeObserver(measure);
+    const observer = new ResizeObserver(() =>
+      setWidth(Math.floor(el.clientWidth)),
+    );
     observer.observe(el);
-    window.addEventListener("resize", measure);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", measure);
-    };
+    return () => observer.disconnect();
   }, []);
   return { ref, width };
 }
@@ -83,12 +76,13 @@ export default function Board({
   return (
     <div
       ref={ref}
-      className="w-full"
+      className="mx-auto aspect-square w-full"
+      style={{ maxWidth: "min(640px, calc(100dvh - 140px))" }}
       role="group"
       aria-label={`Chessboard, ${orientation} at the bottom`}
     >
       {width > 0 && (
-        <div className="mx-auto" style={{ width }}>
+        <div>
           <Chessboard
             position={fen}
             boardWidth={width}
