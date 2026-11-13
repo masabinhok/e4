@@ -97,14 +97,11 @@ export class AuthService {
     }
 
     const tokens = await this.getTokens(
-      newUser._id as MongooseId,
+      newUser._id,
       newUser.role,
       newUser.email,
     );
-    await this.storeRefreshToken(
-      newUser._id as MongooseId,
-      tokens.refreshToken,
-    );
+    await this.storeRefreshToken(newUser._id, tokens.refreshToken);
 
     return tokens;
   }
@@ -126,14 +123,11 @@ export class AuthService {
     }
 
     const tokens = await this.getTokens(
-      existingUser._id as MongooseId,
+      existingUser._id,
       existingUser.role,
       existingUser.email,
     );
-    await this.storeRefreshToken(
-      existingUser._id as MongooseId,
-      tokens.refreshToken,
-    );
+    await this.storeRefreshToken(existingUser._id, tokens.refreshToken);
 
     return tokens;
   }
@@ -161,12 +155,12 @@ export class AuthService {
     }
 
     const tokens = await this.getTokens(
-      user._id as MongooseId,
+      user._id,
       user.role,
       user.email,
       user.isDemo,
     );
-    await this.storeRefreshToken(user._id as MongooseId, tokens.refreshToken);
+    await this.storeRefreshToken(user._id, tokens.refreshToken);
     return tokens;
   }
 
@@ -174,13 +168,8 @@ export class AuthService {
   async demo(): Promise<{ accessToken: string; refreshToken: string }> {
     const unusablePassword = await this.generateHash(randomUUID());
     const user = await this.usersService.createDemoUser(unusablePassword);
-    const tokens = await this.getTokens(
-      user._id as MongooseId,
-      user.role,
-      user.email,
-      true,
-    );
-    await this.storeRefreshToken(user._id as MongooseId, tokens.refreshToken);
+    const tokens = await this.getTokens(user._id, user.role, user.email, true);
+    await this.storeRefreshToken(user._id, tokens.refreshToken);
     return tokens;
   }
 

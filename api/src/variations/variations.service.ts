@@ -116,10 +116,7 @@ export class VariationsService {
       status: Status.Accepted,
       contributor: userId,
     });
-    await this.usersService.addRecordedLines(
-      userId,
-      variation._id as MongooseId,
-    );
+    await this.usersService.addRecordedLines(userId, variation._id);
     return { message: 'Successfully recorded a variation!' };
   }
 
@@ -131,7 +128,7 @@ export class VariationsService {
       status: Status.Accepted,
       contributor: userId,
     });
-    await this.usersService.addCustomPgns(userId, variation._id as MongooseId);
+    await this.usersService.addCustomPgns(userId, variation._id);
     return { message: 'Successfully saved a custom pgn!' };
   }
 }
