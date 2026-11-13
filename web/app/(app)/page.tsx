@@ -33,6 +33,16 @@ const courses = [
     side: "For White with 1.d4",
     text: "An aggressive London with Nc3 and Bf4: Nb5 tricks, the f3–g4 plan, and an h-pawn attack against ...g6.",
   },
+  {
+    name: "Slav Defense",
+    side: "For Black against 1.d4",
+    text: "The Caro-Kann's twin: ...c6 and ...Bf5 against the main lines, the slow e3 systems, and the London and Colle.",
+  },
+  {
+    name: "Italian Game",
+    side: "For White against 1...e5",
+    text: "The modern, slow Giuoco Pianissimo, the Two Knights with 4.d3, quieter replies and the traps to avoid.",
+  },
 ];
 
 export default function Home() {
