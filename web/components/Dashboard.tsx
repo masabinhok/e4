@@ -1,10 +1,24 @@
 "use client";
 import Link from "next/link";
+import Board from "@/components/board/Board";
 import Button from "@/components/Button";
 import { PageSpinner } from "@/components/ProtectedRoute";
 import { whenDue } from "@/lib/progress";
 import { useLearning } from "@/lib/useLearning";
 import { useAuth } from "@/store/auth";
+
+// The position each course is built around, for its cover tile.
+// shortcut: hard-coded per course; move into course.json when there are more than a few.
+const COVERS: Record<string, { fen: string; side: "white" | "black" }> = {
+  carokann: {
+    fen: "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+    side: "black",
+  },
+  jobava: {
+    fen: "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/2N5/PPP1PPPP/R2QKBNR b KQkq - 3 3",
+    side: "white",
+  },
+};
 
 // Home for a signed-in learner: what's due, and how far each course has got.
 export default function Dashboard() {
@@ -82,26 +96,37 @@ export default function Dashboard() {
             <Link
               key={o._id}
               href={`/lessons/${o.code}`}
-              className="flex flex-col gap-3 rounded-xl border border-line bg-surface px-5 py-4 hover:border-amber/60"
+              className="flex items-center gap-4 rounded-2xl bg-surface p-4 hover:bg-raised"
             >
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="font-display text-xl">{o.name}</span>
-                <span className="shrink-0 text-sm text-muted tabular-nums">
-                  {learned} / {total} learned
+              {COVERS[o.code] && (
+                <div className="w-20 shrink-0 sm:w-24">
+                  <Board
+                    fen={COVERS[o.code].fen}
+                    orientation={COVERS[o.code].side}
+                    interactive={false}
+                  />
+                </div>
+              )}
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <span className="font-display text-xl font-black">
+                  {o.name}
                 </span>
-              </div>
-              <div
-                role="progressbar"
-                aria-label={`${o.name} progress`}
-                aria-valuemin={0}
-                aria-valuemax={total}
-                aria-valuenow={learned}
-                className="h-1.5 overflow-hidden rounded-full bg-raised"
-              >
+                <span className="text-sm text-muted tabular-nums">
+                  You play {o.side ?? "both"} · {learned} / {total} learned
+                </span>
                 <div
-                  className="h-full rounded-full bg-amber"
-                  style={{ width: `${total ? (learned / total) * 100 : 0}%` }}
-                />
+                  role="progressbar"
+                  aria-label={`${o.name} progress`}
+                  aria-valuemin={0}
+                  aria-valuemax={total}
+                  aria-valuenow={learned}
+                  className="h-1.5 overflow-hidden rounded-full bg-raised"
+                >
+                  <div
+                    className="h-full rounded-full bg-amber"
+                    style={{ width: `${total ? (learned / total) * 100 : 0}%` }}
+                  />
+                </div>
               </div>
             </Link>
           );
