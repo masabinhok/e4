@@ -19,6 +19,7 @@ import {
   SkipForward,
 } from "lucide-react";
 import Board, { Marker } from "@/components/board/Board";
+import AskCoach from "@/components/board/AskCoach";
 import Coach from "@/components/board/Coach";
 import MoveList from "@/components/board/MoveList";
 import Button from "@/components/Button";
@@ -340,6 +341,7 @@ export default function LessonPage({
     : 0;
   const nextMove = state.moves[state.index];
 
+  const coachable = Boolean(line?.notes?.length);
   // What the coach says right now.
   const coach = done ? (
     <Coach tone="done">
@@ -376,6 +378,13 @@ export default function LessonPage({
           : `Not ${wrong.san}. This line plays ${nextMove}.`}
       </p>
       {correctNote && <p className="mt-1">{correctNote}</p>}
+      {coachable && line && (
+        <AskCoach
+          variationId={line._id}
+          index={state.index}
+          played={wrong.san}
+        />
+      )}
     </Coach>
   ) : marker?.kind === "correct" && coachNote ? (
     <Coach tone="correct">
@@ -383,10 +392,16 @@ export default function LessonPage({
         <span className="font-display font-extrabold text-moss">Correct. </span>
         {coachNote}
       </p>
+      {coachable && line && (
+        <AskCoach variationId={line._id} index={state.index - 1} />
+      )}
     </Coach>
   ) : coachNote ? (
     <Coach>
       <p>{coachNote}</p>
+      {coachable && line && state.index > 0 && !drilling && (
+        <AskCoach variationId={line._id} index={state.index - 1} />
+      )}
       {drilling && yourTurn && (
         <p className="mt-1 font-display font-extrabold text-amber">
           Your move.
