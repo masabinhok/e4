@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   BookOpen,
+  Repeat,
   FileText,
   LogOut,
   Shield,
@@ -15,6 +16,7 @@ import { useAuth } from "@/store/auth";
 
 const items = [
   { href: "/lessons", label: "Lessons", Icon: BookOpen },
+  { href: "/review", label: "Review", Icon: Repeat },
   { href: "/record", label: "Record", Icon: SquarePen },
   { href: "/custom", label: "PGNs", Icon: FileText },
   { href: "/profile", label: "Profile", Icon: UserRound },
@@ -137,7 +139,7 @@ export default function Navigation() {
       {isAuthenticated && (
         <nav
           aria-label="Main"
-          className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-line bg-night/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-night/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
         >
           {items.map(({ href, label, Icon }) => (
             <Link

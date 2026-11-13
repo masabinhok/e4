@@ -5,6 +5,8 @@ import { expect, Page, test } from "@playwright/test";
 const widths = [375, 768, 1280];
 const publicPages = ["/", "/auth/login", "/auth/signup", "/credit"];
 const appPages = [
+  "/",
+  "/review",
   "/lessons",
   "/profile",
   "/lessons/carokann",

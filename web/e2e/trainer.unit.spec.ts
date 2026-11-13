@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { parseMoves } from "../lib/chess";
+import { Progress, statusOf, whenDue } from "../lib/progress";
 import {
+  branchPoint,
   initialTrainer,
   isComplete,
   isLearnersTurn,
@@ -18,15 +20,15 @@ const run = (
 
 test.describe("trainer", () => {
   test("black waits for the opponent, then moves", () => {
-    const s = initialTrainer(line, "black", "practice");
+    const s = initialTrainer(line, "black", "drill");
     expect(isLearnersTurn(s)).toBe(false);
     expect(opponentShouldMove(s)).toBe(true);
     const after = run(s, { type: "next" });
     expect(isLearnersTurn(after)).toBe(true);
   });
 
-  test("a wrong move counts in quiz but not in learn", () => {
-    const quiz = run(initialTrainer(line, "white", "quiz"), {
+  test("a wrong move counts in a drill but not in learn", () => {
+    const quiz = run(initialTrainer(line, "white", "drill"), {
       type: "attempt",
       san: "d4",
     });
@@ -40,7 +42,7 @@ test.describe("trainer", () => {
 
   test("moves out of turn are ignored", () => {
     const s = run(
-      initialTrainer(line, "white", "quiz"),
+      initialTrainer(line, "white", "drill"),
       { type: "attempt", san: "e4" },
       { type: "attempt", san: "c6" },
     );
@@ -48,7 +50,7 @@ test.describe("trainer", () => {
   });
 
   test("completing the line once, then restarting, clears it", () => {
-    let s = initialTrainer(line, "white", "quiz");
+    let s = initialTrainer(line, "white", "drill");
     s = run(
       s,
       { type: "attempt", san: "e4" },
@@ -72,11 +74,61 @@ test.describe("trainer", () => {
     ).toBe(0);
     expect(
       run(
-        initialTrainer(line, "white", "quiz"),
+        initialTrainer(line, "white", "drill"),
         { type: "next" },
         { type: "back" },
       ).index,
     ).toBe(1);
+  });
+});
+
+test.describe("drill extras", () => {
+  test("a hint counts as a mistake, on the learner's turn only", () => {
+    const s = run(initialTrainer(line, "black", "drill"), { type: "hint" });
+    expect(s.mistakes).toBe(0); // White to move: no hint to give
+    expect(run(s, { type: "next" }, { type: "hint" }).mistakes).toBe(1);
+  });
+
+  test("branchPoint finds where a line leaves the others", () => {
+    const short = ["e4", "c6", "d4", "d5", "e5", "Bf5", "Nf3"];
+    const tal = ["e4", "c6", "d4", "d5", "e5", "Bf5", "h4"];
+    const panov = ["e4", "c6", "d4", "d5", "exd5"];
+    expect(branchPoint(short, [tal, panov])).toBe(6);
+    expect(branchPoint(panov, [short])).toBe(4);
+    expect(branchPoint(short, [])).toBe(0);
+  });
+
+  test("jump skips ahead only from the start", () => {
+    const s = run(initialTrainer(line, "white", "drill"), {
+      type: "jump",
+      index: 2,
+    });
+    expect(s.index).toBe(2);
+    expect(run(s, { type: "jump", index: 3 }).index).toBe(2);
+  });
+});
+
+test.describe("progress", () => {
+  const p = (box: number, dueInDays: number): Progress => ({
+    _id: "p",
+    variation: { _id: "v", title: "t", code: "c", moves: [] },
+    box,
+    dueAt: new Date(Date.now() + dueInDays * 86_400_000).toISOString(),
+    reviews: 1,
+    lastMistakes: 0,
+  });
+
+  test("status of a line", () => {
+    expect(statusOf(undefined)).toBe("new");
+    expect(statusOf(p(2, -1))).toBe("due");
+    expect(statusOf(p(2, 3))).toBe("learned");
+    expect(statusOf(p(4, 14))).toBe("mastered");
+  });
+
+  test("when it's due, in words", () => {
+    expect(whenDue(p(1, 1).dueAt)).toBe("tomorrow");
+    expect(whenDue(p(2, 3).dueAt)).toBe("in 3 days");
+    expect(whenDue(p(2, -2).dueAt)).toBe("now");
   });
 });
 
