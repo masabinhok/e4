@@ -1,0 +1,14 @@
+{
+  "code": "italian",
+  "name": "Italian Game",
+  "side": "white",
+  "description": "A classic 1.e4 weapon for White: bishop to c4, then the slow, solid build-up of the Giuoco Pianissimo. Covers 1...e5 only.",
+  "summary": "The Italian (1.e4 e5 2.Nf3 Nc6 3.Bc4) aims the bishop at f7 and builds a flexible centre with c3 and d3. This course plays it the modern way, slowly: castle, Re1 and a4, with d4 kept in reserve. It covers Black's main replies 3...Bc5 and 3...Nf6, the Hungarian 3...Be7, the quieter 3...d6, the 3...Nd4 trap, and one line each against the Petrov and the Philidor. It covers 1...e5 only; against the Sicilian, French and others you'll need other material.",
+  "keyIdeas": [
+    "The bishop on c4 aims at f7, the weakest square in Black's camp.",
+    "c3 and d3 first: a solid centre, with d4 kept in reserve.",
+    "Castling, Re1 and a4 are the standard build-up moves.",
+    "Against passive setups like ...Be7 or ...d6, strike with d4 at once.",
+    "Don't grab bait: against 3...Nd4, simply trade knights."
+  ]
+}
