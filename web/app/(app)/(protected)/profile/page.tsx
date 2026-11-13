@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import BoardSettings from "@/components/BoardSettings";
 import Button from "@/components/Button";
 import { isDue } from "@/lib/progress";
 import { useLearning } from "@/lib/useLearning";
@@ -75,6 +76,8 @@ export default function Profile() {
           </a>
         ))}
       </dl>
+
+      <BoardSettings />
 
       <div className="flex flex-col gap-3 sm:flex-row">
         {user.role === "ADMIN" && (

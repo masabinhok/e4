@@ -40,7 +40,7 @@ export default function SaveLineForm({
         body: JSON.stringify({ title, description, moves, boardflip: side }),
       });
       addMessage({ content: savedMessage, type: "success" });
-      playSound("achievement");
+      playSound("complete");
       form.reset();
       onSaved();
     } catch (err) {

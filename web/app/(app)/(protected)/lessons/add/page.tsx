@@ -25,7 +25,7 @@ export default function ContributeOpening() {
         content: "Submitted. An admin will review it.",
         type: "success",
       });
-      playSound("achievement");
+      playSound("complete");
       form.reset();
     } catch (err) {
       addMessage({ content: errorMessage(err), type: "error" });

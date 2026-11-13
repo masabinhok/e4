@@ -18,9 +18,10 @@ import {
   SkipBack,
   SkipForward,
 } from "lucide-react";
-import Board from "@/components/board/Board";
+import Board, { Marker } from "@/components/board/Board";
 import MoveList from "@/components/board/MoveList";
 import Button from "@/components/Button";
+import SoundToggle from "@/components/SoundToggle";
 import { PageSpinner } from "@/components/ProtectedRoute";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { api, errorMessage } from "@/lib/api";
@@ -167,7 +168,7 @@ export default function LessonPage({
     const move = positionAfter(state.moves, state.index).move(
       state.moves[state.index],
     );
-    playSound(soundFor(move));
+    playSound(soundFor(move, !isLearnersTurn(state)));
     dispatch({ type: "next" });
   }, [state, playSound]);
 
@@ -188,7 +189,7 @@ export default function LessonPage({
   const done = isComplete(state) && state.mode === "drill";
   useEffect(() => {
     if (!done || !line) return;
-    playSound(state.mistakes === 0 ? "lessonPass" : "achievement");
+    playSound(state.mistakes === 0 ? "cleanRun" : "complete");
     api<Progress>(`/progress/${line._id}`, {
       method: "POST",
       body: JSON.stringify({ mistakes: state.mistakes }),
@@ -226,7 +227,7 @@ export default function LessonPage({
     }
     dispatch({ type: "attempt", san: move.san });
     if (move.san !== state.moves[state.index]) {
-      playSound("incorrect");
+      playSound("wrong");
       setWrong({ squares: [from, to], san: move.san });
       return false;
     }
@@ -285,6 +286,16 @@ export default function LessonPage({
 
   const fen = positionAfter(state.moves, state.index).fen();
   const nextSquares = squaresOf(state.moves, state.index);
+  // ✓ on the learner's move just played in a drill, ✗ on a wrong attempt.
+  const lastWasLearners =
+    state.index > 0 &&
+    ((state.index - 1) % 2 === 0) === (state.side === "white");
+  const lastSquares = squaresOf(state.moves, state.index - 1);
+  const marker: Marker | null = wrong
+    ? { square: wrong.squares[1], kind: "wrong" }
+    : state.mode === "drill" && lastWasLearners && lastSquares
+      ? { square: lastSquares[1], kind: "correct" }
+      : null;
   const yourTurn = isLearnersTurn(state);
   const drilling = state.mode === "drill";
   // After a wrong move in a drill, show the right one so it sticks.
@@ -320,6 +331,7 @@ export default function LessonPage({
           onMove={onMove}
           lastMove={squaresOf(state.moves, state.index - 1)}
           wrongMove={wrong?.squares}
+          marker={marker}
           hint={arrow}
         />
 
@@ -385,6 +397,7 @@ export default function LessonPage({
           >
             Restart
           </Button>
+          <SoundToggle />
           <Button
             variant="ghost"
             aria-label="Flip board"
