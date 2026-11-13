@@ -22,7 +22,8 @@ export class Variation {
   @Prop({ default: 'white' })
   boardflip: BoardFlip;
 
-  @Prop({ required: true })
+  // Optional in the forms, so an empty string is valid.
+  @Prop({ default: '' })
   description: string;
 
   @Prop({ required: true })

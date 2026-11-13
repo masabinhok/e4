@@ -1,334 +1,125 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { Chess } from "chess.js";
-import { Chessboard } from "react-chessboard";
-import useLocalStorage from "@/hooks/useLocalStorage";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { BoardFlip } from "@/types/types";
-import Image from "next/image";
-import flipBoard from "@/public/icons/flip.svg";
+import { FlipVertical2, RotateCcw, Undo2 } from "lucide-react";
+import Board from "@/components/board/Board";
+import MoveList from "@/components/board/MoveList";
+import SaveLineForm from "@/components/board/SaveLineForm";
 import Button from "@/components/Button";
-import { api, errorMessage } from "@/lib/api";
+import { positionAfter, soundFor, squaresOf, tryMove } from "@/lib/chess";
+import { useAuth } from "@/store/auth";
 import { useSoundStore } from "@/store/useSoundStore";
-import { useMessageStore } from "@/store/messageStore";
+import { BoardFlip } from "@/types/types";
 
 export default function RecordLine() {
-  const searchParams = useSearchParams();
-  const code = searchParams.get("code");
-  const [pgnName, setPgnName] = useState<string>("");
-  const [pgnDescription, setPgnDescription] = useState<string>("");
-  const [game, setGame] = useState(new Chess());
-  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
-  const [moveHistory, setMoveHistory] = useState<string[]>([]);
-  const [boardFlip, setBoardFlip] = useLocalStorage<BoardFlip>(
-    "boardFlip",
-    "white",
-  );
-  const [moveValidation, setMoveValidation] = useState<{
-    source: string;
-    target: string;
-    valid: boolean;
-  } | null>(null);
-  const { addMessage } = useMessageStore();
-  const [isBrowser, setIsBrowser] = useState<boolean>(false);
+  const code = useSearchParams().get("code");
+  const { user } = useAuth();
   const playSound = useSoundStore((s) => s.playSound);
-  const [isContributed, setIsContributed] = useLocalStorage<boolean>(
-    "isContributed",
-    false,
-  );
-  const movesContainerRef = useRef<HTMLDivElement>(null);
+  const [moves, setMoves] = useState<string[]>([]);
+  const [side, setSide] = useState<BoardFlip>("white");
+  const [saved, setSaved] = useState(false);
 
-  const toggleBoardFlip = () => {
-    setBoardFlip(boardFlip === "white" ? "black" : "white");
-  };
-
-  useEffect(() => {
-    setIsBrowser(true);
-  }, []);
-
-  const onDrop = (sourceSquare: string, targetSquare: string) => {
-    try {
-      const move = {
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: "q",
-      };
-
-      const gameCopy = new Chess(game.fen());
-      const result = gameCopy.move(move);
-
-      if (!result) {
-        playSound("illegal");
-        setMoveValidation({
-          source: sourceSquare,
-          target: targetSquare,
-          valid: false,
-        });
-        addMessage({
-          content: "Invalid move",
-          type: "error",
-        });
-        return false;
-      }
-
-      setMoveValidation({
-        source: sourceSquare,
-        target: targetSquare,
-        valid: true,
-      });
-      setGame(gameCopy);
-      setMoveHistory([...moveHistory, result.san]);
-      setCurrentMoveIndex(currentMoveIndex + 1);
-
-      if (gameCopy.inCheck()) {
-        playSound("check");
-      } else if (result.captured) {
-        playSound("capture");
-      } else {
-        playSound("moveSelf");
-      }
-
-      if (result.isKingsideCastle() || result.isQueensideCastle()) {
-        playSound("castle");
-      }
-      return true;
-    } catch {
+  const onMove = (from: string, to: string) => {
+    const move = tryMove(positionAfter(moves, moves.length), from, to);
+    if (!move) {
       playSound("illegal");
-      setMoveValidation({
-        source: sourceSquare,
-        target: targetSquare,
-        valid: false,
-      });
-      addMessage({
-        content: "Invalid move",
-        type: "error",
-      });
       return false;
     }
+    playSound(soundFor(move));
+    setMoves([...moves, move.san]);
+    setSaved(false);
+    return true;
   };
 
-  useEffect(() => {
-    if (movesContainerRef.current) {
-      movesContainerRef.current.lastElementChild?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "end",
-      });
-    }
-  }, [currentMoveIndex]);
-
-  const resetGame = () => {
-    setGame(new Chess());
-    setMoveHistory([]);
-    setCurrentMoveIndex(0);
-    setMoveValidation(null);
-  };
-
-  const savePGN = async () => {
-    if (!moveHistory.length) {
-      addMessage({
-        content: "Please play some moves to record.",
-        type: "error",
-      });
-      return;
-    }
-    if (!pgnName) {
-      addMessage({
-        content: "Please enter a name.",
-        type: "error",
-      });
-      return;
-    }
-    if (!pgnDescription) {
-      addMessage({
-        content: "Please describe your recording.",
-        type: "error",
-      });
-      return;
-    }
-
-    const newVariation = {
-      title: pgnName,
-      description: pgnDescription,
-      moves: moveHistory,
-      boardflip: boardFlip,
-    };
-
-    try {
-      await api(`/variations/${code ? `contribute/${code}` : "record"}`, {
-        method: "POST",
-        body: JSON.stringify(newVariation),
-      });
-    } catch (err) {
-      addMessage({
-        content: errorMessage(err, "Couldn't save the line."),
-        type: "error",
-      });
-      return;
-    }
-
-    setPgnName("");
-    setPgnDescription("");
-    setIsContributed(true);
-    addMessage({
-      content: "PGN saved successfully",
-      type: "success",
-    });
-  };
-
-  const getSquareStyles = () => {
-    if (!moveValidation) return {};
-    const { source, target, valid } = moveValidation;
-    const color = valid ? "rgba(0, 255, 0, 0.4)" : "rgba(255, 0, 0, 0.4)";
-    return {
-      [source]: { backgroundColor: color },
-      [target]: { backgroundColor: color },
-    };
-  };
-
-  const previousMove = () => {
-    if (currentMoveIndex > 0) {
-      playSound("moveSelf");
-      const newHistory = moveHistory.slice(0, -1);
-      const newGame = new Chess();
-      newHistory.forEach((move) => newGame.move(move));
-      setGame(newGame);
-      setMoveHistory(newHistory);
-      setCurrentMoveIndex(currentMoveIndex - 1);
-      setMoveValidation(null);
-      return true;
-    }
-    return false;
-  };
+  const contributing = Boolean(code);
+  const blocked = contributing && user?.isDemo;
 
   return (
-    <div className="flex flex-col lg:flex-row relative">
-      <div className="flex-1 flex items-center justify-center p-6 relative">
-        {isBrowser ? (
-          <Chessboard
-            onPieceDrop={onDrop}
-            position={game.fen()}
-            boardWidth={Math.min(window.innerWidth * 0.85, 520)}
-            customDarkSquareStyle={{ backgroundColor: "#334155" }}
-            customLightSquareStyle={{ backgroundColor: "#cbd5e1" }}
-            customSquareStyles={getSquareStyles()}
-            boardOrientation={boardFlip}
-          />
-        ) : (
-          <div className="text-7xl text-blue-400">LOADING...</div>
-        )}
-      </div>
-
-      <aside className="w-full lg:w-[430px] bg-gray-800/95 p-8 flex flex-col gap-5 shadow-xl rounded-t-3xl lg:rounded-l-3xl">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-extrabold text-blue-400">
-            Record Lines
-          </h1>
-          <button
-            className=" bg-blue-500 hover:brightness-110 transition p-2 rounded-full shadow-lg cursor-pointer"
-            onClick={toggleBoardFlip}
-            aria-label="Flip Board"
-          >
-            <Image
-              src={flipBoard}
-              alt="Flip board"
-              width={28}
-              height={28}
-              className="invert"
-            />
-          </button>
-        </div>
-
-        <div className="bg-gray-700 p-4 rounded-xl  shadow-inner">
-          <div className="flex items-center gap-2">
-            <div
-              ref={movesContainerRef}
-              className="font-mono text-base bg-gray-800 p-2 rounded flex-1 whitespace-nowrap overflow-x-hidden"
-            >
-              {moveHistory?.map((move, i) => {
-                // Show moves up to and including the current move index
-                if (i < currentMoveIndex - 1) {
-                  return <span key={i}>{move} </span>;
-                }
-                // Highlight the last played move in yellow
-                if (i === currentMoveIndex - 1) {
-                  return (
-                    <span key={i} className="text-yellow-400 font-bold">
-                      {move}{" "}
-                    </span>
-                  );
-                }
-                // Show the next move as green (quiz/learn mode)
-                return null;
-              })}
-              <span className=" text-red-500 rounded-full">!</span>
-            </div>
-
-            <span className="ml-2 text-xs text-gray-400">
-              {currentMoveIndex}/{moveHistory?.length ?? 0}
-            </span>
-          </div>
-          {/* Progress bar */}
-          <div className="h-2 bg-gray-600 rounded mt-2">
-            <div
-              className="h-2 bg-blue-500 rounded transition-all"
-              style={{
-                width: `${((currentMoveIndex / (moveHistory?.length || 1)) * 100).toFixed(1)}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="flex space-x-3 space-y-3  flex-wrap w-full">
-          <div className="flex space-x-3 w-full -mr-3">
-            <Button
-              onClick={previousMove}
-              disabled={currentMoveIndex === 0}
-              text="Previous"
-              icon="←"
-            />
-            <Button onClick={resetGame} text="Reset" icon="⟳" />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <label htmlFor="name" className="text-sm font-semibold text-gray-200">
-            Opening Name
-          </label>
-          <input
-            type="text"
-            value={pgnName}
-            onChange={(e) => setPgnName(e.target.value)}
-            className="w-full p-2 bg-white rounded-lg px-4 text-black"
-            placeholder="Name your variation"
-          />
-          <label
-            htmlFor="description"
-            className="text-sm font-semibold text-gray-200"
-          >
-            Description
-          </label>
-          <textarea
-            value={pgnDescription}
-            onChange={(e) => setPgnDescription(e.target.value)}
-            className="w-full p-2 bg-white resize-none rounded-lg px-4 text-black"
-            placeholder="Describe your variation"
-          />
-          <Button onClick={savePGN} text="Save PGN" icon="#" />
-        </div>
-        <div className="flex flex-col w-full gap-2">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] lg:items-start">
+      <section aria-label="Board" className="flex flex-col gap-4">
+        <Board
+          fen={positionAfter(moves, moves.length).fen()}
+          orientation={side}
+          onMove={onMove}
+          lastMove={squaresOf(moves, moves.length - 1)}
+        />
+        <div className="flex flex-wrap justify-center gap-2">
           <Button
-            href={`/lessons/recorded-lines`}
-            text="Play Recorded Lines"
-            icon="→"
-          />
-          {isContributed && (
-            <Button
-              href={`/lessons/${code ? code : "recorded-lines"}`}
-              text="View your saved line"
-            />
-          )}
+            variant="secondary"
+            icon={<Undo2 className="size-4" />}
+            onClick={() => setMoves(moves.slice(0, -1))}
+            disabled={!moves.length}
+          >
+            Undo
+          </Button>
+          <Button
+            variant="ghost"
+            icon={<RotateCcw className="size-4" />}
+            onClick={() => setMoves([])}
+            disabled={!moves.length}
+          >
+            Clear
+          </Button>
+          <Button
+            variant="ghost"
+            icon={<FlipVertical2 className="size-4" />}
+            onClick={() => setSide(side === "white" ? "black" : "white")}
+          >
+            Play as {side === "white" ? "black" : "white"}
+          </Button>
         </div>
+      </section>
+
+      <aside className="flex flex-col gap-5">
+        <div>
+          <h1 className="text-3xl">
+            {contributing ? "Suggest a line" : "Record a line"}
+          </h1>
+          <p className="mt-2 text-muted">
+            {contributing
+              ? `Play the line for "${code}". An admin reviews it before it appears in the lesson.`
+              : `Play both sides on the board, then save the line to practise it later. You play ${side}.`}
+          </p>
+        </div>
+
+        <MoveList moves={moves} played={moves.length} />
+
+        {blocked ? (
+          <p className="rounded-xl border border-line p-4 text-sm text-muted">
+            Demo accounts can record private lines but can&apos;t suggest lines
+            for everyone.{" "}
+            <a href="/auth/signup" className="text-brass underline">
+              Create an account
+            </a>{" "}
+            to contribute.
+          </p>
+        ) : (
+          <SaveLineForm
+            endpoint={
+              contributing
+                ? `/variations/contribute/${code}`
+                : "/variations/record"
+            }
+            moves={moves}
+            side={side}
+            saveLabel={contributing ? "Submit for review" : "Save line"}
+            savedMessage={
+              contributing
+                ? "Submitted. An admin will review it."
+                : "Saved to your recorded lines."
+            }
+            onSaved={() => {
+              setMoves([]);
+              setSaved(true);
+            }}
+          />
+        )}
+
+        {saved && !contributing && (
+          <Button href="/lessons/recorded-lines" variant="secondary">
+            Practise your recorded lines
+          </Button>
+        )}
       </aside>
     </div>
   );
