@@ -27,7 +27,7 @@ test("walkthrough", async ({ browser }) => {
   await page.getByRole("button", { name: "Try the demo, no signup" }).click();
   await page.waitForURL("**/lessons");
   await page.goto("/lessons/carokann");
-  await page.getByLabel("Line").selectOption({ index: 0 });
+  await page.getByLabel("Line", { exact: true }).selectOption({ index: 0 });
   await pause(page, 1500);
 
   // Learn: step through with the notes.
@@ -83,10 +83,25 @@ test("mobile screenshot", async ({ browser }) => {
   await page.getByRole("button", { name: "Try the demo, no signup" }).click();
   await page.waitForURL("**/lessons");
   await page.goto("/lessons/jobava");
-  await page.getByLabel("Line").selectOption({ label: "Punishing 4...Nc6" });
+  await page
+    .getByLabel("Line", { exact: true })
+    .selectOption({ label: "Punishing 4...Nc6" });
   const next = page.getByRole("button", { name: "Next", exact: true });
   for (let i = 0; i < 9; i++) await next.click();
   await pause(page, 800);
   await page.screenshot({ path: "../docs/media/mobile-lesson.png" });
+  await context.close();
+});
+
+test("social preview", async ({ browser }) => {
+  // 1280x640 is GitHub's social preview size; reduced motion stills the hero board.
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 640 },
+    reducedMotion: "reduce",
+  });
+  const page = await context.newPage();
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  await page.screenshot({ path: "../docs/media/social-preview.png" });
   await context.close();
 });

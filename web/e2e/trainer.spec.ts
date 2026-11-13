@@ -16,7 +16,7 @@ test("drill: the opponent replies, a wrong move shows the right one, which then 
 }) => {
   await demo(page);
   await page.goto("/lessons/carokann");
-  await page.getByLabel("Line").selectOption({ index: 0 });
+  await page.getByLabel("Line", { exact: true }).selectOption({ index: 0 });
   await page.getByRole("radio", { name: "Drill" }).click();
 
   await expect(page.getByText("Your move.")).toBeVisible(); // after the opponent's 1.e4
@@ -31,7 +31,9 @@ test("drill: a clean run schedules the line and it shows up in progress", async 
 }) => {
   await demo(page);
   await page.goto("/lessons/jobava");
-  await page.getByLabel("Line").selectOption({ label: "Punishing 4...Nc6" });
+  await page
+    .getByLabel("Line", { exact: true })
+    .selectOption({ label: "Punishing 4...Nc6" });
   await page.getByRole("radio", { name: "Drill" }).click();
 
   // 1.d4 d5 2.Nc3 Nf6 3.Bf4 c5 4.e3 Nc6 5.Nb5 e5 6.Bxe5 Nxe5 7.dxe5
@@ -48,7 +50,7 @@ test("drill: a clean run schedules the line and it shows up in progress", async 
     await tap(page, from, to);
   }
   await expect(
-    page.getByText("Clean run. You'll see this line again tomorrow."),
+    page.getByText("You'll see this line again tomorrow."),
   ).toBeVisible();
 
   await page.goto("/review");
@@ -60,7 +62,7 @@ test("drill: a clean run schedules the line and it shows up in progress", async 
 test("learn: each move comes with its note", async ({ page }) => {
   await demo(page);
   await page.goto("/lessons/carokann");
-  await page.getByLabel("Line").selectOption({ index: 0 });
+  await page.getByLabel("Line", { exact: true }).selectOption({ index: 0 });
   await expect(page.getByText("White grabs space with 3.e5")).toBeVisible(); // the line's introduction
   const next = page.getByRole("button", { name: "Next", exact: true });
   await next.click();
@@ -75,13 +77,31 @@ test("learn: each move comes with its note", async ({ page }) => {
 
 test("PGNs: a full PGN loads and saves", async ({ page }) => {
   await demo(page);
-  await page.goto("/custom");
+  await page.goto("/my-lines?tab=paste");
   await page
     .getByLabel("PGN or moves")
     .fill('[Event "Test"]\n\n1. e4 {main} c6 2. d4 d5 1/2-1/2');
   await page.getByRole("button", { name: "Load" }).click();
-  await expect(page.getByRole("list", { name: "Moves" })).toContainText("d5");
+  await expect(page.getByRole("table", { name: "Moves" })).toContainText("d5");
   await page.getByLabel("Name").fill("Caro-Kann start");
   await page.getByRole("button", { name: "Save PGN" }).click();
   await expect(page.getByText("Saved to your PGNs.")).toBeVisible();
+});
+
+test("coach: without an AI key the coach falls back to the checked note", async ({
+  page,
+}) => {
+  await demo(page);
+  await page.goto("/lessons/carokann");
+  await page.getByLabel("Line", { exact: true }).selectOption({ index: 0 });
+  const next = page.getByRole("button", { name: "Next", exact: true });
+  await next.click();
+  await next.click();
+  await page.getByRole("button", { name: "Ask the coach" }).click();
+  await expect(
+    page.getByText("The AI coach is resting right now"),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Prepares ...d5, so Black can challenge"),
+  ).toBeVisible();
 });

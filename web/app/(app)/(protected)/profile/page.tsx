@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import BoardSettings from "@/components/BoardSettings";
 import Button from "@/components/Button";
 import { isDue } from "@/lib/progress";
 import { useLearning } from "@/lib/useLearning";
@@ -45,7 +46,7 @@ export default function Profile() {
       <header className="flex items-center gap-4">
         <div
           aria-hidden="true"
-          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-raised font-serif text-2xl text-brass"
+          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-raised font-display text-2xl text-amber"
         >
           {user.fullName.charAt(0).toUpperCase()}
         </div>
@@ -66,13 +67,17 @@ export default function Profile() {
           <a
             key={s.label}
             href={s.href}
-            className="rounded-xl border border-line bg-surface p-5 hover:border-brass/60"
+            className="rounded-xl border border-line bg-surface p-5 hover:border-amber/60"
           >
             <dt className="text-sm text-muted">{s.label}</dt>
-            <dd className="mt-1 font-serif text-4xl tabular-nums">{s.value}</dd>
+            <dd className="mt-1 font-display text-4xl tabular-nums">
+              {s.value}
+            </dd>
           </a>
         ))}
       </dl>
+
+      <BoardSettings />
 
       <div className="flex flex-col gap-3 sm:flex-row">
         {user.role === "ADMIN" && (

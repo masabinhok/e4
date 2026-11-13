@@ -43,7 +43,7 @@ export default function HeroBoard() {
       />
       <figcaption
         aria-live="off"
-        className="min-h-[4.5rem] font-serif text-lg italic leading-relaxed text-ivory/90"
+        className="min-h-[4.5rem] font-display text-lg font-bold leading-relaxed text-ivory/90"
       >
         {note}
       </figcaption>

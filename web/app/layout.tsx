@@ -1,40 +1,32 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Schibsted_Grotesk, Spectral } from "next/font/google";
+import { Inter, Nunito } from "next/font/google";
 import Toaster from "@/components/Toaster";
 
-const schibsted = Schibsted_Grotesk({
+// Inter for reading (body, move tables, forms); Nunito for the voice
+// (headings, buttons, the coach).
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const nunito = Nunito({
   subsets: ["latin"],
-  variable: "--font-schibsted",
+  weight: ["700", "800", "900"],
+  variable: "--font-nunito",
 });
 
-// Book serif for headings and move notes, in the spirit of printed opening books.
-const spectral = Spectral({
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-spectral",
-});
-
+// Icons come from app/icon.svg and app/apple-icon.png (Next's file conventions).
 export const metadata: Metadata = {
   title: "e4.learnchess",
   description:
-    "Learn chess openings by playing them: step through a line, drill it from memory, and quiz yourself.",
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
-  },
+    "Learn chess openings by playing them: annotated lines, drills from memory, and spaced-repetition review.",
   manifest: "/site.webmanifest",
 };
 
-export const viewport: Viewport = { themeColor: "#121a24" };
+export const viewport: Viewport = { themeColor: "#1d1916" };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${schibsted.variable} ${spectral.variable}`}>
+    <html lang="en" className={`${inter.variable} ${nunito.variable}`}>
       <body>
         {children}
         <Toaster />

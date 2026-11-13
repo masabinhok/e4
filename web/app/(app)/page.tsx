@@ -93,8 +93,8 @@ export default function Home() {
         <ol className="mt-6 grid gap-6 sm:grid-cols-3">
           {steps.map((step, i) => (
             <li key={step.title} className="border-t border-line pt-4">
-              <p className="font-serif text-lg">
-                <span className="text-brass">{i + 1}.</span> {step.title}
+              <p className="font-display text-lg">
+                <span className="text-amber">{i + 1}.</span> {step.title}
               </p>
               <p className="mt-2 text-sm text-muted">{step.text}</p>
             </li>
@@ -112,8 +112,8 @@ export default function Home() {
               key={c.name}
               className="rounded-xl border border-line bg-surface p-5"
             >
-              <p className="font-serif text-xl">{c.name}</p>
-              <p className="mt-1 text-sm text-brass">{c.side}</p>
+              <p className="font-display text-xl">{c.name}</p>
+              <p className="mt-1 text-sm text-amber">{c.side}</p>
               <p className="mt-3 text-sm text-muted">{c.text}</p>
             </li>
           ))}

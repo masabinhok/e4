@@ -21,14 +21,14 @@ function Row({
   return (
     <Link
       href={href}
-      className="group flex items-center justify-between gap-4 rounded-xl border border-line bg-surface px-5 py-4 transition-colors hover:border-brass/60 hover:bg-raised"
+      className="group flex items-center justify-between gap-4 rounded-xl border border-line bg-surface px-5 py-4 transition-colors hover:border-amber/60 hover:bg-raised"
     >
       <div className="min-w-0">
-        <p className="font-serif text-xl">{title}</p>
+        <p className="font-display text-xl">{title}</p>
         <p className="mt-1 line-clamp-2 text-sm text-muted">{detail}</p>
       </div>
       <ChevronRight
-        className="size-5 shrink-0 text-muted group-hover:text-brass"
+        className="size-5 shrink-0 text-muted group-hover:text-amber"
         aria-hidden="true"
       />
     </Link>
@@ -142,7 +142,7 @@ export default function LessonsPage() {
               className="flex flex-col gap-3 rounded-xl border border-line px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <p className="font-serif text-lg">{o.name}</p>
+                <p className="font-display text-lg">{o.name}</p>
                 <p className="text-sm text-muted">
                   Waiting for an admin to review it.
                 </p>

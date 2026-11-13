@@ -18,9 +18,12 @@ import {
   SkipBack,
   SkipForward,
 } from "lucide-react";
-import Board from "@/components/board/Board";
+import Board, { Marker } from "@/components/board/Board";
+import AskCoach from "@/components/board/AskCoach";
+import Coach from "@/components/board/Coach";
 import MoveList from "@/components/board/MoveList";
 import Button from "@/components/Button";
+import SoundToggle from "@/components/SoundToggle";
 import { PageSpinner } from "@/components/ProtectedRoute";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { api, errorMessage } from "@/lib/api";
@@ -167,7 +170,7 @@ export default function LessonPage({
     const move = positionAfter(state.moves, state.index).move(
       state.moves[state.index],
     );
-    playSound(soundFor(move));
+    playSound(soundFor(move, !isLearnersTurn(state)));
     dispatch({ type: "next" });
   }, [state, playSound]);
 
@@ -188,7 +191,7 @@ export default function LessonPage({
   const done = isComplete(state) && state.mode === "drill";
   useEffect(() => {
     if (!done || !line) return;
-    playSound(state.mistakes === 0 ? "lessonPass" : "achievement");
+    playSound(state.mistakes === 0 ? "cleanRun" : "complete");
     api<Progress>(`/progress/${line._id}`, {
       method: "POST",
       body: JSON.stringify({ mistakes: state.mistakes }),
@@ -203,19 +206,31 @@ export default function LessonPage({
       .catch(() => {});
   }, [done]); // eslint-disable-line react-hooks/exhaustive-deps -- save once per completion
 
+  // Keyboard: ←/→ step through the line in Learn, H for a hint in a drill, R restarts.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (
-        state.mode !== "learn" ||
-        (e.target as HTMLElement).closest("input, select, textarea")
-      )
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if ((e.target as HTMLElement).closest("input, select, textarea, button"))
         return;
-      if (e.key === "ArrowRight") playNext();
-      if (e.key === "ArrowLeft") dispatch({ type: "back" });
+      const key = e.key.toLowerCase();
+      if (state.mode === "learn" && key === "arrowright") playNext();
+      if (state.mode === "learn" && key === "arrowleft")
+        dispatch({ type: "back" });
+      if (state.mode === "drill" && key === "h" && isLearnersTurn(state)) {
+        dispatch({ type: "hint" });
+        setShowHint(true);
+      }
+      if (key === "r") {
+        dispatch({ type: "reset" });
+        setWrong(null);
+        setShowHint(false);
+        setAutoplay(false);
+        setResult(null);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [state.mode, playNext]);
+  }, [state, playNext]);
 
   const onMove = (from: string, to: string) => {
     if (!isLearnersTurn(state)) return false;
@@ -226,7 +241,7 @@ export default function LessonPage({
     }
     dispatch({ type: "attempt", san: move.san });
     if (move.san !== state.moves[state.index]) {
-      playSound("incorrect");
+      playSound("wrong");
       setWrong({ squares: [from, to], san: move.san });
       return false;
     }
@@ -285,6 +300,16 @@ export default function LessonPage({
 
   const fen = positionAfter(state.moves, state.index).fen();
   const nextSquares = squaresOf(state.moves, state.index);
+  // ✓ on the learner's move just played in a drill, ✗ on a wrong attempt.
+  const lastWasLearners =
+    state.index > 0 &&
+    ((state.index - 1) % 2 === 0) === (state.side === "white");
+  const lastSquares = squaresOf(state.moves, state.index - 1);
+  const marker: Marker | null = wrong
+    ? { square: wrong.squares[1], kind: "wrong" }
+    : state.mode === "drill" && lastWasLearners && lastSquares
+      ? { square: lastSquares[1], kind: "correct" }
+      : null;
   const yourTurn = isLearnersTurn(state);
   const drilling = state.mode === "drill";
   // After a wrong move in a drill, show the right one so it sticks.
@@ -311,39 +336,129 @@ export default function LessonPage({
     (v) => statusOf(byLine.get(v._id)) === "due",
   ).length;
 
+  const progressPct = state.moves.length
+    ? Math.round((state.index / state.moves.length) * 100)
+    : 0;
+  const nextMove = state.moves[state.index];
+
+  const coachable = Boolean(line?.notes?.length);
+  // What the coach says right now.
+  const coach = done ? (
+    <Coach tone="done">
+      <p className="font-display text-lg font-black">
+        {state.mistakes === 0
+          ? "Clean run. Every move from memory."
+          : `Line done, with ${state.mistakes} ${state.mistakes === 1 ? "slip" : "slips"} (mistakes and hints count).`}
+      </p>
+      {result && (
+        <p className="mt-1 text-muted">
+          You&apos;ll see this line again {whenDue(result.dueAt)}.
+        </p>
+      )}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {reviewing ? (
+          <Button onClick={nextDue}>Next review</Button>
+        ) : (
+          lines.length > 1 && (
+            <Button onClick={() => chooseLine((index + 1) % lines.length)}>
+              Next line
+            </Button>
+          )
+        )}
+        <Button variant="secondary" onClick={restart}>
+          Again
+        </Button>
+      </div>
+    </Coach>
+  ) : wrong ? (
+    <Coach tone="wrong">
+      <p className="font-display font-extrabold">
+        {transposition
+          ? `${wrong.san} is the move in “${transposition.title}”. This line plays ${nextMove}.`
+          : `Not ${wrong.san}. This line plays ${nextMove}.`}
+      </p>
+      {correctNote && <p className="mt-1">{correctNote}</p>}
+      {coachable && line && (
+        <AskCoach
+          variationId={line._id}
+          index={state.index}
+          played={wrong.san}
+        />
+      )}
+    </Coach>
+  ) : marker?.kind === "correct" && coachNote ? (
+    <Coach tone="correct">
+      <p>
+        <span className="font-display font-extrabold text-moss">Correct. </span>
+        {coachNote}
+      </p>
+      {coachable && line && (
+        <AskCoach variationId={line._id} index={state.index - 1} />
+      )}
+    </Coach>
+  ) : coachNote ? (
+    <Coach>
+      <p>{coachNote}</p>
+      {coachable && line && state.index > 0 && !drilling && (
+        <AskCoach variationId={line._id} index={state.index - 1} />
+      )}
+      {drilling && yourTurn && (
+        <p className="mt-1 font-display font-extrabold text-amber">
+          Your move.
+        </p>
+      )}
+    </Coach>
+  ) : drilling ? (
+    <Coach>
+      <p>
+        {yourTurn ? "Your move. Play it from memory." : "Opponent is replying…"}
+      </p>
+    </Coach>
+  ) : null;
+
+  const label = (text: string) => (
+    <span className="hidden sm:inline">{text}</span>
+  );
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] lg:items-start">
-      <section aria-label="Board" className="flex flex-col gap-4">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,390px)] lg:items-start">
+      <section aria-label="Board" className="flex flex-col gap-3">
         <Board
           fen={fen}
           orientation={orientation}
           onMove={onMove}
-          lastMove={squaresOf(state.moves, state.index - 1)}
+          lastMove={lastSquares}
           wrongMove={wrong?.squares}
+          marker={marker}
           hint={arrow}
         />
 
-        <div className="flex flex-wrap items-center justify-center gap-2">
+        {/* On phones the controls stay in reach above the tab bar while the panel scrolls. */}
+        <div className="flex items-center justify-center gap-1 sm:gap-1.5 max-lg:sticky max-lg:bottom-[calc(4rem+env(safe-area-inset-bottom))] max-lg:z-30 max-lg:-mx-4 max-lg:bg-night/95 max-lg:px-4 max-lg:py-2 max-lg:backdrop-blur">
           {!drilling ? (
             <>
               <Button
                 variant="secondary"
+                aria-label="Back"
+                className="max-sm:px-3"
                 icon={<SkipBack className="size-4" />}
                 onClick={() => dispatch({ type: "back" })}
                 disabled={state.index === 0}
               >
-                Back
+                {label("Back")}
               </Button>
               <Button
                 icon={<SkipForward className="size-4" />}
                 onClick={playNext}
                 disabled={isComplete(state)}
-                className="min-w-28"
+                className="sm:min-w-28"
               >
                 Next
               </Button>
               <Button
                 variant="secondary"
+                aria-label={autoplay ? "Pause" : "Autoplay"}
+                className="max-sm:px-3"
                 icon={
                   autoplay ? (
                     <Pause className="size-4" />
@@ -354,13 +469,12 @@ export default function LessonPage({
                 onClick={() => setAutoplay((a) => !a)}
                 disabled={isComplete(state)}
               >
-                {autoplay ? "Pause" : "Autoplay"}
+                {label(autoplay ? "Pause" : "Autoplay")}
               </Button>
             </>
           ) : (
             <>
               <Button
-                variant="secondary"
                 icon={<Lightbulb className="size-4" />}
                 onClick={hint}
                 disabled={!yourTurn || showHint}
@@ -380,26 +494,33 @@ export default function LessonPage({
           )}
           <Button
             variant="ghost"
+            aria-label="Restart"
+            className="max-sm:px-3"
             icon={<RotateCcw className="size-4" />}
             onClick={restart}
           >
-            Restart
+            {label("Restart")}
           </Button>
+          <SoundToggle />
           <Button
             variant="ghost"
             aria-label="Flip board"
+            className="max-sm:px-3"
             icon={<FlipVertical2 className="size-4" />}
             onClick={() =>
               setOrientation((o) => (o === "white" ? "black" : "white"))
             }
           />
         </div>
+        <p className="hidden text-center text-xs text-muted lg:block">
+          Keys: ← → step through the line · H hint · R restart
+        </p>
       </section>
 
       <aside className="flex flex-col gap-5">
         <div>
           {reviewing && (
-            <p className="mb-1 text-sm font-medium text-brass">Review</p>
+            <p className="mb-1 text-sm font-bold text-amber">Review</p>
           )}
           <h1 className="text-3xl">{opening.name}</h1>
           {lines.length > 0 && (
@@ -416,8 +537,8 @@ export default function LessonPage({
             No lines here yet.{" "}
             {isPersonal
               ? code === "recorded-lines"
-                ? "Record one from the Record tab."
-                : "Paste one in the PGNs tab."
+                ? "Save one from My lines."
+                : "Paste one in My lines."
               : ""}
           </p>
         ) : (
@@ -430,7 +551,7 @@ export default function LessonPage({
                 id="line"
                 value={index}
                 onChange={(e) => chooseLine(Number(e.target.value))}
-                className="min-h-11 rounded-lg border border-line bg-raised px-3 focus:border-brass focus:outline-none"
+                className="min-h-11 rounded-xl border border-line bg-raised px-3 focus:border-amber focus:outline-none"
               >
                 {chapters.map(([chapter, entries]) => {
                   const options = entries.map(({ v, i }) => (
@@ -456,7 +577,7 @@ export default function LessonPage({
             <div
               role="radiogroup"
               aria-label="Mode"
-              className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-surface p-1"
+              className="grid grid-cols-2 gap-1 rounded-2xl bg-surface p-1"
             >
               {modes.map((m) => (
                 <button
@@ -465,7 +586,11 @@ export default function LessonPage({
                   role="radio"
                   aria-checked={state.mode === m.id}
                   onClick={() => chooseMode(m.id)}
-                  className={`min-h-11 rounded-lg text-sm font-medium ${state.mode === m.id ? "bg-raised text-ivory" : "text-muted hover:text-ivory"}`}
+                  className={`min-h-11 rounded-xl font-display text-[15px] font-extrabold ${
+                    state.mode === m.id
+                      ? "bg-amber text-on-amber"
+                      : "text-muted hover:text-ivory"
+                  }`}
                 >
                   {m.label}
                 </button>
@@ -475,73 +600,39 @@ export default function LessonPage({
               {modes.find((m) => m.id === state.mode)?.help}
             </p>
 
-            {coachNote && !wrong && (
-              <p
-                aria-live="polite"
-                className="font-serif text-lg italic leading-relaxed text-ivory/90"
+            {coach}
+
+            <div className="flex flex-col gap-2">
+              <div
+                role="progressbar"
+                aria-label="Progress through the line"
+                aria-valuemin={0}
+                aria-valuemax={state.moves.length}
+                aria-valuenow={state.index}
+                className="h-1.5 overflow-hidden rounded-full bg-raised"
               >
-                {coachNote}
-              </p>
-            )}
-
-            <MoveList
-              moves={state.moves}
-              played={state.index}
-              next={drilling ? "hide" : "show"}
-            />
-
-            <div aria-live="polite" className="min-h-6 text-sm">
-              {done ? (
-                <div className="flex flex-col gap-3 rounded-xl border border-moss/40 bg-moss/10 p-4">
-                  <p className="text-ivory">
-                    {state.mistakes === 0
-                      ? "Clean run."
-                      : `Done, with ${state.mistakes} ${state.mistakes === 1 ? "mistake or hint" : "mistakes or hints"}.`}
-                    {result &&
-                      ` You'll see this line again ${whenDue(result.dueAt)}.`}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {reviewing ? (
-                      <Button onClick={nextDue}>Next review</Button>
-                    ) : (
-                      lines.length > 1 && (
-                        <Button
-                          onClick={() => chooseLine((index + 1) % lines.length)}
-                        >
-                          Next line
-                        </Button>
-                      )
-                    )}
-                    <Button variant="secondary" onClick={restart}>
-                      Again
-                    </Button>
-                  </div>
-                </div>
-              ) : wrong ? (
-                <div className="flex flex-col gap-2 rounded-xl border border-ember/40 bg-ember/10 p-4">
-                  <p className="text-ivory">
-                    {transposition
-                      ? `${wrong.san} is the move in "${transposition.title}". This line plays ${state.moves[state.index]}.`
-                      : `Not ${wrong.san}. This line plays ${state.moves[state.index]}.`}
-                  </p>
-                  {correctNote && (
-                    <p className="font-serif italic text-ivory/90">
-                      {correctNote}
-                    </p>
-                  )}
-                </div>
-              ) : drilling ? (
-                <p className="text-muted">
-                  {yourTurn ? "Your move." : "Opponent is replying…"}
-                </p>
-              ) : null}
+                <div
+                  className="h-full rounded-full bg-amber transition-[width]"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              <MoveList
+                moves={state.moves}
+                played={state.index}
+                next={drilling ? "hide" : "all"}
+                onSelect={
+                  drilling
+                    ? undefined
+                    : (i) => dispatch({ type: "goto", index: i })
+                }
+              />
             </div>
           </>
         )}
 
         {opening.summary && (
-          <details className="rounded-xl border border-line bg-surface">
-            <summary className="flex min-h-11 cursor-pointer items-center px-4 font-medium">
+          <details className="rounded-2xl bg-surface">
+            <summary className="flex min-h-11 cursor-pointer items-center px-4 font-display font-extrabold">
               About this opening
             </summary>
             <div className="flex flex-col gap-3 px-4 pb-4 text-sm text-muted">

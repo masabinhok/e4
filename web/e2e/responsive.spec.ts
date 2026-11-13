@@ -10,8 +10,8 @@ const appPages = [
   "/lessons",
   "/profile",
   "/lessons/carokann",
+  "/my-lines",
   "/record",
-  "/custom",
 ];
 
 async function check(
@@ -53,7 +53,10 @@ async function check(
           !el.closest("p") &&
           el.getBoundingClientRect().width > 1,
       )
-      .filter((el) => el.getBoundingClientRect().height < 44)
+      // A checkbox or slider is tapped through its label, so measure that.
+      .filter(
+        (el) => (el.closest("label") ?? el).getBoundingClientRect().height < 44,
+      )
       .map(
         (el) =>
           `${el.tagName} "${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 30)}"`,

@@ -1,32 +1,32 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   BookOpen,
   Repeat,
-  FileText,
   LogOut,
   Shield,
   SquarePen,
   UserRound,
 } from "lucide-react";
-import logo from "@/public/icons/e4.svg";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/store/auth";
 
 const items = [
   { href: "/lessons", label: "Lessons", Icon: BookOpen },
   { href: "/review", label: "Review", Icon: Repeat },
-  { href: "/record", label: "Record", Icon: SquarePen },
-  { href: "/custom", label: "PGNs", Icon: FileText },
+  { href: "/my-lines", label: "My lines", Icon: SquarePen },
   { href: "/profile", label: "Profile", Icon: UserRound },
 ];
 
 function Wordmark() {
   return (
-    <Link href="/" className="flex min-h-11 items-center gap-2.5">
-      <Image src={logo} alt="" width={32} height={32} className="size-8" />
-      <span className="font-serif text-xl font-semibold">e4.learnchess</span>
+    <Link
+      href="/"
+      aria-label="e4.learnchess home"
+      className="flex min-h-11 items-center"
+    >
+      <Logo />
     </Link>
   );
 }
@@ -61,14 +61,14 @@ export default function Navigation() {
                 key={href}
                 href={href}
                 aria-current={isActive(href) ? "page" : undefined}
-                className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-[15px] transition-colors ${
+                className={`flex min-h-11 items-center gap-3 rounded-xl px-3 font-display text-[15px] font-bold transition-colors ${
                   isActive(href)
-                    ? "bg-raised text-ivory"
+                    ? "bg-amber/15 text-ivory"
                     : "text-muted hover:bg-surface hover:text-ivory"
                 }`}
               >
                 <Icon
-                  className={`size-5 ${isActive(href) ? "text-brass" : ""}`}
+                  className={`size-5 ${isActive(href) ? "text-amber" : ""}`}
                   aria-hidden="true"
                 />
                 {label}
@@ -117,7 +117,7 @@ export default function Navigation() {
             href="/credit"
             className="flex min-h-11 items-center rounded-lg px-3 text-muted hover:text-ivory"
           >
-            About the author
+            About
           </Link>
         </div>
       </aside>
@@ -128,7 +128,7 @@ export default function Navigation() {
         {!isAuthenticated && (
           <Link
             href="/auth/login"
-            className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-brass"
+            className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-amber"
           >
             Log in
           </Link>
@@ -139,7 +139,7 @@ export default function Navigation() {
       {isAuthenticated && (
         <nav
           aria-label="Main"
-          className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-night/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-line bg-night/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
         >
           {items.map(({ href, label, Icon }) => (
             <Link
@@ -147,7 +147,7 @@ export default function Navigation() {
               href={href}
               aria-current={isActive(href) ? "page" : undefined}
               className={`flex min-h-16 flex-col items-center justify-center gap-1 text-xs ${
-                isActive(href) ? "text-brass" : "text-muted"
+                isActive(href) ? "text-amber" : "text-muted"
               }`}
             >
               <Icon className="size-5" aria-hidden="true" />

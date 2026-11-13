@@ -209,7 +209,7 @@ export default function AdminPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name or email"
-              className="w-full rounded-lg border border-line bg-raised py-3 pr-4 pl-10 focus:border-brass focus:outline-none"
+              className="w-full rounded-lg border border-line bg-raised py-3 pr-4 pl-10 focus:border-amber focus:outline-none"
             />
           </label>
           <ul className="flex flex-col gap-2">

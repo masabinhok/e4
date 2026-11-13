@@ -139,7 +139,7 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
         {isSignup ? "Already have an account? " : "New to e4? "}
         <Link
           href={isSignup ? "/auth/login" : "/auth/signup"}
-          className="font-medium text-brass hover:underline"
+          className="font-medium text-amber hover:underline"
         >
           {isSignup ? "Log in" : "Create an account"}
         </Link>
