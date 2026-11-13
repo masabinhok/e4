@@ -1,0 +1,14 @@
+{
+  "code": "slav",
+  "name": "Slav Defense",
+  "side": "black",
+  "description": "A rock-solid answer to 1.d4: support d5 with ...c6 and get the light-squared bishop out before ...e6. The Caro-Kann's twin against 1.d4.",
+  "summary": "The Slav (1.d4 d5 2.c4 c6) is one of the most reliable defences to the Queen's Gambit. Like the Caro-Kann, it supports d5 with the c-pawn, so the light-squared bishop can come out to f5 before ...e6 locks it in. This course covers the main line with 4.Nc3 dxc4, the slower e3 systems, the Exchange Slav, early queen moves, and the setups White uses without c4: the London, the Colle, the Jobava and the Veresov.",
+  "keyIdeas": [
+    "...c6 supports d5 without blocking the c8 bishop.",
+    "Develop the light-squared bishop to f5 before playing ...e6.",
+    "After ...dxc4, White usually wins the pawn back; Black uses that time to develop.",
+    "Against setups without c4, hit d4 with ...c5.",
+    "Watch b7: once the bishop leaves c8, Qb3 can attack it."
+  ]
+}
