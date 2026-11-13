@@ -5,21 +5,25 @@
   Dark only; every colour below is checked for AA contrast on `night`.
 */
 @theme {
-  --color-night: #121a24; /* page background */
-  --color-surface: #1b2532; /* panels, cards */
-  --color-raised: #243142; /* inputs, hover, selected rows */
-  --color-line: #33425a; /* borders and dividers */
-  --color-ivory: #ece4d2; /* primary text */
-  --color-muted: #a3afbf; /* secondary text */
-  --color-brass: #d2a843; /* primary actions, focus */
-  --color-brass-bright: #e2bd5f;
-  --color-moss: #7fb37a; /* correct move, success */
-  --color-ember: #e5775f; /* wrong move, destructive */
-  --color-board-light: #e6d5b0; /* boxwood */
-  --color-board-dark: #9c7653; /* walnut */
+  /* e4 "warm study" palette: a lamp-lit wooden board, amber highlights. Dark only. */
+  --color-night: #1d1916; /* page background */
+  --color-surface: #29231f; /* panels, cards */
+  --color-raised: #352d28; /* inputs, hover, selected rows */
+  --color-line: #43392f; /* borders and dividers */
+  --color-ivory: #f6f0e8; /* primary text */
+  --color-muted: #c2b4a5; /* secondary text */
+  --color-amber: #ffb020; /* primary actions, focus, accent */
+  --color-amber-bright: #ffc24d;
+  --color-amber-deep: #c98504; /* pressed edge of amber buttons */
+  --color-on-amber: #2a1d06; /* text on amber */
+  --color-moss: #79d160; /* correct move, success */
+  --color-ember: #ff7a62; /* wrong move, destructive */
+  --color-board-light: #f1dcba; /* maple */
+  --color-board-dark: #c2915f;
 
-  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-spectral), ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    var(--font-nunito), var(--font-inter), ui-sans-serif, sans-serif;
 }
 
 @layer base {
@@ -39,14 +43,14 @@
   h1,
   h2,
   h3 {
-    font-family: var(--font-serif);
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.015em;
     text-wrap: balance;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brass);
+    outline: 2px solid var(--color-amber);
     outline-offset: 2px;
     border-radius: 6px;
   }

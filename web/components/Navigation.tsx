@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -11,7 +10,7 @@ import {
   SquarePen,
   UserRound,
 } from "lucide-react";
-import logo from "@/public/icons/e4.svg";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/store/auth";
 
 const items = [
@@ -24,9 +23,12 @@ const items = [
 
 function Wordmark() {
   return (
-    <Link href="/" className="flex min-h-11 items-center gap-2.5">
-      <Image src={logo} alt="" width={32} height={32} className="size-8" />
-      <span className="font-serif text-xl font-semibold">e4.learnchess</span>
+    <Link
+      href="/"
+      aria-label="e4.learnchess home"
+      className="flex min-h-11 items-center"
+    >
+      <Logo />
     </Link>
   );
 }
@@ -61,14 +63,14 @@ export default function Navigation() {
                 key={href}
                 href={href}
                 aria-current={isActive(href) ? "page" : undefined}
-                className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-[15px] transition-colors ${
+                className={`flex min-h-11 items-center gap-3 rounded-xl px-3 font-display text-[15px] font-bold transition-colors ${
                   isActive(href)
-                    ? "bg-raised text-ivory"
+                    ? "bg-amber/15 text-ivory"
                     : "text-muted hover:bg-surface hover:text-ivory"
                 }`}
               >
                 <Icon
-                  className={`size-5 ${isActive(href) ? "text-brass" : ""}`}
+                  className={`size-5 ${isActive(href) ? "text-amber" : ""}`}
                   aria-hidden="true"
                 />
                 {label}
@@ -128,7 +130,7 @@ export default function Navigation() {
         {!isAuthenticated && (
           <Link
             href="/auth/login"
-            className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-brass"
+            className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-amber"
           >
             Log in
           </Link>
@@ -147,7 +149,7 @@ export default function Navigation() {
               href={href}
               aria-current={isActive(href) ? "page" : undefined}
               className={`flex min-h-16 flex-col items-center justify-center gap-1 text-xs ${
-                isActive(href) ? "text-brass" : "text-muted"
+                isActive(href) ? "text-amber" : "text-muted"
               }`}
             >
               <Icon className="size-5" aria-hidden="true" />
