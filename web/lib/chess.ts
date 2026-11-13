@@ -17,13 +17,12 @@ export function tryMove(chess: Chess, from: string, to: string): Move | null {
   }
 }
 
-export function soundFor(move: Move): SoundEvent {
+export function soundFor(move: Move, byOpponent = false): SoundEvent {
   const after = new Chess(move.after);
   if (after.inCheck()) return "check";
   if (move.isKingsideCastle() || move.isQueensideCastle()) return "castle";
-  if (move.isPromotion()) return "promotion";
   if (move.isCapture()) return "capture";
-  return "moveSelf";
+  return byOpponent ? "opponent" : "move";
 }
 
 export const sideToMove = (index: number): BoardFlip =>

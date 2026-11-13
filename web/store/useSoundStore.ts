@@ -1,19 +1,36 @@
 "use client";
 
 import { create } from "zustand";
+import { usePrefs } from "@/store/prefs";
 
-export type SoundEvent =
-  | "moveSelf"
-  | "moveOpponent"
-  | "achievement"
-  | "lessonPass"
-  | "scatter"
-  | "illegal"
-  | "incorrect"
-  | "capture"
-  | "promotion"
-  | "check"
-  | "castle";
+// e4's own sound set, synthesised by web/scripts/render-sounds.mjs.
+const FILES = {
+  move: "/sounds/move.mp3",
+  opponent: "/sounds/move-opponent.mp3",
+  capture: "/sounds/capture.mp3",
+  check: "/sounds/check.mp3",
+  castle: "/sounds/castle.mp3",
+  correct: "/sounds/correct.mp3",
+  wrong: "/sounds/wrong.mp3",
+  illegal: "/sounds/illegal.mp3",
+  complete: "/sounds/complete.mp3",
+  cleanRun: "/sounds/clean-run.mp3",
+} as const;
+
+export type SoundEvent = keyof typeof FILES;
+
+// One preloaded element per sound, cloned when it's already playing, instead of
+// downloading and decoding a new Audio object on every move.
+const cache = new Map<SoundEvent, HTMLAudioElement>();
+function audioFor(event: SoundEvent) {
+  let audio = cache.get(event);
+  if (!audio) {
+    audio = new Audio(FILES[event]);
+    audio.preload = "auto";
+    cache.set(event, audio);
+  }
+  return audio.paused ? audio : (audio.cloneNode() as HTMLAudioElement);
+}
 
 interface SoundStore {
   playSound: (event: SoundEvent) => void;
@@ -21,39 +38,11 @@ interface SoundStore {
 
 export const useSoundStore = create<SoundStore>(() => ({
   playSound: (event) => {
-    const getAudioPath = (event: SoundEvent): string => {
-      switch (event) {
-        case "moveSelf":
-          return "/audio/move-self.mp3";
-        case "moveOpponent":
-          return "/audio/move-opponent.mp3";
-        case "achievement":
-          return "/audio/achievement.mp3";
-        case "lessonPass":
-          return "/audio/lesson-pass.mp3";
-        case "scatter":
-          return "/audio/scatter.mp3";
-        case "illegal":
-          return "/audio/illegal.mp3";
-        case "incorrect":
-          return "/audio/incorrect.mp3";
-        case "capture":
-          return "/audio/capture.mp3";
-        case "promotion":
-          return "/audio/promote.mp3";
-        case "check":
-          return "/audio/move-check.mp3";
-        case "castle":
-          return "/audio/castle.mp3";
-        default:
-          return "";
-      }
-    };
-
-    const path = getAudioPath(event);
-    if (path) {
-      const audio = new Audio(path);
-      audio.play();
-    }
+    const { sound, volume } = usePrefs.getState();
+    if (!sound || typeof window === "undefined") return;
+    const audio = audioFor(event);
+    audio.volume = volume;
+    audio.currentTime = 0;
+    audio.play().catch(() => {}); // browsers block sound until the first tap; that's fine
   },
 }));
