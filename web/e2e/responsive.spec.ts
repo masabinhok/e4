@@ -46,7 +46,13 @@ async function check(
         "a, button, input, select, textarea",
       ),
     ]
-      .filter((el) => el.offsetParent !== null && !el.closest("p"))
+      // Skip hidden elements, like the skip link (1 px until focused).
+      .filter(
+        (el) =>
+          el.offsetParent !== null &&
+          !el.closest("p") &&
+          el.getBoundingClientRect().width > 1,
+      )
       .filter((el) => el.getBoundingClientRect().height < 44)
       .map(
         (el) =>
