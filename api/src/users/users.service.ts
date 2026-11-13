@@ -16,7 +16,7 @@ export class UsersService {
 
   async findUsers() {
     const users = await this.userModel.find();
-    return await Promise.all(users.map((user) => this.getSafeUser(user)));
+    return users.map((user) => this.getSafeUser(user));
   }
 
   async findUserById(userId: MongooseId): Promise<User> {

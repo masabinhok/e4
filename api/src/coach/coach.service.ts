@@ -81,9 +81,7 @@ export class CoachService {
             model: process.env.COACH_MODEL || DEFAULT_MODEL,
             messages: buildPrompt({
               openingName: opening.name,
-              side: (opening.side ?? line.boardflip ?? 'white') as
-                | 'white'
-                | 'black',
+              side: opening.side ?? line.boardflip ?? 'white',
               lineTitle: line.title,
               moves: line.moves,
               index,
