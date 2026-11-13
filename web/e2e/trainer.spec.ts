@@ -87,3 +87,21 @@ test("PGNs: a full PGN loads and saves", async ({ page }) => {
   await page.getByRole("button", { name: "Save PGN" }).click();
   await expect(page.getByText("Saved to your PGNs.")).toBeVisible();
 });
+
+test("coach: without an AI key the coach falls back to the checked note", async ({
+  page,
+}) => {
+  await demo(page);
+  await page.goto("/lessons/carokann");
+  await page.getByLabel("Line", { exact: true }).selectOption({ index: 0 });
+  const next = page.getByRole("button", { name: "Next", exact: true });
+  await next.click();
+  await next.click();
+  await page.getByRole("button", { name: "Ask the coach" }).click();
+  await expect(
+    page.getByText("The AI coach is resting right now"),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Prepares ...d5, so Black can challenge"),
+  ).toBeVisible();
+});
