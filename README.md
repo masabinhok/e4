@@ -134,7 +134,7 @@ The scores use Lighthouse's default simulated throttling. The lesson page's SEO 
 
 ## Credits
 
-e4 is MIT-licensed. The piece sets are papercut by Nikolay Anzarov (CC BY 4.0) and chessnut by Alexis Luengas (Apache-2.0), both from Lichess's list of free sets, with licence files in [`web/public/pieces`](web/public/pieces). Opening names come from Lichess's CC0 [chess-openings](https://github.com/lichess-org/chess-openings) dataset. The fonts are Nunito and Inter (SIL OFL). The sounds are synthesised for e4 by [`web/scripts/render-sounds.mjs`](web/scripts/render-sounds.mjs).
+e4 is MIT-licensed. The piece sets are papercut by Nikolay Anzarov (CC BY 4.0) and chessnut by Alexis Luengas (Apache-2.0), both from Lichess's list of free sets, with licence files in [`web/public/pieces`](web/public/pieces). Opening names come from Lichess's CC0 [chess-openings](https://github.com/lichess-org/chess-openings) dataset. The fonts are Nunito and Inter (SIL OFL). The board sounds are CC0 wood recordings from Kenney's [Impact Sounds](https://kenney.nl/assets/impact-sounds); the feedback cues are synthesised for e4 by [`web/scripts/render-sounds.mjs`](web/scripts/render-sounds.mjs).
 
 ## License
 

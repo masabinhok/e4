@@ -48,7 +48,13 @@ const credits = [
     href: "https://github.com/jhlywa/chess.js",
   },
   {
-    what: "Sounds",
+    what: "Board sounds",
+    who: "Kenney, Impact Sounds",
+    licence: "CC0",
+    href: "https://kenney.nl/assets/impact-sounds",
+  },
+  {
+    what: "Feedback sounds",
     who: "Made for e4 (synthesised)",
     licence: "MIT, with e4",
     href: "https://github.com/masabinhok/e4/blob/main/web/scripts/render-sounds.mjs",

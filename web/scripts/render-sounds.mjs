@@ -1,4 +1,5 @@
-// e4's sound set is synthesised here, not sampled, so it's original to e4.
+// e4's feedback cues are synthesised here. The board sounds (move, capture,
+// castle, check) are CC0 wood recordings by Kenney; see public/sounds/README.md.
 // Renders each sound with OfflineAudioContext in headless Chromium and writes WAVs:
 //   node scripts/render-sounds.mjs /tmp/e4-sounds
 //   for f in /tmp/e4-sounds/*.wav; do ffmpeg -y -i "$f" -ac 1 -b:a 96k "public/sounds/$(basename "$f" .wav).mp3"; done
@@ -6,30 +7,6 @@ import { chromium } from "playwright";
 import fs from "fs";
 const out = process.argv[2];
 const SOUNDS = {
-  move: [
-    ["knock", 0, 950, 4, 0.09, 1.6],
-    ["tone", 0, 190, 0.09, 0.35],
-  ],
-  "move-opponent": [
-    ["knock", 0, 820, 4, 0.085, 1.35],
-    ["tone", 0, 165, 0.09, 0.3],
-  ],
-  capture: [
-    ["knock", 0, 820, 3, 0.1, 2.0],
-    ["tone", 0, 160, 0.1, 0.4],
-    ["knock", 0.05, 1100, 4, 0.07, 1.2],
-  ],
-  check: [
-    ["knock", 0, 950, 4, 0.09, 1.6],
-    ["tone", 0, 190, 0.09, 0.35],
-    ["tone", 0.04, 1568, 0.14, 0.09],
-  ],
-  castle: [
-    ["knock", 0, 950, 4, 0.08, 1.4],
-    ["tone", 0, 190, 0.08, 0.3],
-    ["knock", 0.11, 880, 4, 0.08, 1.4],
-    ["tone", 0.11, 175, 0.08, 0.3],
-  ],
   correct: [
     ["tone", 0, 784, 0.35, 0.25],
     ["tone", 0.1, 1175, 0.45, 0.22],

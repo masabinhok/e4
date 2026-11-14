@@ -3,7 +3,8 @@
 import { create } from "zustand";
 import { usePrefs } from "@/store/prefs";
 
-// e4's own sound set, synthesised by web/scripts/render-sounds.mjs.
+// Board sounds are CC0 wood recordings (public/sounds/README.md); the
+// feedback cues are synthesised by web/scripts/render-sounds.mjs.
 const FILES = {
   move: "/sounds/move.mp3",
   opponent: "/sounds/move-opponent.mp3",
