@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
+import { speak } from "@/lib/speak";
 
 type Answer = { text: string; source: "ai" | "cache" | "note" };
 
@@ -31,6 +32,7 @@ export default function AskCoach({
   // Type the reply out, unless the reader prefers less motion.
   useEffect(() => {
     if (!answer || answer.source === "note") return;
+    speak(answer.text);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setShown(answer.text);
       return;

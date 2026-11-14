@@ -24,6 +24,7 @@ import Coach from "@/components/board/Coach";
 import MoveList from "@/components/board/MoveList";
 import Button from "@/components/Button";
 import SoundToggle from "@/components/SoundToggle";
+import VoiceToggle from "@/components/VoiceToggle";
 import { PageSpinner } from "@/components/ProtectedRoute";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { api, errorMessage } from "@/lib/api";
@@ -343,13 +344,18 @@ export default function LessonPage({
 
   const coachable = Boolean(line?.notes?.length);
   // What the coach says right now.
+  const doneText =
+    state.mistakes === 0
+      ? "Clean run. Every move from memory."
+      : `Line done, with ${state.mistakes} ${state.mistakes === 1 ? "slip" : "slips"} (mistakes and hints count).`;
+  const wrongText = wrong
+    ? transposition
+      ? `${wrong.san} is the move in “${transposition.title}”. This line plays ${nextMove}.`
+      : `Not ${wrong.san}. This line plays ${nextMove}.`
+    : "";
   const coach = done ? (
-    <Coach tone="done">
-      <p className="font-display text-lg font-black">
-        {state.mistakes === 0
-          ? "Clean run. Every move from memory."
-          : `Line done, with ${state.mistakes} ${state.mistakes === 1 ? "slip" : "slips"} (mistakes and hints count).`}
-      </p>
+    <Coach tone="done" say={doneText}>
+      <p className="font-display text-lg font-black">{doneText}</p>
       {result && (
         <p className="mt-1 text-muted">
           You&apos;ll see this line again {whenDue(result.dueAt)}.
@@ -371,12 +377,8 @@ export default function LessonPage({
       </div>
     </Coach>
   ) : wrong ? (
-    <Coach tone="wrong">
-      <p className="font-display font-extrabold">
-        {transposition
-          ? `${wrong.san} is the move in “${transposition.title}”. This line plays ${nextMove}.`
-          : `Not ${wrong.san}. This line plays ${nextMove}.`}
-      </p>
+    <Coach tone="wrong" say={`${wrongText} ${correctNote ?? ""}`}>
+      <p className="font-display font-extrabold">{wrongText}</p>
       {correctNote && <p className="mt-1">{correctNote}</p>}
       {coachable && line && (
         <AskCoach
@@ -387,7 +389,7 @@ export default function LessonPage({
       )}
     </Coach>
   ) : marker?.kind === "correct" && coachNote ? (
-    <Coach tone="correct">
+    <Coach tone="correct" say={`Correct. ${coachNote}`}>
       <p>
         <span className="font-display font-extrabold text-moss">Correct. </span>
         {coachNote}
@@ -397,7 +399,7 @@ export default function LessonPage({
       )}
     </Coach>
   ) : coachNote ? (
-    <Coach>
+    <Coach say={coachNote}>
       <p>{coachNote}</p>
       {coachable && line && state.index > 0 && !drilling && (
         <AskCoach variationId={line._id} index={state.index - 1} />
@@ -596,9 +598,12 @@ export default function LessonPage({
                 </button>
               ))}
             </div>
-            <p className="-mt-2 text-sm text-muted">
-              {modes.find((m) => m.id === state.mode)?.help}
-            </p>
+            <div className="-mt-2 flex items-center justify-between gap-2">
+              <p className="text-sm text-muted">
+                {modes.find((m) => m.id === state.mode)?.help}
+              </p>
+              <VoiceToggle />
+            </div>
 
             {coach}
 

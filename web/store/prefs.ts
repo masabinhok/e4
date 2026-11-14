@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Per-device preferences: board look and sound. Kept in localStorage only.
+// Per-device preferences: board look, sound and the coach's voice. Kept in localStorage only.
 
 export const BOARD_THEMES = {
   maple: { label: "Maple", light: "#f1dcba", dark: "#c2915f" },
@@ -20,6 +20,7 @@ type Prefs = {
   board: BoardTheme;
   pieces: PieceSet;
   sound: boolean;
+  voice: boolean; // the coach reads its notes aloud
   volume: number; // 0..1
   set: (p: Partial<Omit<Prefs, "set">>) => void;
 };
@@ -30,6 +31,7 @@ export const usePrefs = create<Prefs>()(
       board: "maple",
       pieces: "papercut",
       sound: true,
+      voice: false,
       volume: 0.8,
       set: (p) => set(p),
     }),

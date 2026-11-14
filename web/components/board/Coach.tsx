@@ -1,4 +1,7 @@
+"use client";
+import { useEffect } from "react";
 import { LogoMark } from "@/components/Logo";
+import { speak, stopSpeaking } from "@/lib/speak";
 
 const tones = {
   note: "bg-raised",
@@ -8,13 +11,22 @@ const tones = {
 };
 
 // The coach's voice: an avatar and a speech bubble.
+// `say` is the plain text read aloud when the coach voice is on.
 export default function Coach({
   tone = "note",
+  say,
   children,
 }: {
   tone?: keyof typeof tones;
+  say?: string;
   children: React.ReactNode;
 }) {
+  useEffect(() => {
+    if (!say) return;
+    speak(say);
+    return stopSpeaking;
+  }, [say]);
+
   return (
     <div className="flex items-start gap-3" aria-live="polite">
       <LogoMark className="mt-1 size-10 shrink-0 rounded-full" />
