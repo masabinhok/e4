@@ -1,0 +1,1 @@
+e4.learnchess: learn chess openings by playing them on the board

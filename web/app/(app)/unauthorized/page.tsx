@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import Button from "@/components/Button";
+
+export const metadata: Metadata = { robots: { index: false } };
 
 export default function Unauthorized() {
   return (

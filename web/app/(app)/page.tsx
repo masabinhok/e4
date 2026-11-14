@@ -5,6 +5,7 @@ import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
 import HeroBoard from "@/components/HeroBoard";
 import { errorMessage } from "@/lib/api";
+import { DESCRIPTION, SITE_URL } from "@/lib/site";
 import { useAuth } from "@/store/auth";
 
 const steps = [
@@ -21,6 +22,18 @@ const steps = [
     text: "Each line comes back when it's due: soon after a mistake, weeks later once it sticks.",
   },
 ];
+
+// Tells search engines e4 is a free learning web app.
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "e4.learnchess",
+  url: SITE_URL,
+  description: DESCRIPTION,
+  applicationCategory: "EducationalApplication",
+  operatingSystem: "Web",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+});
 
 const courses = [
   {
@@ -69,6 +82,10 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-20 py-4 lg:py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
+      />
       <section className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div>
           <h1 className="text-4xl leading-tight sm:text-5xl">
