@@ -1,8 +1,9 @@
 // The AI coach: a small isometric robot, drawn by hand so it costs no requests.
 // It sets itself apart from the pawn mark that speaks the checked lesson notes.
 // state: "idle" blinks, "thinking" glances about with a pulsing antenna,
-// "speaking" moves its mouth and lights its speaker. Animations live in globals.css.
-export type BotState = "idle" | "thinking" | "speaking";
+// "speaking" moves its mouth and lights its speaker, "sleeping" dozes while the
+// model is unavailable. Animations live in globals.css.
+export type BotState = "idle" | "thinking" | "speaking" | "sleeping";
 
 export default function AiCoachAvatar({
   state = "idle",
@@ -17,13 +18,7 @@ export default function AiCoachAvatar({
       className={`ai-bot ${className}`}
       data-state={state}
       role="img"
-      aria-label={
-        state === "speaking"
-          ? "AI coach, speaking"
-          : state === "thinking"
-            ? "AI coach, thinking"
-            : "AI coach"
-      }
+      aria-label={state === "idle" ? "AI coach" : `AI coach, ${state}`}
     >
       <ellipse cx="24" cy="44.5" rx="12" ry="2.2" fill="#000" opacity="0.25" />
       <g className="bot-body">
@@ -114,6 +109,18 @@ export default function AiCoachAvatar({
           </g>
         </g>
       </g>
+      {state === "sleeping" && (
+        <text
+          className="bot-z"
+          x="34"
+          y="10"
+          fill="#c2b4a5"
+          fontSize="8"
+          fontWeight="900"
+        >
+          z
+        </text>
+      )}
     </svg>
   );
 }

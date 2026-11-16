@@ -75,9 +75,9 @@ export default function AskCoach({
         >
           <AiCoachAvatar
             state={loading ? "thinking" : "idle"}
-            className="-ml-1 size-8"
+            className="-ml-1 size-11"
           />
-          {loading ? "The coach is thinking…" : "Ask the coach"}
+          {loading ? "The AI coach is thinking…" : "Ask the AI coach"}
         </button>
         {failed && (
           <p className="text-sm text-muted">
@@ -90,9 +90,12 @@ export default function AskCoach({
 
   if (answer.source === "note") {
     return (
-      <p className="mt-2 text-sm text-muted">
-        The AI coach is resting right now, so the note above is all there is.
-      </p>
+      <div className="mt-2 flex items-center gap-2.5">
+        <AiCoachAvatar state="sleeping" className="size-11 shrink-0" />
+        <p className="text-sm text-muted">
+          The AI coach is resting right now, so the note above is all there is.
+        </p>
+      </div>
     );
   }
 

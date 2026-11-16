@@ -88,7 +88,7 @@ The seed refuses to write to anything but a local database unless you confirm th
 | `NODE_ENV` | prod | | `production` turns on `Secure` cookies |
 | `COACH_API_KEY` | no | | Enables the AI coach. A free key from console.groq.com works |
 | `COACH_API_URL` | no | Groq's OpenAI-compatible URL | Any OpenAI-compatible chat API |
-| `COACH_MODEL` | no | `llama-3.1-8b-instant` | An open-weight model the provider hosts |
+| `COACH_MODEL` | no | `openai/gpt-oss-20b` | An open-weight model the provider hosts |
 | `COACH_DAILY_LIMIT` | no | `500` | Model calls per day; then the coach shows the note |
 
 **Web** (`web/.env.local`)

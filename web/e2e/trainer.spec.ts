@@ -97,7 +97,7 @@ test("coach: without an AI key the coach falls back to the checked note", async 
   const next = page.getByRole("button", { name: "Next", exact: true });
   await next.click();
   await next.click();
-  await page.getByRole("button", { name: "Ask the coach" }).click();
+  await page.getByRole("button", { name: "Ask the AI coach" }).click();
   await expect(
     page.getByText("The AI coach is resting right now"),
   ).toBeVisible();
