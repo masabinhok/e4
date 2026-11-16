@@ -9,7 +9,7 @@ export default function VoiceToggle() {
     set({ voice: !voice });
     // Speaking inside the tap also unlocks speech on iOS for later notes.
     if (voice) stopSpeaking();
-    else speak("Coach voice on.", true);
+    else speak("Coach voice on.", { force: true });
   };
   return (
     <button
