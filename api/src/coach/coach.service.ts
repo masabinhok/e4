@@ -17,7 +17,8 @@ export type CoachAnswer = { text: string; source: 'ai' | 'cache' | 'note' };
 // OpenAI-compatible chat API. Defaults to Groq's free tier for open-weight models;
 // changing these env vars swaps the provider.
 const DEFAULT_URL = 'https://api.groq.com/openai/v1';
-const DEFAULT_MODEL = 'llama-3.1-8b-instant';
+// Groq retired llama-3.1-8b-instant in Aug 2026; gpt-oss-20b is its suggested successor.
+const DEFAULT_MODEL = 'openai/gpt-oss-20b';
 
 @Injectable()
 export class CoachService {
@@ -68,6 +69,10 @@ export class CoachService {
     const apiKey = process.env.COACH_API_KEY;
     if (!apiKey || (await this.overDailyLimit())) return fallback;
 
+    const model = process.env.COACH_MODEL || DEFAULT_MODEL;
+    // gpt-oss thinks before it answers and that thinking spends output tokens,
+    // so keep it brief and leave room for the reply itself.
+    const thinks = model.startsWith('openai/gpt-oss');
     try {
       const res = await fetch(
         `${process.env.COACH_API_URL || DEFAULT_URL}/chat/completions`,
@@ -78,7 +83,7 @@ export class CoachService {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: process.env.COACH_MODEL || DEFAULT_MODEL,
+            model,
             messages: buildPrompt({
               openingName: opening.name,
               side: opening.side ?? line.boardflip ?? 'white',
@@ -88,8 +93,12 @@ export class CoachService {
               note,
               played,
             }),
-            max_tokens: 120,
+            max_tokens: thinks ? 600 : 120,
             temperature: 0.8,
+            ...(thinks && {
+              reasoning_effort: 'low',
+              include_reasoning: false,
+            }),
           }),
           signal: AbortSignal.timeout(8000),
         },
